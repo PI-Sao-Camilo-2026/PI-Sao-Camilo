@@ -1,0 +1,220 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: #eef0f3;
+  display: flex;
+  justify-content: center;
+}
+
+.phone-screen {
+  width: 430px;
+  min-height: 100vh;
+  background: #dde1e7;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-header {
+  height: 150px;
+  text-align: center;
+  padding-top: 38px;
+  border-bottom: 6px solid #a5161b;
+}
+
+.login-header h1 {
+  margin: 0;
+  color: #991b1f;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.login-header p {
+  margin: 10px 0 0;
+  color: #991b1f;
+  font-size: 27px;
+  letter-spacing: 3px;
+}
+
+.login-main {
+  flex: 1;
+  padding: 42px 34px 20px;
+}
+
+.sport-icon {
+  width: 92px;
+  height: 92px;
+  background: #991b1f;
+  color: white;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+
+.login-main h2 {
+  margin: 28px 0 4px;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 800;
+  color: #000;
+}
+
+.subtitle {
+  margin: 0 0 28px;
+  text-align: center;
+  font-size: 18px;
+  color: #444;
+}
+
+.login-main label {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+.input-box {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.input-box input {
+  width: 100%;
+  height: 52px;
+  background: white;
+  border: 1.5px solid #9ca3af;
+  border-radius: 9px;
+  padding: 0 56px 0 14px;
+  font-size: 20px;
+  outline: none;
+}
+
+.input-box input::placeholder {
+  color: #9a9a9a;
+}
+
+.input-box span {
+  position: absolute;
+  right: 15px;
+  top: 12px;
+  font-size: 24px;
+  opacity: 0.65;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 0 28px;
+  font-size: 16px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #333;
+}
+
+.checkbox {
+  width: 25px;
+  height: 25px;
+  background: white;
+  border: 2px solid #555;
+  border-radius: 5px;
+}
+
+.options a {
+  color: #245b9f;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.enter-btn {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #245b9f, #4b96e8);
+  color: white;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 16px 20px rgba(0, 0, 0, 0.22);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 32px 0 26px;
+}
+
+.divider div {
+  height: 1px;
+  background: #9ca3af;
+  flex: 1;
+}
+
+.divider span {
+  font-size: 22px;
+  color: #222;
+}
+
+.register-btn {
+  width: 100%;
+  height: 54px;
+  background: white;
+  border: 2px solid #245b9f;
+  border-radius: 6px;
+  color: #245b9f;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.create-account {
+  text-align: center;
+  font-size: 17px;
+  color: #444;
+  margin-top: 24px;
+}
+
+.create-account a {
+  color: #245b9f;
+  text-decoration: none;
+}
+
+.bottom-nav {
+  height: 82px;
+  background: #a5161b;
+  color: white;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav div {
+  text-align: center;
+}
+
+.bottom-nav span {
+  font-size: 36px;
+  line-height: 28px;
+}
+
+.bottom-nav p {
+  margin: 7px 0 0;
+  font-size: 15px;
+}
