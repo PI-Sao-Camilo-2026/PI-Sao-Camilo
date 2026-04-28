@@ -1,6 +1,9 @@
 import "./Login.css";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate(); // ✅ TEM QUE FICAR AQUI
+
   return (
     <div className="login-page">
       <div className="phone-screen">
@@ -36,7 +39,9 @@ export default function Login() {
             <a href="#">Esqueceu sua senha?</a>
           </div>
 
-          <button className="enter-btn">🔒 ENTRAR</button>
+          <button className="enter-btn" onClick={() => navigate("/home")}>
+            🔒 ENTRAR
+          </button>
 
           <div className="divider">
             <div></div>
