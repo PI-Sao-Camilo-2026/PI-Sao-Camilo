@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #dc2626, #991b1b);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  color: white;
+  text-align: center;
+}
+
+/* TÍTULO */
+.home-title {
+  font-size: 40px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.home-sub {
+  font-size: 18px;
+  margin-bottom: 40px;
+}
+
+/* ÁREA DOS BOTÕES */
+.home-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* BOTÃO BASE */
+.home-btn {
+  background: white;
+  color: #dc2626;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 220px;
+}
+
+/* HOVER */
+.home-btn:hover {
+  background: #f3f4f6;
+  transform: scale(1.05);
+}
+
+/* BOTÃO SECUNDÁRIO */
+.home-btn.secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.home-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+.hist-container {
+  font-family: 'Poppins', sans-serif;
+  background: #f5f5f5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.top {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.top h2 {
+  color: #dc2626;
+}
+
+.active {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* TÍTULO */
+.titulo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* LISTA */
+.lista {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ITEM */
+.item {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  border-left: 5px solid #dc2626;
+}
+
+/* BOTÃO */
+.btn-voltar {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto 0 auto;
+  padding: 15px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-voltar:hover {
+  background: #991b1b;
+}

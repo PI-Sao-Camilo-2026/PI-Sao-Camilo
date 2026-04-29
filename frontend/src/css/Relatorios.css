@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+.rel-container {
+  font-family: 'Poppins', sans-serif;
+  background: #f5f5f5;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.top {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.top h2 {
+  color: #dc2626;
+}
+
+.active {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* TÍTULO */
+.titulo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* BOX */
+.box {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* GRÁFICO */
+.grafico {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 150px;
+  margin: 15px 0;
+}
+
+.bar {
+  width: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: white;
+  font-size: 10px;
+}
+
+.perdido {
+  background: #dc2626;
+}
+
+.ingerido {
+  background: #16a34a;
+}
+
+.legenda {
+  text-align: center;
+  font-size: 12px;
+}
+
+/* PROGRESS */
+.progress {
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.p1 {
+  background: #dc2626;
+  color: white;
+  padding: 8px;
+  width: 69%;
+}
+
+.p2 {
+  background: #16a34a;
+  color: white;
+  padding: 8px;
+  width: 31%;
+}
+
+/* LISTA */
+ul {
+  padding-left: 20px;
+}
+
+/* BOTÃO */
+.btn {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 15px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #991b1b;
+}
+
+.btn-sair {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin: 10px auto 0 auto;
+  padding: 12px;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-sair:hover {
+  background: #374151;
+}
