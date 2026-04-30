@@ -1,8 +1,3 @@
-"""
-exportacao/pdf.py — Geração de relatório PDF por sessão
-RF12 — Exportar relatório de sessão individual em formato PDF
-Usa ReportLab
-"""
 from __future__ import annotations
 import io
 from datetime import datetime
@@ -16,7 +11,6 @@ from reportlab.platypus import (
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
-# ─── Paleta de cores ─────────────────────────────────────────────────────────
 COR_PRIMARIA    = colors.HexColor("#0A7C59")
 COR_SECUNDARIA  = colors.HexColor("#1D9E75")
 COR_LIGHT       = colors.HexColor("#E1F5EE")
@@ -101,7 +95,6 @@ def _tabela_metricas(metricas: list[dict]) -> Table:
             Paragraph(m["unidade"], estilos["metrica_unidade"]),
         ])
 
-    # Transpor para uma única linha com N colunas
     row_labels  = [c[0] for c in cells]
     row_valores = [c[1] for c in cells]
     row_units   = [c[2] for c in cells]
@@ -145,9 +138,8 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     estilos = _estilos()
     story   = []
 
-    # ── Cabeçalho ──────────────────────────────────────────────────────────
     header_data = [[
-        Paragraph("💧 <b>Nutri-Esportiva</b>", ParagraphStyle("hdr",
+        Paragraph("<b>Nutri-Esportiva</b>", ParagraphStyle("hdr",
             fontSize=14, textColor=COR_PRIMARIA, fontName="Helvetica-Bold")),
         Paragraph(
             f"Relatório de Sessão<br/>"
@@ -165,7 +157,6 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     story.append(header_t)
     story.append(HRFlowable(width="100%", thickness=2, color=COR_PRIMARIA, spaceAfter=14))
 
-    # ── Identificação ──────────────────────────────────────────────────────
     story.append(Paragraph("Identificação", estilos["secao"]))
     data_sessao = sessao.get("criada_em", "")
     if hasattr(data_sessao, "strftime"):
@@ -183,7 +174,6 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     ]))
     story.append(Spacer(1, 14))
 
-    # ── Métricas principais ────────────────────────────────────────────────
     story.append(Paragraph("Resultados", estilos["secao"]))
     variacao = float(sessao.get("variacao_massa_pct") or 0)
     story.append(_tabela_metricas([
@@ -194,7 +184,6 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     ]))
     story.append(Spacer(1, 14))
 
-    # ── Detalhes calculados ────────────────────────────────────────────────
     story.append(Paragraph("Detalhes do Balanço Hídrico", estilos["secao"]))
     story.append(_tabela_dados([
         ("Massa pré-sessão",        f"{sessao.get('massa_pre_kg', '—')} kg"),
@@ -208,7 +197,6 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     ]))
     story.append(Spacer(1, 14))
 
-    # ── Dados pré/pós sessão ────────────────────────────────────────────────
     story.append(Paragraph("Dados Clínicos", estilos["secao"]))
     story.append(_tabela_dados([
         ("Cor da urina (pré)",      f"{sessao.get('cor_urina', '—')} / 8"),
@@ -221,20 +209,18 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
     ]))
     story.append(Spacer(1, 14))
 
-    # ── Alertas ─────────────────────────────────────────────────────────────
     if alertas:
         story.append(Paragraph("Alertas e Recomendações Clínicas", estilos["secao"]))
         for alerta in alertas:
             tipo   = alerta.get("tipo", "")
             msg    = alerta.get("mensagem", "")
             estilo = estilos["alerta_danger"] if tipo == "desidratacao" else estilos["alerta_warning"]
-            prefixo = "⚠ " if tipo == "desidratacao" else "ℹ "
+            prefixo = "Aviso" if tipo == "desidratacao" else "ℹ "
             story.append(KeepTogether([
                 Paragraph(f"{prefixo}{msg}", estilo),
                 Spacer(1, 6),
             ]))
 
-    # ── IA ─────────────────────────────────────────────────────────────────
     if sessao.get("predicao_taxa") or sessao.get("anomalia_detectada"):
         story.append(Paragraph("Análise por Inteligência Artificial", estilos["secao"]))
         ia_linhas = []
@@ -243,11 +229,10 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
                 f"{float(sessao['predicao_taxa']):.3f} L/h"))
         if sessao.get("anomalia_detectada"):
             ia_linhas.append(("Detecção de anomalia (Isolation Forest)",
-                "⚠ Resultado atípico detectado em relação ao histórico"))
+                "Resultado atípico detectado em relação ao histórico"))
         story.append(_tabela_dados(ia_linhas))
         story.append(Spacer(1, 14))
 
-    # ── Rodapé ──────────────────────────────────────────────────────────────
     story.append(HRFlowable(width="100%", thickness=0.5, color=COR_GRAY, spaceBefore=10, spaceAfter=8))
     story.append(Paragraph(
         "Nutri-Esportiva — Instituto Mauá de Tecnologia — ICD 2026 | "
