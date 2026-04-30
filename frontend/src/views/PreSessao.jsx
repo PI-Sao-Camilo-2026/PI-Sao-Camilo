@@ -36,21 +36,52 @@ export default function Home() {
   async function handleSubmit() {
     console.log("Enviando:", form);
 
+    // 🔥 VALIDAÇÃO
+    if (!form.peso || isNaN(form.peso)) {
+      alert("Digite um peso válido");
+      return;
+    }
+
+    if (!form.urina) {
+      alert("Selecione a cor da urina");
+      return;
+    }
+
     try {
-      const res = await fetch("http://127.0.0.1:5000/pre-sessao", {
+      // 🔥 MAPEAMENTO CORRETO PRO BACKEND
+      const payload = {
+        peso_pre: Number(form.peso),
+        temp_celsius: Number(form.temperatura) || 25,
+        umidade_pct: Number(form.umidade) || 60,
+        cor_urina_basal: Number(form.urina) || 2
+      };
+
+      const res = await fetch("http://127.0.0.1:8000/sessoes/pre-treino", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form)
+        // ⚠️ só usa se tiver login/token
+        // credentials: "include",
+        body: JSON.stringify(payload)
       });
 
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+
       const data = await res.json();
-      console.log("Resposta:", data);
+      console.log("Sessão criada:", data);
+
+      // 🔥 salva sessão
+      localStorage.setItem("sessao_id", data.id);
 
       navigate("/sessao");
+
     } catch (err) {
-      console.error("Erro ao enviar:", err);
+      console.error("Erro:", err);
+      alert("Erro ao conectar com o servidor");
     }
   }
 
@@ -74,7 +105,12 @@ export default function Home() {
       <section className="box">
         <h2>Massa corporal</h2>
 
-        <input name="peso" className="input" onChange={handleChange} />
+        <input
+          name="peso"
+          className="input"
+          placeholder="Ex: 73.6"
+          onChange={handleChange}
+        />
 
         <label>
           <input type="checkbox" name="bexiga" onChange={handleChange} />
@@ -91,10 +127,10 @@ export default function Home() {
       <section className="box">
         <h2>Condições ambientais</h2>
 
-        <input name="temperatura" className="input" onChange={handleChange} />
-        <input name="umidade" className="input" onChange={handleChange} />
-        <input name="sensacaoTermica" className="input" onChange={handleChange} />
-        <input name="vento" className="input" onChange={handleChange} />
+        <input name="temperatura" placeholder="Temperatura (°C)" className="input" onChange={handleChange} />
+        <input name="umidade" placeholder="Umidade (%)" className="input" onChange={handleChange} />
+        <input name="sensacaoTermica" placeholder="Sensação térmica" className="input" onChange={handleChange} />
+        <input name="vento" placeholder="Vento" className="input" onChange={handleChange} />
 
         <select name="sol" className="input" onChange={handleChange}>
           <option value="">Exposição solar</option>
@@ -108,8 +144,8 @@ export default function Home() {
       <section className="box">
         <h2>Treino</h2>
 
-        <input name="modalidade" className="input" onChange={handleChange} />
-        <input name="duracao" className="input" onChange={handleChange} />
+        <input name="modalidade" placeholder="Modalidade" className="input" onChange={handleChange} />
+        <input name="duracao" placeholder="Duração (min)" className="input" onChange={handleChange} />
 
         <select name="intensidade" className="input" onChange={handleChange}>
           <option value="">Intensidade</option>
@@ -121,14 +157,14 @@ export default function Home() {
 
       {/* VESTIMENTA */}
       <section className="box">
-        <input name="vestimenta" className="input" onChange={handleChange} />
+        <input name="vestimenta" placeholder="Vestimenta" className="input" onChange={handleChange} />
       </section>
 
       {/* ESTADO */}
       <section className="box">
         <p>Urina</p>
         <div className="scale">
-          {[1,2,3,4,5,6,7,8].map(n => (
+          {[1,2,3,4,5,6,7].map(n => (  // 🔥 corrigido (1–7)
             <label key={n} className="scale-box">
               <input
                 type="radio"
@@ -148,11 +184,10 @@ export default function Home() {
           <option>Alta</option>
         </select>
 
-        <textarea name="sintomas" className="input" onChange={handleChange} />
-        <textarea name="hidratacao" className="input" onChange={handleChange} />
+        <textarea name="sintomas" placeholder="Sintomas" className="input" onChange={handleChange} />
+        <textarea name="hidratacao" placeholder="Histórico de hidratação" className="input" onChange={handleChange} />
       </section>
 
-      {/* BOTÃO */}
       <button className="start" onClick={handleSubmit}>
         INICIAR SESSÃO DE TREINO
       </button>
