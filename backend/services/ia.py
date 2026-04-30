@@ -1,15 +1,9 @@
-"""
-Serviço de recomendações de IA.
-Usa cálculo local por padrão; se ANTHROPIC_API_KEY estiver configurada,
-enriquece a recomendação com análise contextual do Claude.
-"""
 import os
 import httpx
 from services.calculo import gerar_recomendacao
 
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"
+# link da ia e codigo de seguranca, colocar aqui quando escolher
 
 
 async def obter_recomendacao(
@@ -20,16 +14,12 @@ async def obter_recomendacao(
     modalidade: str | None = None,
     historico_taxas: list[float] | None = None,
 ) -> dict:
-    """
-    Retorna recomendação de hidratação.
-    Se API Key da Anthropic estiver disponível, usa Claude para contexto adicional.
-    """
+
     base = gerar_recomendacao(taxa_l_h, variacao_pct)
 
     if not ANTHROPIC_API_KEY:
         return base
 
-    # Contexto extra via Claude
     contexto_historico = ""
     if historico_taxas:
         media = sum(historico_taxas) / len(historico_taxas)

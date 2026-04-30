@@ -13,7 +13,6 @@ from services.ia import obter_recomendacao
 router = APIRouter()
 
 
-# ── Schemas ────────────────────────────────────────────────
 
 class PreTreinoInput(BaseModel):
     peso_pre: float = Field(gt=0, lt=300)
@@ -43,7 +42,6 @@ class SessaoResponse(BaseModel):
         from_attributes = True
 
 
-# ── Endpoints ──────────────────────────────────────────────
 
 @router.post("/pre-treino", response_model=SessaoResponse, status_code=201)
 def iniciar_pre_treino(
@@ -113,7 +111,6 @@ async def finalizar_pos_treino(
     sessao.variacao_peso_pct = resultado["variacao_peso_pct"]
     sessao.status = "concluida"
 
-    # Histórico para IA
     historico = (
         db.query(Sessao.taxa_sudorese)
         .filter(Sessao.atleta_id == current.id, Sessao.taxa_sudorese != None)
@@ -246,7 +243,6 @@ def sessoes_de_atleta(
     )
 
 
-# ── Helpers ────────────────────────────────────────────────
 
 def _get_sessao_atleta(db: Session, sessao_id: int, atleta_id: int) -> Sessao:
     s = db.query(Sessao).filter(

@@ -1,9 +1,5 @@
-"""
-Cálculo da taxa de sudorese segundo protocolo ACSM:
-  Taxa (L/h) = (Peso_pré − Peso_pós + Ingestão_L − Urina_L) / Duração_h
-
-Variação de massa (%) = (Peso_pré − Peso_pós) / Peso_pré × 100
-"""
+# calculo da taxa: Taxa (L/h) = (Peso_pré − Peso_pós + Ingestão_L − Urina_L) / Duração_h
+# calculo da variacao de massa: Variação de massa (%) = (Peso_pré − Peso_pós) / Peso_pré × 100
 from typing import Optional
 
 FATOR_VESTIMENTA = {
@@ -44,17 +40,12 @@ def calcular_taxa_sudorese(
 
 
 def gerar_recomendacao(taxa_l_h: float, variacao_pct: float) -> dict:
-    """
-    Gera recomendação de hidratação para a próxima sessão.
-    Intervalo padrão: 15 min.
-    """
     intervalo_min = 15
     ingestao_recomendada_ml_h = taxa_l_h * 1000
     por_intervalo = ingestao_recomendada_ml_h / (60 / intervalo_min)
 
-    # Alerta de risco
     if variacao_pct > 3:
-        alerta = "⚠️ Perda acima de 3% — risco de desempenho prejudicado. Aumente a hidratação pré-treino."
+        alerta = "Perda acima de 3% — risco de desempenho prejudicado. Aumente a hidratação pré-treino."
     elif variacao_pct > 2:
         alerta = "Perda moderada. Fique atento à hidratação nas próximas sessões."
     else:

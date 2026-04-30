@@ -9,7 +9,6 @@ from routers.auth import get_current_user, require_profissional
 router = APIRouter()
 
 
-# ── PDF ────────────────────────────────────────────────────
 @router.get("/pdf/{atleta_id}")
 def gerar_pdf(
     atleta_id: int,
@@ -37,7 +36,6 @@ def gerar_pdf(
     )
 
 
-# ── Excel ──────────────────────────────────────────────────
 @router.get("/excel/{atleta_id}")
 def exportar_excel(
     atleta_id: int,
@@ -65,7 +63,6 @@ def exportar_excel(
     )
 
 
-# ── Dashboard stats para profissional ─────────────────────
 @router.get("/dashboard-stats")
 def dashboard_stats(
     prof: Usuario = Depends(require_profissional),
@@ -86,7 +83,6 @@ def dashboard_stats(
     taxas = [s.taxa_sudorese for s in sessoes if s.taxa_sudorese]
     perdas = [s.variacao_peso_pct for s in sessoes if s.variacao_peso_pct]
 
-    # Alertas: variação > 3%
     alertas = []
     for s in sessoes:
         if s.variacao_peso_pct and s.variacao_peso_pct > 3:
@@ -99,7 +95,6 @@ def dashboard_stats(
                 "data": s.criado_em.isoformat() if s.criado_em else None,
             })
 
-    # Por modalidade
     modalidade_map: dict[str, list] = {}
     for a in atletas:
         mod = a.modalidade or "Outro"
@@ -122,7 +117,6 @@ def dashboard_stats(
     }
 
 
-# ── Builders ───────────────────────────────────────────────
 
 def _build_pdf(atleta: Usuario, sessoes: list, prof: Usuario) -> bytes:
     from reportlab.lib.pagesizes import A4
@@ -147,7 +141,6 @@ def _build_pdf(atleta: Usuario, sessoes: list, prof: Usuario) -> bytes:
         Spacer(1, 0.5*cm),
     ]
 
-    # Tabela de sessões
     headers = ["Data", "Duração (min)", "Peso Pré (kg)", "Peso Pós (kg)", "Ingestão (ml)", "Taxa (L/h)", "Variação (%)"]
     rows = [headers]
     for s in sessoes:
@@ -224,7 +217,6 @@ def _build_excel(atleta: Usuario, sessoes: list) -> bytes:
             cell.fill = fill
             cell.border = thin
 
-    # Aba de estatísticas
     ws_stats = wb.create_sheet("Estatísticas")
     taxas = [s.taxa_sudorese for s in sessoes if s.taxa_sudorese]
     perdas = [s.variacao_peso_pct for s in sessoes if s.variacao_peso_pct]

@@ -10,7 +10,6 @@ from services.auth_service import hash_senha
 
 router = APIRouter()
 
-# ─── SCHEMAS ─────────────────────────────────────────
 
 class UsuarioCreate(BaseModel):
     nome: str
@@ -27,13 +26,11 @@ class UsuarioOut(BaseModel):
     codigo_anonimizado: str
 
 
-# ─── HELPERS ─────────────────────────────────────────
 
 def gerar_codigo():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 
-# ─── ENDPOINT ───────────────────────────────────────
 
 @router.post("/cadastro", response_model=UsuarioOut)
 def cadastrar_usuario(dados: UsuarioCreate, db: Session = Depends(get_db)):
