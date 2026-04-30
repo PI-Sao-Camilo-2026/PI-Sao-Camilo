@@ -1,8 +1,3 @@
-"""
-exportacao/excel.py — Geração de planilha Excel do histórico completo
-RF13 — Exportar histórico em formato .xlsx com aba de estatísticas
-Usa OpenPyXL
-"""
 from __future__ import annotations
 import io
 import statistics
@@ -16,7 +11,6 @@ from openpyxl.utils import get_column_letter
 from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.series import SeriesLabel
 
-# ─── Cores (hex sem #) ───────────────────────────────────────────────────────
 COR_PRIMARIA   = "0A7C59"
 COR_LIGHT      = "E1F5EE"
 COR_DARK       = "085041"
@@ -77,7 +71,6 @@ def _auto_width(ws, min_width=10, max_width=40):
         ws.column_dimensions[col_letter].width = min(max(max_len + 3, min_width), max_width)
 
 
-# ─── Aba 1: Histórico completo ───────────────────────────────────────────────
 
 COLUNAS_HISTORICO = [
     ("ID",                    "id"),
@@ -106,7 +99,6 @@ def _aba_historico(wb: Workbook, sessoes: list[dict], atleta: dict):
     ws.title = "Histórico"
     ws.freeze_panes = "A3"
 
-    # Título
     ws.merge_cells("A1:R1")
     title_cell = ws["A1"]
     title_cell.value = (
@@ -118,11 +110,10 @@ def _aba_historico(wb: Workbook, sessoes: list[dict], atleta: dict):
     title_cell.alignment = _center()
     ws.row_dimensions[1].height = 28
 
-    # Cabeçalho
+
     _aplicar_header_row(ws, 2, [c[0] for c in COLUNAS_HISTORICO])
     ws.row_dimensions[2].height = 22
 
-    # Dados
     for row_idx, sessao in enumerate(sessoes, start=3):
         row_fill = _fill(COR_GRAY_LIGHT) if row_idx % 2 == 0 else _fill(COR_WHITE)
         for col_idx, (_, campo) in enumerate(COLUNAS_HISTORICO, start=1):
@@ -137,12 +128,10 @@ def _aba_historico(wb: Workbook, sessoes: list[dict], atleta: dict):
             cell.alignment = _center()
             cell.border    = _border()
 
-            # Destaque: variação > 2%
             if campo == "variacao_massa_pct" and valor and float(valor) > 2:
                 cell.fill = _fill(COR_DANGER_BG)
                 cell.font = _font(bold=True, color=COR_DANGER, size=10)
 
-            # Destaque: anomalia
             if campo == "anomalia_detectada" and valor == "Sim":
                 cell.fill = _fill(COR_WARNING_BG)
                 cell.font = _font(bold=True, color=COR_WARNING, size=10)
@@ -151,12 +140,10 @@ def _aba_historico(wb: Workbook, sessoes: list[dict], atleta: dict):
     ws.column_dimensions["A"].width = 6   # ID estreito
 
 
-# ─── Aba 2: Estatísticas por modalidade ─────────────────────────────────────
 
 def _aba_estatisticas(wb: Workbook, sessoes: list[dict]):
     ws = wb.create_sheet("Estatísticas")
 
-    # Agrupar por modalidade
     por_modalidade: dict[str, list[float]] = {}
     for s in sessoes:
         mod  = s.get("modalidade") or "Outros"
@@ -164,7 +151,7 @@ def _aba_estatisticas(wb: Workbook, sessoes: list[dict]):
         if taxa:
             por_modalidade.setdefault(mod, []).append(float(taxa))
 
-    # Título
+
     ws.merge_cells("A1:G1")
     ws["A1"].value     = "Estatísticas de Taxa de Sudorese por Modalidade (L/h)"
     ws["A1"].fill      = _fill(COR_DARK)
@@ -196,7 +183,6 @@ def _aba_estatisticas(wb: Workbook, sessoes: list[dict]):
             cell.border    = _border()
         row += 1
 
-    # Totais gerais
     ws.row_dimensions[row].height = 20
     todas_taxas = [t for ts in por_modalidade.values() for t in ts]
     if todas_taxas:
@@ -219,7 +205,6 @@ def _aba_estatisticas(wb: Workbook, sessoes: list[dict]):
     _auto_width(ws)
 
 
-# ─── Aba 3: Gráfico de evolução ──────────────────────────────────────────────
 
 def _aba_grafico(wb: Workbook, sessoes: list[dict]):
     ws = wb.create_sheet("Gráfico")
@@ -264,7 +249,6 @@ def _aba_grafico(wb: Workbook, sessoes: list[dict]):
     _auto_width(ws)
 
 
-# ─── Função principal ────────────────────────────────────────────────────────
 
 def gerar_excel_historico(sessoes: list[dict], atleta: dict) -> bytes:
     """
