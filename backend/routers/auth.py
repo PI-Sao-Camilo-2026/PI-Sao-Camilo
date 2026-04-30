@@ -15,7 +15,6 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-# ── Schemas ────────────────────────────────────────────────
 class RegistroInput(BaseModel):
     nome: str
     email: EmailStr
@@ -39,7 +38,6 @@ class RefreshInput(BaseModel):
     refresh_token: str
 
 
-# ── Dependency: usuário autenticado ────────────────────────
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Usuario:
     payload = decodificar_token(token)
     if not payload or payload.get("token_type") != "access":
@@ -56,7 +54,6 @@ def require_profissional(current: Usuario = Depends(get_current_user)) -> Usuari
     return current
 
 
-# ── Endpoints ──────────────────────────────────────────────
 @router.post("/registrar", response_model=TokenResponse, status_code=201)
 def registrar(body: RegistroInput, db: Session = Depends(get_db)):
     if db.query(Usuario).filter(Usuario.email == body.email).first():
