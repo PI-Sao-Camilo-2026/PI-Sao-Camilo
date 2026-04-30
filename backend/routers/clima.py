@@ -7,7 +7,7 @@ from database import Usuario
 router = APIRouter()
 
 OWM_KEY = os.getenv("OPENWEATHER_API_KEY", "")
-OWM_URL = "https://api.openweathermap.org/data/2.5/weather"
+OWM_URL = "https://openweathermap.org/"
 
 
 @router.get("/atual")
