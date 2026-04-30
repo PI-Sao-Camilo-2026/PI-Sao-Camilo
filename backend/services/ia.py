@@ -39,10 +39,10 @@ async def obter_recomendacao(
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(
-                ANTHROPIC_URL,
+                # url da ia
                 headers={
-                    "x-api-key": ANTHROPIC_API_KEY,
-                    "anthropic-version": "2023-06-01",
+                    "x-api-key": ,
+                    "version": ,
                     "content-type": "application/json",
                 },
                 json={
