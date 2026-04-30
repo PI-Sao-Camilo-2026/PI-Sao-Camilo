@@ -14,6 +14,14 @@ body {
   justify-content: center;
 }
 
+.login-header img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: block;
+  margin: 0 61px 50px;
+}
+
 .phone-screen {
   width: 430px;
   min-height: 100vh;
@@ -30,17 +38,19 @@ body {
 }
 
 .login-header h1 {
-  margin: 0;
+  margin: -124px;
+  margin-left: -30px;
   color: #991b1f;
-  font-size: 34px;
+  font-size: 29px;
   font-weight: 800;
   letter-spacing: 2px;
 }
 
 .login-header p {
-  margin: 10px 0 0;
+  margin: 123px 0;
+  margin-left: 87px;
   color: #991b1f;
-  font-size: 27px;
+  font-size: 22px;
   letter-spacing: 3px;
 }
 
@@ -53,89 +63,106 @@ body {
   width: 92px;
   height: 92px;
   background: #991b1f;
+  /* fundo vermelho */
   border-radius: 50%;
-  margin: 0 auto;
+  margin: auto auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .atleta {
-  width: 70px;
-  height: 70px;
+  width: 78px;
+  height: 78px;
   object-fit: contain;
 }
 
 .login-main h2 {
-  margin: 28px 0 4px;
+  margin: 10px 0 5px;
   text-align: center;
   font-size: 34px;
   font-weight: 800;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   color: #000;
 }
 
 .subtitle {
   margin: 0 0 28px;
   text-align: center;
-  font-size: 18px;
+  font-size: 15px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   color: #444;
 }
 
 .login-main label {
   display: block;
-  font-size: 18px;
-  font-weight: 700;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: bold;
   margin-bottom: 7px;
 }
 
 .input-box {
   position: relative;
-  margin-bottom: 22px;
+  width: 100%;
 }
 
 .input-box input {
   width: 100%;
-  height: 52px;
-  background: white;
-  border: 1.5px solid #9ca3af;
-  border-radius: 9px;
-  padding: 0 56px 0 14px;
-  font-size: 20px;
-  outline: none;
+  padding: 12px 40px 12px 12px;
+  margin-bottom: 23px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.input-box .simbolo-email {
+  position: absolute;
+  right: 12px;
+  margin-top: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 15px;
+  opacity: 0.29;
+}
+
+.input-box .cadeado-senha {
+  position: absolute;
+  right: 12px;
+  margin-top: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
 }
 
 .input-box input::placeholder {
   color: #9a9a9a;
 }
 
-.input-box span {
-  position: absolute;
-  right: 15px;
-  top: 12px;
-  font-size: 24px;
-  opacity: 0.65;
-}
-
-.options {
+.opcoes {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 4px 0 28px;
-  font-size: 16px;
+  margin-top: -10px;
+  font-size: 13px;
 }
 
-.remember {
+.relembrar {
   display: flex;
   align-items: center;
+  font-size: 13px;
   gap: 9px;
   color: #333;
 }
 
 .checkbox {
-  width: 25px;
-  height: 25px;
+  width: 19px;
+  height: 18px;
   background: white;
-  border: 2px solid #555;
+  border: 2px solid #999;
   border-radius: 5px;
 }
 
@@ -146,16 +173,25 @@ body {
 }
 
 .enter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 56px;
   border: none;
   border-radius: 6px;
   background: linear-gradient(90deg, #245b9f, #4b96e8);
   color: white;
-  font-size: 23px;
+  font-size: 19px;
   font-weight: 800;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   letter-spacing: 1px;
   box-shadow: 0 16px 20px rgba(0, 0, 0, 0.22);
+}
+
+.cadeado-btn {
+  width: 37px;
+  height: 37px;
 }
 
 .divider {
@@ -178,14 +214,20 @@ body {
 
 .register-btn {
   width: 100%;
-  height: 54px;
+  height: 56px;
   background: white;
   border: 2px solid #245b9f;
   border-radius: 6px;
   color: #245b9f;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 1px;
+  margin-bottom: 25px;
+}
+
+.cadastar-btn {
+  width: 37px;
+  height: 37px;
 }
 
 .create-account {
