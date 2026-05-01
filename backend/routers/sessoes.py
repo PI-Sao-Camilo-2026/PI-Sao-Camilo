@@ -43,14 +43,13 @@ class SessaoResponse(BaseModel):
 
 
 
-@router.post("/pre-treino", response_model=SessaoResponse, status_code=201)
+@router.post("/pre-treino")
 def iniciar_pre_treino(
     body: PreTreinoInput,
-    current: Usuario = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     sessao = Sessao(
-        atleta_id=current.id,
+        atleta_id=1, # temporario, deve ser customer id
         peso_pre=body.peso_pre,
         temp_celsius=body.temp_celsius,
         umidade_pct=body.umidade_pct,
@@ -60,6 +59,7 @@ def iniciar_pre_treino(
     )
     db.add(sessao)
     db.commit()
+    print("📦 BODY RECEBIDO:", body.model_dump())
     db.refresh(sessao)
     return sessao
 

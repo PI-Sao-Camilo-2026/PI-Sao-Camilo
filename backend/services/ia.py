@@ -2,9 +2,7 @@ import os
 import httpx
 from services.calculo import gerar_recomendacao
 
-
-# link da ia e codigo de seguranca, colocar aqui quando escolher
-
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 async def obter_recomendacao(
     taxa_l_h: float,
@@ -23,38 +21,39 @@ async def obter_recomendacao(
     contexto_historico = ""
     if historico_taxas:
         media = sum(historico_taxas) / len(historico_taxas)
-        contexto_historico = f" A média histórica do atleta é {media:.2f} L/h."
+        contexto_historico = f" Média histórica: {media:.2f} L/h."
 
     prompt = (
-        f"Atleta com taxa de sudorese atual de {taxa_l_h:.2f} L/h e variação de peso de "
-        f"{variacao_pct:.1f}% durante a sessão."
-        f" Modalidade: {modalidade or 'não informada'}."
-        f" Temperatura: {temp_celsius or 'não informada'}°C."
-        f" Umidade: {umidade_pct or 'não informada'}%."
-        f"{contexto_historico}"
-        " Dê uma recomendação de hidratação personalizada e objetiva em 2-3 frases em português, "
-        "focando nos próximos treinos. Seja direto e técnico."
+        f"Atleta com taxa de sudorese de {taxa_l_h:.2f} L/h. "
+        f"Variação de peso {variacao_pct:.1f}%. "
+        f"Modalidade: {modalidade or 'não informada'}. "
+        f"Temperatura: {temp_celsius or 'não informada'}°C. "
+        f"Umidade: {umidade_pct or 'não informada'}%. "
+        f"{contexto_historico} "
+        "Dê recomendação de hidratação em 2-3 frases, objetiva e técnica."
     )
 
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             resp = await client.post(
-                # url da ia
+                "https://api.anthropic.com/v1/messages",
                 headers={
-                    "x-api-key": ,
-                    "version": ,
+                    "x-api-key": ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
                     "content-type": "application/json",
                 },
                 json={
-                    "model": "claude-haiku-4-5-20251001",
+                    "model": "claude-3-haiku-20240307",
                     "max_tokens": 256,
                     "messages": [{"role": "user", "content": prompt}],
                 },
             )
+
             if resp.status_code == 200:
                 ia_text = resp.json()["content"][0]["text"]
                 base["texto_ia"] = ia_text
-    except Exception:
-        pass  # Fallback para recomendação local
+
+    except Exception as e:
+        print("Erro IA:", e)
 
     return base
