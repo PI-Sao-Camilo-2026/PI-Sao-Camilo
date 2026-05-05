@@ -31,7 +31,7 @@ export default function Login() {
             <img src="png-transparent-email-email.png" className="simbolo-email" alt="E-mail" />
           </div>
 
-          <label className="label-email">Senha</label>
+          <label className="label-senha">Senha</label>
           <div className="input-box">
             <input type="password" placeholder="Digite sua senha" />
             <img src="698630.png" className="cadeado-senha" alt="Cadeado Senha" />
@@ -62,25 +62,6 @@ export default function Login() {
           <img src="91f0148c-ff2c-4bc2-9a93-62aa1cdbdb02-removebg-preview.png" className="cadastrar-btn" alt="Ícone Cadastrar" /> 
           + CADASTRE-SE</button>
         </main>
-
-        <nav className="bottom-nav">
-          <div>
-            <span>⌂</span>
-            <p>INÍCIO</p>
-          </div>
-          <div>
-            <span>▤</span>
-            <p>HISTÓRICO</p>
-          </div>
-          <div>
-            <span>♡</span>
-            <p>OBSERVAÇÕES</p>
-          </div>
-          <div>
-            <span>♙</span>
-            <p>PERFIL</p>
-          </div>
-        </nav>
       </div>
     </div>
   );

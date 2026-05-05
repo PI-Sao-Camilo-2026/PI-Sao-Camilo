@@ -2,7 +2,7 @@ import "../css/Relatorios.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Relatorios() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <div className="rel-container">
 
@@ -72,14 +72,31 @@ export default function Relatorios() {
         <p>Data: --</p>
       </section>
 
-      {/* BOTÃO */}
       <button className="btn">
         COMPARTILHAR COM O STAFF
       </button>
 
-<button className="btn-sair" onClick={() => navigate("/home")}>
-  Sair
-</button>
+      <button className="btn-sair" onClick={() => navigate("/home")}>
+        Sair
+      </button>
+      <nav className="bottom-nav">
+        <div>
+          <span>⌂</span>
+          <p>INÍCIO</p>
+        </div>
+        <div>
+          <span>▤</span>
+          <p>HISTÓRICO</p>
+        </div>
+        <div>
+          <span>♡</span>
+          <p>OBSERVAÇÕES</p>
+        </div>
+        <div>
+          <span>♙</span>
+          <p>PERFIL</p>
+        </div>
+      </nav>
     </div>
   );
 }
