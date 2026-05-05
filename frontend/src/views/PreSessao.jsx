@@ -1,6 +1,6 @@
 import "../css/Pre-Sessao.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,6 +24,37 @@ export default function Home() {
     hidratacao: ""
   });
 
+  useEffect(() => {
+    carregarClima();
+  }, []);
+
+  async function carregarClima() {
+    try {
+      const cidade = "Sao Paulo";
+
+      const res = await fetch(
+        `http://127.0.0.1:8001/clima/atual?cidade=${cidade}`
+      );
+
+      if (!res.ok) {
+        throw new Error("Erro ao buscar clima");
+      }
+
+      const data = await res.json();
+
+      setForm(prev => ({
+        ...prev,
+        temperatura: data.temp_celsius || "",
+        umidade: data.umidade_pct || "",
+        sensacaoTermica: data.descricao || "",
+        vento: data.vento_mps || ""
+      }));
+
+    } catch (err) {
+      console.error("Erro clima:", err);
+    }
+  }
+
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
 
@@ -36,7 +67,6 @@ export default function Home() {
   async function handleSubmit() {
     console.log("Enviando:", form);
 
-    // 🔥 VALIDAÇÃO
     if (!form.peso || isNaN(form.peso)) {
       alert("Digite um peso válido");
       return;
@@ -48,7 +78,6 @@ export default function Home() {
     }
 
     try {
-      // 🔥 MAPEAMENTO CORRETO PRO BACKEND
       const payload = {
         peso_pre: Number(form.peso),
         temp_celsius: Number(form.temperatura) || 25,
@@ -56,13 +85,11 @@ export default function Home() {
         cor_urina_basal: Number(form.urina) || 2
       };
 
-      const res = await fetch("http://127.0.0.1:8000/sessoes/pre-treino", {
+      const res = await fetch("http://127.0.0.1:8001/sessoes/pre-treino", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        // ⚠️ só usa se tiver login/token
-        // credentials: "include",
         body: JSON.stringify(payload)
       });
 
@@ -72,9 +99,7 @@ export default function Home() {
       }
 
       const data = await res.json();
-      console.log("Sessão criada:", data);
 
-      // 🔥 salva sessão
       localStorage.setItem("sessao_id", data.id);
 
       navigate("/sessao");
@@ -101,6 +126,50 @@ export default function Home() {
         <p>Preencha os dados antes do treino</p>
       </section>
 
+      {/* 🔥 CLIMA NO TOPO */}
+      <section className="box">
+        <h2>Condições ambientais</h2>
+
+        <input
+          name="temperatura"
+          value={form.temperatura}
+          placeholder="Temperatura (°C)"
+          className="input"
+          readOnly
+        />
+
+        <input
+          name="umidade"
+          value={form.umidade}
+          placeholder="Umidade (%)"
+          className="input"
+          readOnly
+        />
+
+        <input
+          name="sensacaoTermica"
+          value={form.sensacaoTermica}
+          placeholder="Condição do clima"
+          className="input"
+          readOnly
+        />
+
+        <input
+          name="vento"
+          value={form.vento}
+          placeholder="Vento (m/s)"
+          className="input"
+          readOnly
+        />
+
+        <select name="sol" className="input" onChange={handleChange}>
+          <option value="">Exposição solar</option>
+          <option>Baixa</option>
+          <option>Moderada</option>
+          <option>Alta</option>
+        </select>
+      </section>
+
       {/* MASSA */}
       <section className="box">
         <h2>Massa corporal</h2>
@@ -121,23 +190,6 @@ export default function Home() {
           <input type="checkbox" name="vestimentaPadrao" onChange={handleChange} />
           Vestimenta padronizada
         </label>
-      </section>
-
-      {/* AMBIENTE */}
-      <section className="box">
-        <h2>Condições ambientais</h2>
-
-        <input name="temperatura" placeholder="Temperatura (°C)" className="input" onChange={handleChange} />
-        <input name="umidade" placeholder="Umidade (%)" className="input" onChange={handleChange} />
-        <input name="sensacaoTermica" placeholder="Sensação térmica" className="input" onChange={handleChange} />
-        <input name="vento" placeholder="Vento" className="input" onChange={handleChange} />
-
-        <select name="sol" className="input" onChange={handleChange}>
-          <option value="">Exposição solar</option>
-          <option>Baixa</option>
-          <option>Moderada</option>
-          <option>Alta</option>
-        </select>
       </section>
 
       {/* TREINO */}
@@ -164,7 +216,7 @@ export default function Home() {
       <section className="box">
         <p>Urina</p>
         <div className="scale">
-          {[1,2,3,4,5,6,7].map(n => (  // 🔥 corrigido (1–7)
+          {[1,2,3,4,5,6,7].map(n => (
             <label key={n} className="scale-box">
               <input
                 type="radio"

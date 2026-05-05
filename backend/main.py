@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, usuarios, sessoes, fluidos, clima, relatorios
 from database import Base, engine
 
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -26,9 +27,10 @@ app.include_router(auth.router, prefix="/auth", tags=["Autenticação"])
 app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuários"])
 app.include_router(sessoes.router, prefix="/sessoes", tags=["Sessões"])
 app.include_router(fluidos.router, prefix="/fluidos", tags=["Fluidos"])
-app.include_router(clima.router, prefix="/clima", tags=["Clima"])
+app.include_router(clima.router)
 app.include_router(relatorios.router, prefix="/relatorios", tags=["Relatórios"])
 app.include_router(auth.router, prefix="/api/auth")
+
 
 @app.get("/")
 def root():
