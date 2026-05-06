@@ -7,6 +7,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.phone-screen {
+  width: 430px;
+  min-height: 100vh;
+  background: #dde1e7;
+  display: flex;
+  flex-direction: column;
+}
+
 .login-page {
   min-height: 100vh;
   background: #eef0f3;
@@ -22,13 +30,6 @@ body {
   margin: 0 61px 50px;
 }
 
-.phone-screen {
-  width: 430px;
-  min-height: 100vh;
-  background: #dde1e7;
-  display: flex;
-  flex-direction: column;
-}
 
 .login-header {
   height: 150px;

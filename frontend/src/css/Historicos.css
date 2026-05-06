@@ -1,63 +1,104 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+* {
+  box-sizing: border-box;
+}
 
-.hist-container {
-  font-family: 'Poppins', sans-serif;
-  background: #f5f5f5;
-  padding: 20px;
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.phone-screen {
+  width: 430px;
   min-height: 100vh;
+  background: #dde1e7;
+  display: flex;
+  flex-direction: column;
 }
 
-/* HEADER */
-.top {
-  text-align: center;
-  margin-bottom: 20px;
+.historico-page {
+  min-height: 100vh;
+  background: #eef0f3;
+  display: flex;
+  justify-content: center;
 }
 
-.top h2 {
-  color: #dc2626;
-}
-
-.active {
-  color: #dc2626;
-  font-weight: bold;
-}
-
-/* TÍTULO */
-.titulo {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* LISTA */
-.lista {
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-/* ITEM */
-.item {
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-  border-left: 5px solid #dc2626;
-}
-
-/* BOTÃO */
-.btn-voltar {
+.historico-header img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
   display: block;
-  width: 100%;
-  max-width: 500px;
-  margin: 20px auto 0 auto;
-  padding: 15px;
-  background: #dc2626;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
+  margin: 0 16px 50px;
 }
 
-.btn-voltar:hover {
-  background: #991b1b;
+.historico-header {
+  height: 110px;
+  text-align: center;
+  padding-top: 30px;
+  border-bottom: 6px solid #a5161b;
+}
+
+.historico-header h1 {
+  margin-top: -98px;
+  margin-right: 112px;
+  color: #991b1f;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.historico-header p {
+  margin-bottom: 60px;
+  margin-top: -13px;
+  margin-right: 127px;
+  color: #991b1f;
+  font-size: 13px;
+  letter-spacing: 3px;
+}
+
+.historico-main {
+  flex: 1;
+  padding: 42px 34px 20px;
+}
+
+.titulo {
+  color: #245b9f;
+  font-size: 10px;
+  margin-top: 16px;
+  margin-right: 167px;
+}
+
+.cards-topo {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 28px 32px;
+
+}
+
+.card-estatistica {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 12px;
+  min-height: 220px;
+  text-align: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.periodo, .tempo, .energia, .hidratacao {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 12px;
+  font-weight: 500;
 }
