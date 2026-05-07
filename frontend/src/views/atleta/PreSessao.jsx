@@ -1,4 +1,4 @@
-import "../css/Pre-Sessao.css";
+import "../../css/Pre-Sessao.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 

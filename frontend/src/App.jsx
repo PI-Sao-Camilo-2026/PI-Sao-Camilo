@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./views/Login";
 import Home from "./views/Home";
-import PreSessao from "./views/PreSessao";
-import Sessao from "./views/Sessao";
-import PosSessao from "./views/PosSessao";
-import Relatorios from "./views/Relatorios";
-import Historicos from "./views/Historicos";
+import PreSessao from "./views/atleta/PreSessao";
+import Sessao from "./views/atleta/Sessao";
+import PosSessao from "./views/atleta/PosSessao";
+import Relatorios from "./views/atleta/Relatorios";
+import Historicos from "./views/atleta/Historicos";
+
+import Homepage from "./views/medico/Homepage";
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +20,8 @@ function App() {
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/sessao" element={<Sessao />} />
         <Route path="/historicos" element={<Historicos />} />
+
+        <Route path="/homepage" element={<Homepage />} />
       </Routes>
     </BrowserRouter>
   );
