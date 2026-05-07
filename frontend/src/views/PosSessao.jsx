@@ -6,18 +6,34 @@ export default function PosSessao() {
   const navigate = useNavigate();
 
   const [tempoFinal, setTempoFinal] = useState("00 : 00 : 00");
+  const [tempoSegundos, setTempoSegundos] = useState(0);
+
   const [totalIngerido, setTotalIngerido] = useState(0);
   const [volumeUrina, setVolumeUrina] = useState(0);
+
+  // pesos
+  const [pesoPre, setPesoPre] = useState(73.6);
+  const [pesoPos, setPesoPos] = useState(72.9);
 
   useEffect(() => {
     const tempoSalvo = Number(localStorage.getItem("tempoFinalSessao") || 0);
     const totalSalvo = Number(localStorage.getItem("totalIngerido") || 0);
     const urinaSalva = Number(localStorage.getItem("volumeUrina") || 0);
 
-    // eslint-disable-next-line react-hooks/immutability, react-hooks/set-state-in-effect
+    setTempoSegundos(tempoSalvo);
     setTempoFinal(formatarTempo(tempoSalvo));
+
     setTotalIngerido(totalSalvo);
     setVolumeUrina(urinaSalva);
+
+    // pega peso salvo no pré
+    const dadosPre = JSON.parse(
+      localStorage.getItem("dadosPreSessao") || "{}"
+    );
+
+    if (dadosPre.peso) {
+      setPesoPre(Number(dadosPre.peso));
+    }
   }, []);
 
   const formatarTempo = (segundos) => {
@@ -25,18 +41,81 @@ export default function PosSessao() {
     const minutos = Math.floor((segundos % 3600) / 60);
     const seg = segundos % 60;
 
-    return `${String(horas).padStart(2, "0")} : ${String(minutos).padStart(
-      2,
-      "0"
-    )} : ${String(seg).padStart(2, "0")}`;
+    return `${String(horas).padStart(2, "0")} : ${String(
+      minutos
+    ).padStart(2, "0")} : ${String(seg).padStart(2, "0")}`;
   };
+
+  // cálculo da perda %
+  const perdaPct = Number(
+    (((pesoPre - pesoPos) / pesoPre) * 100).toFixed(2)
+  );
+
+  async function finalizarSessao() {
+    try {
+      const sessaoId = localStorage.getItem("sessao_id");
+
+      const payload = {
+        tempo_total_segundos: tempoSegundos,
+
+        agua_ml: totalIngerido,
+        isotonicos_ml: 0,
+        outros_ml: 0,
+
+        volume_urinario_ml: volumeUrina,
+
+        peso_pre: pesoPre,
+        peso_pos: pesoPos,
+
+        perda_pct: perdaPct,
+
+        gasto_energetico_kcal: 840,
+        ingestao_energetica_kcal: 210,
+        saldo_energetico_kcal: -630,
+      };
+
+      console.log("PAYLOAD PÓS-SESSÃO:");
+      console.log(payload);
+
+      const res = await fetch(
+        `http://127.0.0.1:8000/sessoes/${sessaoId}/finalizar`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!res.ok) {
+        const erro = await res.text();
+        console.error(erro);
+        throw new Error(erro);
+      }
+
+      const data = await res.json();
+
+      console.log("RESPOSTA BACKEND:");
+      console.log(data);
+
+      navigate("/relatorios");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao finalizar sessão");
+    }
+  }
 
   return (
     <div className="pos-page">
       <header className="pos-header">
         <div className="brand-area">
           <div className="brand-logo">
-            <img className="brand-logo-img" src="/R.png" alt="São Camilo" />
+            <img
+              className="brand-logo-img"
+              src="/R.png"
+              alt="São Camilo"
+            />
           </div>
 
           <div>
@@ -158,16 +237,26 @@ export default function PosSessao() {
         <div className="peso-grid">
           <div>
             <small>Pré</small>
-            <strong>73,6 kg</strong>
+            <strong>{pesoPre} kg</strong>
           </div>
 
           <div>
             <small>Pós</small>
-            <strong>72,9 kg</strong>
+
+            <input
+              type="number"
+              step="0.1"
+              value={pesoPos}
+              onChange={(e) =>
+                setPesoPos(Number(e.target.value))
+              }
+            />
           </div>
         </div>
 
-        <p className="normal-info">(NORMAL) Perda de 1,6%</p>
+        <p className="normal-info">
+          Perda de {perdaPct}%
+        </p>
       </section>
 
       <section className="summary-card">
@@ -192,7 +281,7 @@ export default function PosSessao() {
         </div>
       </section>
 
-      <button className="finalizar" onClick={() => navigate("/relatorios")}>
+      <button className="finalizar" onClick={finalizarSessao}>
         GERAR RELATÓRIO <span>➜</span>
       </button>
     </div>

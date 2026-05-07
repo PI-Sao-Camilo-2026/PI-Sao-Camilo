@@ -153,51 +153,118 @@ export default function PreSessao() {
     }));
   }
 
-    async function handleSubmit() {
-    if (!form.peso || isNaN(form.peso)) {
-      alert("Digite um peso válido");
-      return;
-    }
+async function handleSubmit() {
+  const pesoConvertido =
+    form.peso === ""
+      ? NaN
+      : Number(form.peso.replace(",", "."));
 
-    if (!form.urina) {
-      alert("Selecione a cor da urina");
-      return;
-    }
-
-    try {
-      const payload = {
-        peso_pre: Number(form.peso),
-        temp_celsius: Number(form.temperatura) || 25,
-        umidade_pct: Number(form.umidade) || 60,
-        cor_urina_basal: Number(form.urina) || 2,
-      };
-
-      const res = await fetch("http://127.0.0.1:8001/sessoes/pre-treino", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-      }
-
-      const data = await res.json();
-
-      localStorage.setItem("sessao_id", data.id);
-      localStorage.setItem("inicioSessao", Date.now().toString());
-      localStorage.removeItem("tempoPausado");
-      localStorage.removeItem("inicioPausa");
-
-      navigate("/sessao");
-    } catch (err) {
-      console.error("Erro:", err);
-      alert("Erro ao conectar com o servidor");
-    }
+  if (isNaN(pesoConvertido)) {
+    alert("Digite um peso válido");
+    return;
   }
+
+  if (!form.urina) {
+    alert("Selecione a cor da urina");
+    return;
+  }
+
+  try {
+    const payload = {
+      // principais
+      peso_pre: pesoConvertido,
+
+      temp_celsius:
+        form.temperatura === ""
+          ? null
+          : Number(form.temperatura),
+
+      umidade_pct:
+        form.umidade === ""
+          ? null
+          : Number(form.umidade),
+
+      cor_urina_basal:
+        form.urina === ""
+          ? null
+          : Number(form.urina),
+
+      // clima
+      sensacao_termica:
+        form.sensacaoTermica === ""
+          ? null
+          : Number(form.sensacaoTermica),
+
+      vento:
+        form.vento === ""
+          ? null
+          : Number(form.vento),
+
+      radiacao:
+        form.radiacao === ""
+          ? null
+          : Number(form.radiacao),
+
+      condicao: form.condicao || null,
+      sol: form.sol || null,
+
+      // checklist
+      bexiga_esvaziada: form.bexiga,
+      vestimenta_padrao: form.vestimentaPadrao,
+
+      // treino
+      modalidade: form.modalidade || null,
+
+      duracao:
+        form.duracao === ""
+          ? null
+          : Number(form.duracao),
+
+      intensidade: form.intensidade || null,
+      vestimenta: form.vestimenta || null,
+      sede: form.sede || null,
+      sintomas: form.sintomas || null,
+      hidratacao: form.hidratacao || null,
+    };
+
+    console.log("FORM COMPLETO:");
+    console.log(form);
+
+    console.log("PAYLOAD ENVIADO:");
+    console.log(payload);
+    console.table(payload);
+
+    const res = await fetch("http://127.0.0.1:8000/sessoes/pre-treino", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("ERRO BACKEND:", err);
+      throw new Error(err);
+    }
+
+    const data = await res.json();
+
+    console.log("RESPOSTA BACKEND:");
+    console.log(data);
+
+    localStorage.setItem("sessao_id", data.id);
+    localStorage.setItem("inicioSessao", Date.now().toString());
+
+    localStorage.removeItem("tempoPausado");
+    localStorage.removeItem("inicioPausa");
+
+    navigate("/sessao");
+  } catch (err) {
+    console.error("Erro:", err);
+    alert("Erro ao conectar com o servidor");
+  }
+}
 
   const nivelUrina = Number(form.urina);
 

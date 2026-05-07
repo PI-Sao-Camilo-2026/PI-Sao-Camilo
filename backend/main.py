@@ -11,7 +11,10 @@ app = FastAPI(
     description="API de hidratação esportiva inteligente",
     version="1.0.0",
 )
-
+@app.on_event("startup")
+def listar_rotas():
+    for route in app.routes:
+        print(f"{route.path} -> {route.methods}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
