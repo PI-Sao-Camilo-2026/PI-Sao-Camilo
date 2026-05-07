@@ -5,7 +5,7 @@ import PreSessao from "./views/atleta/PreSessao";
 import Sessao from "./views/atleta/Sessao";
 import PosSessao from "./views/atleta/PosSessao";
 import Relatorios from "./views/atleta/Relatorios";
-import Historicos from "./views/atleta/Historicos";
+import Historicos from "./views/atleta/Historico";
 
 import Homepage from "./views/medico/Homepage";
 function App() {
@@ -19,7 +19,7 @@ function App() {
         <Route path="/presessao" element={<PreSessao />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/sessao" element={<Sessao />} />
-        <Route path="/historicos" element={<Historicos />} />
+        <Route path="/historico" element={<Historicos />} />
 
         <Route path="/homepage" element={<Homepage />} />
       </Routes>
