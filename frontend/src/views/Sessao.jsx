@@ -10,7 +10,22 @@ export default function Sessao() {
   const [tempo, setTempo] = useState(0);
   const [pausado, setPausado] = useState(false);
 
+  const [clima, setClima] = useState({
+    temperatura: "",
+    umidade: "",
+    vento: "",
+    sol: "",
+    condicao: "",
+  });
+
   useEffect(() => {
+    const climaSalvo = localStorage.getItem("climaSessao");
+
+    if (climaSalvo) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setClima(JSON.parse(climaSalvo));
+    }
+
     let inicio = localStorage.getItem("inicioSessao");
 
     if (!inicio) {
@@ -20,18 +35,22 @@ export default function Sessao() {
 
     const intervalo = setInterval(() => {
       if (!pausado) {
-        const agora = Date.now();
-        const tempoPausado = Number(localStorage.getItem("tempoPausado") || 0);
-        const segundos = Math.floor(
-          (agora - Number(inicio) - tempoPausado) / 1000
-        );
-
-        setTempo(segundos);
+        // eslint-disable-next-line react-hooks/immutability
+        setTempo(calcularTempoAtual());
       }
     }, 1000);
 
     return () => clearInterval(intervalo);
   }, [pausado]);
+
+  const calcularTempoAtual = () => {
+    const inicio = Number(localStorage.getItem("inicioSessao"));
+    const tempoPausado = Number(localStorage.getItem("tempoPausado") || 0);
+
+    if (!inicio) return 0;
+
+    return Math.floor((Date.now() - inicio - tempoPausado) / 1000);
+  };
 
   const pausarOuContinuar = () => {
     if (!pausado) {
@@ -42,6 +61,7 @@ export default function Sessao() {
       const tempoPausadoAnterior = Number(
         localStorage.getItem("tempoPausado") || 0
       );
+
       const novaPausa = Date.now() - inicioPausa;
 
       localStorage.setItem(
@@ -70,77 +90,130 @@ export default function Sessao() {
   };
 
   const encerrarSessao = () => {
-    localStorage.setItem("tempoFinalSessao", tempo.toString());
+    const tempoFinal = pausado ? tempo : calcularTempoAtual();
+
+    localStorage.setItem("tempoFinalSessao", tempoFinal.toString());
+    localStorage.setItem("totalIngerido", total.toString());
+    localStorage.setItem("volumeUrina", urina.toString());
+
     localStorage.removeItem("inicioSessao");
     localStorage.removeItem("inicioPausa");
     localStorage.removeItem("tempoPausado");
+
     navigate("/possessao");
   };
 
   return (
-    <div className="sessao-container">
-      <header className="top">
-        <h2>SÃO CAMILO</h2>
-        <p>Nutri - Esportiva</p>
+    <div className="sessao-page">
+      <header className="sessao-header">
+        <div className="brand-area">
+          <div className="brand-logo">
+            <img className="brand-logo-img" src="/R.png" alt="São Camilo" />
+          </div>
 
-        <div className={pausado ? "session paused" : "session"}>
-          ● {pausado ? "SESSÃO PAUSADA" : "SESSÃO ATIVA"}
+          <div>
+            <h1>SÃO CAMILO</h1>
+            <p>Nutri - Esportiva</p>
+          </div>
+        </div>
+
+        <div className="header-actions">
+          <span className={pausado ? "status-pill paused" : "status-pill"}>
+            ● {pausado ? "SESSÃO PAUSADA" : "SESSÃO ATIVA"}
+          </span>
+          <span className="bell">🔔</span>
+          <span className="menu">☰</span>
         </div>
       </header>
 
-      <section className="tempo">
-        <h1>{formatarTempo(tempo)}</h1>
-        <p>TEMPO DA SESSÃO</p>
+      <section className="atleta-area">
+        <img
+          className="atleta-icon"
+          src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png"
+          alt="Atleta"
+        />
+
+        <div>
+          <h2>Sessão em andamento</h2>
+          <p>Registre hidratação e volume urinário durante o treino.</p>
+        </div>
+
+        <span className="atleta-codigo">SC / ATL - 0000</span>
       </section>
 
-      <section className="steps">
-        <div className="step done">
+      <section className="steps-line">
+        <div className="step-item complete">
           <span>1</span>
           <p>PRÉ</p>
         </div>
 
-        <div className="step active">
+        <div className="line complete-line"></div>
+
+        <div className="step-item active">
           <span>2</span>
           <p>DURANTE</p>
         </div>
 
-        <div className="step">
+        <div className="line"></div>
+
+        <div className="step-item">
           <span>3</span>
           <p>PÓS</p>
         </div>
-      </section>
 
-      <section className="clima">
-        <div>
-          <strong>Temperatura</strong>
-          <br />
-          28°C
-        </div>
+        <div className="line"></div>
 
-        <div>
-          <strong>Umidade</strong>
-          <br />
-          75%
-        </div>
-
-        <div>
-          <strong>Radiação</strong>
-          <br />
-          Alta
-        </div>
-
-        <div>
-          <strong>Vento</strong>
-          <br />
-          8%
+        <div className="step-item">
+          <span>4</span>
+          <p>RELATÓRIO</p>
         </div>
       </section>
 
-      <section className="box">
-        <h2>Ingestão de Fluidos</h2>
+      <section className="tempo-card">
+        <p>TEMPO DA SESSÃO</p>
+        <h1>{formatarTempo(tempo)}</h1>
+      </section>
+
+      <section className="sessao-titulo">
+        <span></span>
+        <h2>CONDIÇÕES DE TEMPO</h2>
+      </section>
+
+      <section className="weather-grid">
+        <div className="weather-card">
+          <div className="weather-icon red">☀</div>
+          <small>TEMPERATURA</small>
+          <strong>{clima.temperatura ? `${clima.temperatura}°C` : "--"}</strong>
+        </div>
+
+        <div className="weather-card">
+          <div className="weather-icon blue">💧</div>
+          <small>UMIDADE</small>
+          <strong>{clima.umidade ? `${clima.umidade}%` : "--"}</strong>
+        </div>
+
+        <div className="weather-card">
+          <div className="weather-icon yellow">☀</div>
+          <small>RADIAÇÃO</small>
+          <strong>{clima.sol || "--"}</strong>
+        </div>
+
+        <div className="weather-card">
+          <div className="weather-icon green">🍃</div>
+          <small>VENTO</small>
+          <strong>{clima.vento ? `${clima.vento} km/h` : "--"}</strong>
+        </div>
+      </section>
+
+      <section className="session-card">
+        <div className="card-title">
+          <span>💧</span>
+          <h3>Ingestão de Fluidos</h3>
+        </div>
+
         <p className="subtitle">Registre por evento simples</p>
 
-        <div className="ingestao">
+        <div className="quick-grid">
           <button type="button" onClick={() => alterarValor(setTotal, 250)}>
             <strong>250 mL</strong>
             <span>Copo</span>
@@ -159,7 +232,7 @@ export default function Sessao() {
 
         <p className="total">Total ingerido: {total} mL</p>
 
-        <div className="acoes-fluido">
+        <div className="adjust-actions">
           <button type="button" onClick={() => alterarValor(setTotal, -100)}>
             -100 mL
           </button>
@@ -172,11 +245,15 @@ export default function Sessao() {
 
       <section className="alerta">⚠️ Beba 200 mL a cada 15 min</section>
 
-      <section className="box">
-        <h2>Volume urinário</h2>
-        <p className="subtitle">Quando aplicável</p>
+      <section className="session-card">
+        <div className="card-title">
+          <span>🚻</span>
+          <h3>Volume urinário</h3>
+        </div>
 
-        <div className="ingestao">
+        <p className="subtitle">Registrar apenas se houver micção</p>
+
+        <div className="quick-grid">
           <button type="button" onClick={() => alterarValor(setUrina, 100)}>
             <strong>100 mL</strong>
             <span>Pouco</span>
@@ -195,7 +272,7 @@ export default function Sessao() {
 
         <p className="total">Volume urinário: {urina} mL</p>
 
-        <div className="acoes-fluido">
+        <div className="adjust-actions">
           <button type="button" onClick={() => alterarValor(setUrina, -100)}>
             -100 mL
           </button>
@@ -204,12 +281,10 @@ export default function Sessao() {
             +100 mL
           </button>
         </div>
-
-        <p className="hint">Registrar apenas se houver micção durante a sessão.</p>
       </section>
 
       <button className="encerrar" onClick={encerrarSessao}>
-        ENCERRAR SESSÃO
+        ENCERRAR SESSÃO <span>➜</span>
       </button>
 
       <button
