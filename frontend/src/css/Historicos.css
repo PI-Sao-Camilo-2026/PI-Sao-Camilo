@@ -39,20 +39,66 @@ body {
 
 .historico-header h1 {
   margin-top: -98px;
-  margin-right: 112px;
+  margin-right: 138px;
   color: #991b1f;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   letter-spacing: 2px;
 }
 
 .historico-header p {
+  display: flex;
+  align-items: center;
   margin-bottom: 60px;
-  margin-top: -13px;
-  margin-right: 127px;
+  margin-top: -11px;
+  margin-left: 74px;
   color: #991b1f;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 3px;
+}
+
+.historico-header .active {
+  color: white;
+  margin-left: 223px;
+  position: relative;
+  top: -90px;
+  font-size: 8px;
+  font-family:
+    "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  letter-spacing: 1px;
+  border: 2px solid #0a9b2d;
+  border-radius: 30px;
+  background: #0a9b2d;
+  padding: 3px 3px;
+}
+
+.header-icon {
+  font-size: 23px;
+  border: none;
+  color: #991b1f;
+  background: #dde1e7;
+  display: flex;
+  position: relative;
+  align-items: center;
+  top: -110px;
+  margin-left: 373px;
+  cursor: pointer;
+}
+
+.notificacao-ativa {
+  color: #991b1f;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c52323;
+  border: 2px solid white;
 }
 
 .historico-main {
@@ -62,43 +108,150 @@ body {
 
 .titulo {
   color: #245b9f;
-  font-size: 10px;
-  margin-top: 16px;
-  margin-right: 167px;
+  font-size: 12px;
+  margin-top: -32px;
+  margin-left: -120px;
+  white-space: nowrap;
 }
 
-.cards-topo {
+.historico-vazio h2 {
+  font-size: 18px;
+  text-align: center;
+  padding-top: 23px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.historico-vazio p {
+  font-size: 14px;
+  padding-top: 10px;
+  text-indent: 15px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin: 28px 32px;
-
+  gap: 14px;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.card-estatistica {
-  background: #fff;
-  border-radius: 14px;
-  padding: 18px 12px;
-  min-height: 220px;
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  width: 180px;
+  height: 180px;
+  min-height: 50px;
+  padding: 18px 10px;
   text-align: center;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.icone {
-  width: 44px;
-  height: 44px;
+.stat-icon {
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  margin: 0 auto 18px;
+  margin: 0 auto 10px;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 26px;
 }
 
-.periodo, .tempo, .energia, .hidratacao {
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-  margin: 0 0 12px;
-  font-weight: 500;
+.green {
+  background: #45b76b;
+  font-size: 19px;
+}
+.blue {
+  background: #3265ad;
+  font-size: 19px;
+}
+.red {
+  background: #ef3340;
+  font-size: 19px;
+}
+.purple {
+  background: #5550df;
+  font-size: 19px;
+}
+
+.stat-card h3 {
+  margin: 4px 0 2px;
+  font-size: 20px;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
+  line-height: 1.1;
+  font-weight: bold;
+}
+
+.stat-card h3 small {
+  font-size: 15px;
+}
+
+.stat-label {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+}
+
+.stat-period {
+  font-size: 10px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin: 0 0 6px;
+}
+
+.stat-growth {
+  font-size: 10px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  line-height: 1.2;
+}
+
+.bottom-nav {
+  height: 50px;
+  color: white;
+  font-size: 12px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background: linear-gradient(#b32025, #991b1f);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: auto;
+}
+
+.nav-icon {
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 10px;
+  margin-bottom: -8px;
+  text-align: center;
+}
+
+.nav-icon.vazio {
+  opacity: 0.95;
+}
+
+.nav-item {
+  opacity: 0.95;
+  transition: 0.2s;
+}
+
+.active-nav {
+  font-weight: bold;
 }
