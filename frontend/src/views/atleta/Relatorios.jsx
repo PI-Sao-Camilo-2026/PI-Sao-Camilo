@@ -1,4 +1,4 @@
-import "../css/Relatorios.css";
+import "../../css/Relatorios.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Relatorios() {

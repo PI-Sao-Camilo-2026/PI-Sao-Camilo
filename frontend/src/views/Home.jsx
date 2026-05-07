@@ -24,6 +24,13 @@ export default function Home() {
   >
     Ver Históricos
   </button>
+
+  <button 
+    className="home-btn medico"
+    onClick={() => navigate("/homepage")}
+  >
+    Entrar
+  </button>
 </div>
 
     </div>

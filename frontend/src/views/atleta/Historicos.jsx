@@ -1,4 +1,4 @@
-import "../css/Historicos.css";
+import "../../css/Historicos.css";
 import { useNavigate } from "react-router-dom";
 import { GiSoccerBall } from "react-icons/gi";
 import { FaDumbbell, FaHeartbeat, FaClipboardList } from "react-icons/fa";
@@ -13,12 +13,6 @@ export default function Historico() {
   const navigate = useNavigate();
 
   const temNotificacao = true;
-  <button
-    className={`header-icon ${temNotificacao ? "notificacao-ativa" : ""}`}
-  >
-    <AiOutlineBell />
-    {temNotificacao && <span className="notification-dot"></span>}
-  </button>;
 
   const sessoesConcluidas = [];
   const sessoesVisiveis = sessoesConcluidas.filter(
@@ -33,8 +27,11 @@ export default function Historico() {
           <h1>SÃO CAMILO</h1>
           <p>Nutri - Esportiva</p>
           <span className="active">● SESSÃO ATIVA</span>
-          <button className="header-icon">
+          <button
+            className={`header-icon ${temNotificacao ? "notificacao-ativa" : ""}`}
+          >
             <AiOutlineBell />
+            {temNotificacao && <span className="notification-dot"></span>}
           </button>
         </header>
 
@@ -197,13 +194,11 @@ export default function Historico() {
             <p>INÍCIO</p>
           </div>
 
-          <div>
-            <div className="nav-item active-nav">
+          <div className="nav-item active-nav">
               <span className="nav-icon">
                 <FaClipboardList />
               </span>
               <p>HISTÓRICO</p>
-            </div>
           </div>
 
           <div className="nav-item">

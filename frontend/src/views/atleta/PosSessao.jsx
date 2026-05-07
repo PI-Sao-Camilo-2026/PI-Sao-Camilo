@@ -1,4 +1,4 @@
-import "../css/Pos-Sessao.css";
+import "../../css/Pos-Sessao.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
