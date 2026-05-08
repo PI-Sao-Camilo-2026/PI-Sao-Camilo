@@ -1,18 +1,21 @@
 import "../../css/Homepage.css";
+import { useNavigate } from "react-router-dom";
 import {
   AiOutlineUser,
   AiOutlineBell,
   AiFillBell,
   AiOutlineExclamationCircle,
-  AiOutlineTeam,
+  AiFillHome,
 } from "react-icons/ai";
-import { FaHome } from "react-icons/fa";
+import { HiOutlineUserGroup } from "react-icons/hi";
 
 export default function Homepage() {
-  const temNotificacao = false;
+  const navigate = useNavigate();
 
-  const atletas = [];
-  const sessoes = [];
+  const temNotificacao = true;
+
+  const atletas = [1];
+  const sessoes = [1];
 
   const mostrarDashboard = atletas.length > 0 || sessoes.length > 0;
 
@@ -127,22 +130,22 @@ export default function Homepage() {
               </section>
 
               <button className="atletas-btn">
-                <span>VER TODOS OS ATLETAS</span>
+                <span>VER ATLETAS INDIVIDUALMENTE</span>
               </button>
             </>
           ) : null}
         </main>
         <nav className="bottom-nav">
           <div className="nav-item active-nav">
-            <span className="nav-icon vazio">
-              <FaHome />
+            <span className="nav-icon">
+              <AiFillHome />
             </span>
             <p>INÍCIO</p>
           </div>
 
-          <div className="nav-item">
-            <span className="nav-icon">
-              <AiOutlineTeam />
+          <div className="nav-item" onClick={() => navigate("/atletas")}>
+            <span className="nav-icon vazio">
+              <HiOutlineUserGroup />
             </span>
             <p>ATLETAS</p>
           </div>

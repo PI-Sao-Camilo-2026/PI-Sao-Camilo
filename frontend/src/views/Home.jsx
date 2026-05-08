@@ -31,6 +31,13 @@ export default function Home() {
   >
     Entrar
   </button>
+
+    <button 
+    className="atletas-btn medico"
+    onClick={() => navigate("/atletas")}
+  >
+    Entrar Atletas
+  </button>
 </div>
 
     </div>

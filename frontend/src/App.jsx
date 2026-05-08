@@ -5,9 +5,11 @@ import PreSessao from "./views/atleta/PreSessao";
 import Sessao from "./views/atleta/Sessao";
 import PosSessao from "./views/atleta/PosSessao";
 import Relatorios from "./views/atleta/Relatorios";
-import Historicos from "./views/atleta/Historico";
+import Historico from "./views/atleta/Historico";
 
 import Homepage from "./views/medico/Homepage";
+import Atletas from "./views/medico/Atletas";
+import PerfilAtleta from "./views/medico/PerfilAtleta";
 function App() {
   return (
     <BrowserRouter>
@@ -19,9 +21,11 @@ function App() {
         <Route path="/presessao" element={<PreSessao />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/sessao" element={<Sessao />} />
-        <Route path="/historico" element={<Historicos />} />
+        <Route path="/historico" element={<Historico />} />
 
         <Route path="/homepage" element={<Homepage />} />
+        <Route path="/atletas" element={<Atletas />} />
+        <Route path="/atletas/:id" element={<PerfilAtleta />} />
       </Routes>
     </BrowserRouter>
   );
