@@ -3,9 +3,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Literal
+import random, string
 
 from database import get_db, Usuario
-from dependencies import get_current_user  
+from dependencies import get_current_user
 from services.auth_service import (
     hash_senha,
     autenticar_usuario,
@@ -25,7 +26,7 @@ class RegistroInput(BaseModel):
     tipo: Literal["atleta", "profissional"]
     sexo: Optional[str] = None
     modalidade: Optional[str] = None
-    profissional_id: Optional[int] = None  # atleta vinculado a um profissional
+    profissional_id: Optional[int] = None
 
 
 class TokenResponse(BaseModel):
@@ -45,13 +46,13 @@ class RefreshInput(BaseModel):
 @router.post("/registrar", response_model=TokenResponse, status_code=201)
 def registrar(body: RegistroInput, db: Session = Depends(get_db)):
     """Cria um novo usuário e retorna tokens de acesso."""
+
     if db.query(Usuario).filter(Usuario.email == body.email).first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="E-mail já cadastrado",
         )
 
-    import random, string
     codigo = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     user = Usuario(
@@ -83,11 +84,12 @@ def login(
     form: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
+    """Login com e-mail e senha."""
     user = autenticar_usuario(db, form.username, form.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciais inválidas",
+            detail="E-mail ou senha incorretos",
         )
 
     return TokenResponse(
@@ -101,6 +103,7 @@ def login(
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(body: RefreshInput, db: Session = Depends(get_db)):
+    """Renova o access token usando o refresh token."""
     payload = decodificar_token(body.refresh_token)
     if not payload or payload.get("token_type") != "refresh":
         raise HTTPException(

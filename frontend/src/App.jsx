@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
-
 import Login from "./views/Login";
+import Cadastro from "./views/Cadastro";   // ← nova rota
 import Home from "./views/Home";
 import PreSessao from "./views/atleta/PreSessao";
 import Sessao from "./views/atleta/Sessao";
@@ -18,10 +18,12 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Pública */}
-          <Route path="/" element={<Login />} />
 
-          {/* Atleta */}
+          {/* ── Públicas ── */}
+          <Route path="/" element={<Login />} />
+          <Route path="/cadastro" element={<Cadastro />} />
+
+          {/* ── Atleta ── */}
           <Route path="/home" element={
             <PrivateRoute tipo="atleta"><Home /></PrivateRoute>
           } />
@@ -41,7 +43,7 @@ function App() {
             <PrivateRoute tipo="atleta"><Historico /></PrivateRoute>
           } />
 
-          {/* Profissional */}
+          {/* ── Profissional ── */}
           <Route path="/homepage" element={
             <PrivateRoute tipo="profissional"><Homepage /></PrivateRoute>
           } />
@@ -52,8 +54,9 @@ function App() {
             <PrivateRoute tipo="profissional"><PerfilAtleta /></PrivateRoute>
           } />
 
-          {/* Fallback */}
+          {/* ── Fallback ── */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
         </Routes>
       </BrowserRouter>
     </AuthProvider>
