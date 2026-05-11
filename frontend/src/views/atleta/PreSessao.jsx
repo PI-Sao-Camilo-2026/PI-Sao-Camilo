@@ -170,6 +170,16 @@ async function handleSubmit() {
   }
 
   try {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token");
+
+    if (!token) {
+      alert("Usuário não autenticado. Faça login novamente.");
+      navigate("/login");
+      return;
+    }
+
     const payload = {
       // principais
       peso_pre: pesoConvertido,
@@ -227,24 +237,35 @@ async function handleSubmit() {
       hidratacao: form.hidratacao || null,
     };
 
+
     console.log("FORM COMPLETO:");
     console.log(form);
-
+    console.log("TOKEN:");
+    console.log(token);
     console.log("PAYLOAD ENVIADO:");
     console.log(payload);
     console.table(payload);
 
-    const res = await fetch("http://127.0.0.1:8000/sessoes/pre-treino", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      "http://127.0.0.1:8000/sessoes/pre-treino",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify(payload),
+      }
+    );
 
     if (!res.ok) {
       const err = await res.text();
-      console.error("ERRO BACKEND:", err);
+
+      console.error("ERRO BACKEND:");
+      console.error(err);
+
       throw new Error(err);
     }
 
@@ -254,14 +275,20 @@ async function handleSubmit() {
     console.log(data);
 
     localStorage.setItem("sessao_id", data.id);
-    localStorage.setItem("inicioSessao", Date.now().toString());
+
+    localStorage.setItem(
+      "inicioSessao",
+      Date.now().toString()
+    );
 
     localStorage.removeItem("tempoPausado");
     localStorage.removeItem("inicioPausa");
 
     navigate("/sessao");
+
   } catch (err) {
     console.error("Erro:", err);
+
     alert("Erro ao conectar com o servidor");
   }
 }
