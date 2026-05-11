@@ -1,5 +1,7 @@
 import "../../css/Historico.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { sessoesApi } from "../../services/api";
 import { GiSoccerBall } from "react-icons/gi";
 import { FaDumbbell, FaHeartbeat, FaClipboardList } from "react-icons/fa";
 import {
@@ -7,18 +9,49 @@ import {
   AiOutlineUser,
   AiOutlineHeart,
   AiOutlineBell,
+  AiFillBell,
 } from "react-icons/ai";
+
+const ICONE_MODALIDADE = {
+  futebol: <GiSoccerBall />,
+  musculação: <FaDumbbell />,
+  musculacao: <FaDumbbell />,
+  aeróbico: <FaHeartbeat />,
+  aerobico: <FaHeartbeat />,
+};
+
+function iconeModalidade(modalidade) {
+  if (!modalidade) return "🏃";
+  const key = modalidade.toLowerCase();
+  return ICONE_MODALIDADE[key] || "🏃";
+}
 
 export default function Historico() {
   const navigate = useNavigate();
+  const [sessoes, setSessoes] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const temNotificacao = true;
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const [hist, st] = await Promise.all([
+          sessoesApi.historico(),
+          sessoesApi.stats(),
+        ]);
+        setSessoes(hist);
+        setStats(st);
+      } catch (err) {
+        console.error("Erro ao carregar histórico:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregar();
+  }, []);
 
-  const sessoesConcluidas = [];
-  const sessoesVisiveis = sessoesConcluidas.filter(
-    (sessao) => sessao.compartilhada == true,
-  );
-  const temSessoes = sessoesVisiveis.length > 0;
+  const temSessoes = sessoes.length > 0;
+
   return (
     <div className="historico-page">
       <div className="phone-screen">
@@ -28,13 +61,7 @@ export default function Historico() {
           <p>Nutri - Esportiva</p>
           <span className="active">● SESSÃO ATIVA</span>
           <button className="header-icon">
-            {temNotificacao ? (
-              <AiFillBell className="notificacao-ativa" />
-            ) : (
-              <AiOutlineBell className="notificacao-vazia" />
-            )}
-
-            {temNotificacao && <span className="notification-dot"></span>}
+            <AiOutlineBell className="notificacao-vazia" />
           </button>
         </header>
 
@@ -43,178 +70,107 @@ export default function Historico() {
             <h1>Dashboard de Sessões</h1>
           </section>
 
-          {!temSessoes ? (
+          {loading ? (
+            <div className="historico-vazio">
+              <p>Carregando histórico...</p>
+            </div>
+          ) : !temSessoes ? (
             <div className="historico-vazio">
               <h2>Nenhuma sessão concluída</h2>
-              <p>
-                Fala, atleta! Conclua sua primeira sessão de treino para
-                aparecer no seu histórico.
-              </p>
+              <p>Fala, atleta! Conclua sua primeira sessão de treino para aparecer no seu histórico.</p>
             </div>
           ) : (
             <>
-              <section>
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <div className="stat-icon green">📅</div>
-                    <p className="stat-label">SESSÕES</p>
-                    <h3>24</h3>
-                    <p className="stat-period">Este mês</p>
-                    <span className="stat-growth">↑ 12% vs mês anterior</span>
-                  </div>
+              {/* Stats reais do backend */}
+              {stats && (
+                <section>
+                  <div className="stats-grid">
+                    <div className="stat-card">
+                      <div className="stat-icon green">📅</div>
+                      <p className="stat-label">SESSÕES</p>
+                      <h3>{stats.total_sessoes}</h3>
+                      <p className="stat-period">Total</p>
+                    </div>
 
-                  <div className="stat-card">
-                    <div className="stat-icon blue">⏱</div>
-                    <p className="stat-label">TEMPO TOTAL</p>
-                    <h3>18h 45m 12s</h3>
-                    <p className="stat-period">Este mês</p>
-                    <span className="stat-growth">↑ 8% vs mês anterior</span>
-                  </div>
+                    <div className="stat-card">
+                      <div className="stat-icon blue">💧</div>
+                      <p className="stat-label">TAXA MÉDIA</p>
+                      <h3>{stats.taxa_media ? `${stats.taxa_media}` : "--"}</h3>
+                      <p className="stat-period">L/h</p>
+                    </div>
 
-                  <div className="stat-card">
-                    <div className="stat-icon red">🔥</div>
-                    <p className="stat-label">ENERGIA TOTAL</p>
-                    <h3>
-                      18.750 <small>kcal</small>
-                    </h3>
-                    <p className="stat-period">Este mês</p>
-                    <span className="stat-growth">↑ 15% vs mês anterior</span>
-                  </div>
+                    <div className="stat-card">
+                      <div className="stat-icon red">⚡</div>
+                      <p className="stat-label">TAXA MÁX.</p>
+                      <h3>{stats.taxa_maxima ?? "--"}</h3>
+                      <p className="stat-period">L/h</p>
+                    </div>
 
-                  <div className="stat-card">
-                    <div className="stat-icon purple">💧</div>
-                    <p className="stat-label">HIDRATAÇÃO</p>
-                    <h3>
-                      28,6 <small>L</small>
-                    </h3>
-                    <p className="stat-period">Este mês</p>
-                    <span className="stat-growth">↑ 10% vs mês anterior</span>
+                    <div className="stat-card">
+                      <div className="stat-icon purple">⚖️</div>
+                      <p className="stat-label">MAIOR PERDA</p>
+                      <h3>{stats.maior_perda_pct ? `${stats.maior_perda_pct}%` : "--"}</h3>
+                      <p className="stat-period">de massa</p>
+                    </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
 
+              {/* Lista de sessões reais */}
               <section className="secao-sessoes">
                 <div className="titulo-sessoes">
-                  <span className="icone-sessoes"></span>
                   <h2>ÚLTIMAS SESSÕES</h2>
                 </div>
 
                 <div className="cards-sessao">
-                  <div className="esquerda">
-                    <div className="informacoes">
-                      <p className="data-tempo">22/04/2026 | 01:25:54</p>
+                  {sessoes.map((s) => (
+                    <div className="esquerda" key={s.id}>
                       <div className="icone-aerobico">
-                        <GiSoccerBall />
+                        {iconeModalidade(s.modalidade)}
                       </div>
-                      <h3>Futebol</h3>
-                      <div className="resumo-resultados">
-                        <span>💧 1,8 L/h</span>
-                        <span></span>
-                        <span>🔥 840 kcal</span>
+                      <div className="informacoes">
+                        <p className="data-tempo">
+                          {s.criado_em
+                            ? new Date(s.criado_em).toLocaleDateString("pt-BR")
+                            : "--"}
+                        </p>
+                        <h3>{s.modalidade || "Treino"}</h3>
+                        <div className="resumo-resultados">
+                          <span>💧 {s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "--"}</span>
+                          <span>⚖️ {s.variacao_peso_pct ? `${s.variacao_peso_pct}%` : "--"}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="direita">
-                      <div className="status">CONCLUÍDA</div>
-                      <span className="flecha">›</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="cards-sessao">
-                  <div className="esquerda">
-                    <div className="icone-musculacao">
-                      <FaDumbbell />
-                    </div>
-                    <div className="informacoes">
-                      <p className="data-tempo">23/04/2026 | 01:04:37</p>
-                      <h3>Musculação</h3>
-                      <div className="resumo-resultados">
-                        <span>💧 2,4 L/h</span>
-                        <span></span>
-                        <span>🔥 1250 kcal</span>
+                      <div className="direita">
+                        <div className="status">CONCLUÍDA</div>
+                        <span className="flecha">›</span>
                       </div>
                     </div>
-                    <div className="direita">
-                      <div className="status">CONCLUÍDA</div>
-                      <span className="flecha">›</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="cards-sessao">
-                  <div className="esquerda">
-                    <div className="icone-aerobico">
-                      <FaHeartbeat />
-                    </div>
-                    <div className="informacoes">
-                      <p className="data-tempo">25/04/2026 | 00:40:07</p>
-                      <h3>Aeróbico</h3>
-                      <div className="resumo-resultados">
-                        <span>💧 0,9 L/h</span>
-                        <span></span>
-                        <span>🔥 650 kcal</span>
-                      </div>
-                    </div>
-                    <div className="direita">
-                      <div className="status">CONCLUÍDA</div>
-                      <span className="flecha">›</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="cards-sessao">
-                  <div className="esquerda">
-                    <div className="icone-musculacao">🏋️</div>
-                    <div className="informacoes">
-                      <p className="data-tempo">23/04/2026 | 01:04:37</p>
-                      <h3>Musculação</h3>
-                      <div className="resumo-resultados">
-                        <span>💧 2,4 L/h</span>
-                        <span></span>
-                        <span>🔥 1250 kcal</span>
-                      </div>
-                    </div>
-                    <div className="direita">
-                      <div className="status">CONCLUÍDA</div>
-                      <span className="flecha">›</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </section>
 
-              <button className="btn-voltar" onClick={() => navigate("/")}>
-                Voltar para pré-sessão
+              <button className="btn-voltar" onClick={() => navigate("/presessao")}>
+                Nova sessão
               </button>
             </>
           )}
         </main>
 
         <nav className="bottom-nav">
-          <div className="nav-item">
-            <span className="nav-icon vazio">
-              <AiOutlineHome />
-            </span>
+          <div className="nav-item" onClick={() => navigate("/home")}>
+            <span className="nav-icon vazio"><AiOutlineHome /></span>
             <p>INÍCIO</p>
           </div>
-
           <div className="nav-item active-nav">
-            <span className="nav-icon">
-              <FaClipboardList />
-            </span>
+            <span className="nav-icon"><FaClipboardList /></span>
             <p>HISTÓRICO</p>
           </div>
-
           <div className="nav-item">
-            <span className="nav-icon vazio">
-              <AiOutlineHeart />
-            </span>
+            <span className="nav-icon vazio"><AiOutlineHeart /></span>
             <p>OBSERVAÇÕES</p>
           </div>
-
           <div className="nav-item">
-            <span className="nav-icon vazio">
-              <AiOutlineUser />
-            </span>
+            <span className="nav-icon vazio"><AiOutlineUser /></span>
             <p>PERFIL</p>
           </div>
         </nav>
