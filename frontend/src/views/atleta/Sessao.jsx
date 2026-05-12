@@ -159,22 +159,25 @@ export default function Sessao() {
 
       <section className="weather-grid">
         <div className="weather-card">
-          <div className="weather-icon red">☀</div>
+          <img className="weather-icon red" src="/temperatura-removebg-preview.png" alt="temperatura imagem"></img>
           <small>TEMPERATURA</small>
           <strong>{clima.temperatura ? `${clima.temperatura}°C` : "--"}</strong>
         </div>
+
         <div className="weather-card">
           <div className="weather-icon blue">💧</div>
           <small>UMIDADE</small>
           <strong>{clima.umidade ? `${clima.umidade}%` : "--"}</strong>
         </div>
+
         <div className="weather-card">
           <div className="weather-icon yellow">☀</div>
           <small>RADIAÇÃO</small>
           <strong>{clima.sol || "--"}</strong>
         </div>
+
         <div className="weather-card">
-          <div className="weather-icon green">🍃</div>
+          <img className="weather-icon green" src="/imaa-removebg-preview.png" alt="vento imagem"></img>
           <small>VENTO</small>
           <strong>{clima.vento ? `${clima.vento} km/h` : "--"}</strong>
         </div>
@@ -185,7 +188,9 @@ export default function Sessao() {
           <span>💧</span>
           <h3>Ingestão de Fluidos</h3>
         </div>
+
         <p className="subtitle">Registre por evento simples</p>
+
         <div className="quick-grid">
           {[250, 500, 750].map((ml) => (
             <button
@@ -199,33 +204,73 @@ export default function Sessao() {
             </button>
           ))}
         </div>
+
         <p className="total">Total ingerido: {total} mL</p>
+
         <div className="adjust-actions">
-          <button type="button" onClick={() => adicionarFluido(-100)} disabled={registrando}>-100 mL</button>
-          <button type="button" onClick={() => adicionarFluido(100)} disabled={registrando}>+100 mL</button>
+          <button
+            type="button"
+            onClick={() => adicionarFluido(-50)}
+            disabled={registrando}
+          >
+            -50 mL
+          </button>
+
+          <button
+            type="button"
+            onClick={() => adicionarFluido(50)}
+            disabled={registrando}
+          >
+            +50 mL
+          </button>
         </div>
       </section>
 
-      <section className="alerta">⚠️ Beba 200 mL a cada 15 min</section>
+      <section className="alerta">
+        ⚠️ Beba 200 mL a cada 15 min
+      </section>
 
       <section className="session-card">
         <div className="card-title">
           <span>🚻</span>
           <h3>Volume urinário</h3>
         </div>
-        <p className="subtitle">Registrar apenas se houver micção</p>
+
+        <p className="subtitle">
+          Registrar apenas se houver micção
+        </p>
+
         <div className="quick-grid">
           {[100, 250, 500].map((ml) => (
-            <button key={ml} type="button" onClick={() => alterarUrina(ml)}>
+            <button
+              key={ml}
+              type="button"
+              onClick={() => alterarUrina(ml)}
+            >
               <strong>{ml} mL</strong>
               <span>{ml === 100 ? "Pouco" : ml === 250 ? "Médio" : "Alto"}</span>
             </button>
           ))}
         </div>
-        <p className="total">Volume urinário: {urina} mL</p>
+
+        <p className="total">
+          Volume urinário: {urina} mL
+        </p>
+
         <div className="adjust-actions">
-          <button type="button" onClick={() => alterarUrina(-100)}>-100 mL</button>
-          <button type="button" onClick={() => alterarUrina(100)}>+100 mL</button>
+          <button
+            type="button"
+            onClick={() => alterarUrina(-50)}
+          >
+            -50 mL
+          </button>
+
+          <button
+            type="button"
+            onClick={() => alterarUrina(50)}
+          >
+            +50 mL
+          </button>
         </div>
       </section>
 

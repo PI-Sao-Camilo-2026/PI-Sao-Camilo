@@ -1,4 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --sc-red: #991b1f;
+  --sc-red-dark: #6f1216;
+  --sc-red-soft: #b83236;
+
+  --sc-blue: #245b9f;
+  --sc-blue-dark: #183f73;
+  --sc-blue-soft: #e8f0fa;
+
+  --sc-bg: #edf1f5;
+  --sc-panel: #ffffff;
+  --sc-card: #f7f9fb;
+  --sc-border: #c9d3df;
+
+  --sc-text: #1f2933;
+  --sc-muted: #5f6b7a;
+
+  --sc-success: #2f8e3f;
+  --sc-warning: #ca8a04;
+  --sc-shadow: rgba(31, 41, 51, 0.16);
+}
 
 * {
   box-sizing: border-box;
@@ -7,18 +29,19 @@
 body {
   margin: 0;
   background: #111217;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Open Sans', sans-serif;
+  color: var(--sc-text);
 }
 
 button {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .sessao-page {
   width: 430px;
   min-height: 100vh;
   margin: 0 auto;
-  background: #dde3e9;
+  background: var(--sc-bg);
   padding-bottom: 90px;
   overflow-x: hidden;
 }
@@ -27,11 +50,11 @@ button {
 .sessao-header {
   height: 90px;
   padding: 17px 20px 12px;
-  border-bottom: 6px solid #991b1f;
+  border-bottom: 6px solid var(--sc-red);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  background: #dde3e9;
+  background: var(--sc-panel);
 }
 
 .brand-area {
@@ -54,18 +77,21 @@ button {
 
 .brand-area h1 {
   margin: 0;
-  color: #991b1f;
+  color: var(--sc-red);
   font-size: 21px;
   line-height: 1;
   font-weight: 800;
   letter-spacing: 1.5px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .brand-area p {
   margin: 5px 0 0;
-  color: #991b1f;
+  color: var(--sc-red-dark);
   font-size: 14px;
   line-height: 1;
+  font-weight: 600;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .header-actions {
@@ -76,29 +102,31 @@ button {
 }
 
 .status-pill {
-  background: #2f8e3f;
-  color: white;
+  background: var(--sc-success);
+  color: #ffffff;
   border-radius: 999px;
   padding: 4px 9px;
   font-size: 8.5px;
   font-weight: 800;
   white-space: nowrap;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .status-pill.paused {
-  background: #ca8a04;
+  background: var(--sc-warning);
 }
 
 .bell {
-  color: #991b1f;
+  color: var(--sc-red);
   font-size: 18px;
 }
 
 .menu {
-  color: #991b1f;
+  color: var(--sc-red);
   font-size: 28px;
   line-height: 1;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* ATLETA */
@@ -114,7 +142,7 @@ button {
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #991b1f;
+  background: var(--sc-red);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -126,26 +154,29 @@ button {
   font-size: 22px;
   line-height: 1;
   font-weight: 800;
-  color: #111;
+  color: var(--sc-text);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .atleta-area p {
   margin: 5px 0 0;
-  color: #111;
+  color: var(--sc-muted);
   font-size: 11px;
   max-width: 245px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .atleta-codigo {
   position: absolute;
   right: 22px;
   bottom: 8px;
-  background: white;
-  color: #777;
+  background: var(--sc-panel);
+  color: var(--sc-muted);
   border-radius: 8px;
   padding: 5px 10px;
   font-size: 7px;
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 5px 14px var(--sc-shadow);
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* STEPS */
@@ -165,68 +196,74 @@ button {
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  background: #d7b0b3;
-  color: #111;
+  background: #ead4d6;
+  color: var(--sc-red-dark);
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .step-item.complete span {
-  background: #58c57b;
+  background: var(--sc-success);
+  color: #ffffff;
 }
 
 .step-item.active span {
-  background: #2c78bd;
-  color: white;
+  background: var(--sc-blue);
+  color: #ffffff;
 }
 
 .step-item p {
   margin: 6px 0 0;
   font-size: 8px;
-  color: #333;
+  color: var(--sc-muted);
   font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .line {
   height: 1px;
-  background: #c98f94;
+  background: #d8b3b6;
   flex: 1;
   margin-top: 12px;
-  border-top: 1px dashed #c98f94;
+  border-top: 1px dashed #d8b3b6;
 }
 
 .complete-line {
-  border-top-color: #63bd7b;
-  background: #63bd7b;
+  border-top-color: var(--sc-success);
+  background: var(--sc-success);
 }
 
 /* TEMPO */
 .tempo-card {
-  background: white;
+  background: var(--sc-panel);
   margin: 20px 22px 16px;
   padding: 18px 16px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 13px 22px rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--sc-border);
+  box-shadow: 0 13px 22px var(--sc-shadow);
 }
 
 .tempo-card p {
   margin: 0 0 8px;
-  color: #245b9f;
-  font-size: 12px;
+  color: var(--sc-blue);
+  font-size: 13px;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .tempo-card h1 {
   margin: 0;
-  color: #111;
-  font-size: 37px;
+  color: var(--sc-red);
+  font-size: 35px;
   font-weight: 800;
   letter-spacing: 1px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* TÍTULO */
@@ -240,40 +277,43 @@ button {
 .sessao-titulo span {
   width: 31px;
   height: 2px;
-  background: #991b1f;
+  background: var(--sc-red);
+  margin-bottom: 4px;
 }
 
 .sessao-titulo h2 {
-  margin: 0;
-  color: #000;
-  font-size: 20px;
+  margin-bottom: 4px;
+  color: var(--sc-text);
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: 1px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* CLIMA */
 .weather-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 3px;
-  padding: 4px 14px 8px;
+  gap: 5px;
+  padding: 4px 14px 15px;
 }
 
 .weather-card {
-  background: white;
-  height: 68px;
-  border: 1px solid #aebdce;
-  border-radius: 4px;
+  background: var(--sc-panel);
+  min-height: 76px;
+  border: 1px solid var(--sc-border);
+  border-radius: 16px;
   text-align: center;
-  padding: 7px 2px 4px;
+  padding: 7px 2px 8px;
+  box-shadow: 0 5px 12px rgba(31, 41, 51, 0.08);
 }
 
 .weather-icon {
-  width: 24px;
-  height: 24px;
-  margin: 0 auto 1px;
+  width: 30px;
+  height: 30px;
+  margin: 0 auto 3px;
   border-radius: 50%;
-  color: white;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,56 +321,59 @@ button {
 }
 
 .weather-icon.red {
-  background: #f24b4b;
+  background: var(--sc-red);
 }
 
 .weather-icon.blue {
-  background: #2f80c9;
+  background: var(--sc-blue);
 }
 
 .weather-icon.yellow {
-  background: #ffdf55;
+  background: #d99b00;
 }
 
 .weather-icon.green {
-  background: #49a866;
+  background: var(--sc-success);
 }
 
 .weather-card small {
   display: block;
-  color: #282f36;
-  font-size: 7px;
+  color: var(--sc-muted);
+  font-size: 8px;
   font-weight: 700;
-  padding-top: 2px;
+  padding-top: 1px;
   padding-bottom: 2px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .weather-card strong {
   display: block;
-  color: #1f2937;
-  font-size: 15px;
+  color: var(--sc-text);
+  font-size: 14px;
   line-height: 1.05;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* CARDS */
 .session-card {
-  background: #e1e7ed;
+  background: var(--sc-card);
   margin: 22px;
-  box-shadow: 0 13px 22px rgba(0, 0, 0, 0.16);
-  border-radius: 10px;
+  box-shadow: 0 13px 22px var(--sc-shadow);
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid var(--sc-border);
 }
 
 .card-title {
   height: 36px;
-  background: #306fbb;
-  color: white;
+  background: var(--sc-red);
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 0 11px;
-  border-radius: 10px;
+  border-radius: 12px 12px 0 0;
 }
 
 .card-title span {
@@ -341,13 +384,15 @@ button {
   margin: 0;
   font-size: 16px;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .subtitle {
   text-align: center;
-  color: #222;
+  color: var(--sc-muted);
   font-size: 12px;
   margin: 13px 14px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .quick-grid {
@@ -358,33 +403,42 @@ button {
 }
 
 .quick-grid button {
-  border-radius: 8px;
-  border: 1px solid #a9b3bd;
-  background: #eef2f5;
+  border-radius: 10px;
+  border: 1px solid var(--sc-border);
+  background: #ffffff;
   padding: 10px 4px;
   cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.quick-grid button:hover {
+  border-color: var(--sc-red);
+  background: #fff5f5;
 }
 
 .quick-grid button strong {
   display: block;
-  color: #111;
+  color: var(--sc-red);
   font-size: 13px;
   font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .quick-grid button span {
   display: block;
   margin-top: 4px;
-  color: #333;
+  color: var(--sc-muted);
   font-size: 10px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .total {
   text-align: center;
-  color: #991b1f;
+  color: var(--sc-red);
   font-size: 13px;
   font-weight: 800;
   margin: 14px 0 10px;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .adjust-actions {
@@ -397,25 +451,34 @@ button {
   flex: 1;
   height: 31px;
   border-radius: 8px;
-  border: 1px solid #245b9f;
-  background: white;
-  color: #245b9f;
+  border: 1px solid var(--sc-blue);
+  background: #ffffff;
+  color: var(--sc-blue);
   font-weight: 800;
   font-size: 11px;
   cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: 0.2s ease;
+}
+
+.adjust-actions button:hover {
+  background: var(--sc-blue);
+  color: #ffffff;
 }
 
 /* ALERTA */
 .alerta {
   margin: 20px 22px;
-  background: white;
+  background: #fff7e6;
   padding: 12px;
   border-radius: 10px;
   text-align: center;
-  color: #991b1f;
+  color: #8a5a00;
   font-weight: 800;
   font-size: 12px;
-  box-shadow: 0 9px 18px rgba(0, 0, 0, 0.16);
+  border: 1px solid #f0c36a;
+  box-shadow: 0 9px 18px rgba(31, 41, 51, 0.12);
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* BOTÕES */
@@ -429,13 +492,19 @@ button {
   margin: 24px auto 0;
   border: none;
   border-radius: 8px;
-  background: white;
-  color: #991b1f;
+  background: var(--sc-red);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 1px;
   cursor: pointer;
-  box-shadow: 0 9px 18px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 9px 18px rgba(153, 27, 31, 0.28);
+  font-family: 'Montserrat', sans-serif;
+  transition: 0.2s ease;
+}
+
+.encerrar:hover {
+  background: var(--sc-red-dark);
 }
 
 .encerrar span {
@@ -451,14 +520,15 @@ button {
   height: 58px;
   border-radius: 50%;
   border: none;
-  background: #991b1f;
-  color: white;
+  background: var(--sc-red);
+  color: #ffffff;
   font-size: 24px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 12px 22px rgba(153, 27, 31, 0.34);
+  font-family: 'Montserrat', sans-serif;
 }
 
 .floating-btn.paused {
-  background: #ca8a04;
+  background: var(--sc-warning);
 }

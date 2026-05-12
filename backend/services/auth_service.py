@@ -1,60 +1,92 @@
 from __future__ import annotations
+
 import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+
 from database import Usuario
 
 logger = logging.getLogger(__name__)
 
 
 _SECRET_KEY_RAW = os.getenv("SECRET_KEY", "")
+
 if not _SECRET_KEY_RAW:
     raise ValueError(
         "SECRET_KEY não definida no .env. "
         "Gere uma com: python -c \"import secrets; print(secrets.token_hex(32))\""
     )
 
-SECRET_KEY    = _SECRET_KEY_RAW
-ALGORITHM     = os.getenv("ALGORITHM", "HS256")
+SECRET_KEY = _SECRET_KEY_RAW
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_EXPIRE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
-REFRESH_EXPIRE= int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS",  "30"))
+REFRESH_EXPIRE = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Troquei bcrypt por pbkdf2_sha256 para evitar erro:
+# ValueError: password cannot be longer than 72 bytes
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto"
+)
+
 
 def hash_senha(senha: str) -> str:
+    if not isinstance(senha, str):
+        raise ValueError("Senha inválida")
+
     return pwd_context.hash(senha)
 
 
-def verificar_senha(senha: str, hash: str) -> bool:
-    return pwd_context.verify(senha, hash)
+def verificar_senha(senha: str, senha_hash: str) -> bool:
+    if not senha or not senha_hash:
+        return False
+
+    try:
+        return pwd_context.verify(senha, senha_hash)
+    except Exception as e:
+        logger.warning("Erro ao verificar senha: %s", e)
+        return False
 
 
 def _criar_token(data: dict, expires_delta: timedelta) -> str:
     payload = data.copy()
 
     agora = datetime.now(timezone.utc)
-    payload.update({
-        "exp": agora + expires_delta,
-        "iat": agora,
-        "nbf": agora,
-    })
+
+    payload.update(
+        {
+            "exp": agora + expires_delta,
+            "iat": agora,
+            "nbf": agora,
+        }
+    )
+
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def criar_access_token(user_id: int, tipo: str) -> str:
     return _criar_token(
-        {"sub": str(user_id), "tipo": tipo, "token_type": "access"},
+        {
+            "sub": str(user_id),
+            "tipo": tipo,
+            "token_type": "access",
+        },
         timedelta(minutes=ACCESS_EXPIRE),
     )
 
 
 def criar_refresh_token(user_id: int) -> str:
     return _criar_token(
-        {"sub": str(user_id), "token_type": "refresh"},
+        {
+            "sub": str(user_id),
+            "token_type": "refresh",
+        },
         timedelta(days=REFRESH_EXPIRE),
     )
 
@@ -68,15 +100,22 @@ def decodificar_token(token: str) -> Optional[dict]:
 
 
 def autenticar_usuario(
-    db: Session, email: str, senha: str
+    db: Session,
+    email: str,
+    senha: str,
 ) -> Optional[Usuario]:
     user = (
         db.query(Usuario)
         .filter(Usuario.email == email, Usuario.ativo == True)
         .first()
     )
-    if not user or not verificar_senha(senha, user.senha_hash):
+
+    if not user:
         return None
+
+    if not verificar_senha(senha, user.senha_hash):
+        return None
+
     return user
 
 

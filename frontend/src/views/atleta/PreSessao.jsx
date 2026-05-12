@@ -247,18 +247,30 @@ export default function PreSessao() {
           <summary>Dados adicionais do treino</summary>
           <input name="modalidade" placeholder="Modalidade" onChange={handleChange} />
           <input name="duracao" placeholder="Duração (min)" onChange={handleChange} />
-          <select name="intensidade" onChange={handleChange}>
-            <option value="">Intensidade</option>
-            <option>Leve</option>
-            <option>Moderada</option>
-            <option>Alta</option>
+          <select
+            name="intensidade"
+            value={form.intensidade}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>
+              Intensidade
+            </option>
+            <option value="Leve">Leve</option>
+            <option value="Moderada">Moderada</option>
+            <option value="Alta">Alta</option>
           </select>
           <input name="vestimenta" placeholder="Vestimenta" onChange={handleChange} />
-          <select name="sede" onChange={handleChange}>
-            <option value="">Sede</option>
-            <option>Leve</option>
-            <option>Moderada</option>
-            <option>Alta</option>
+          <select
+            name="sede"
+            value={form.sede}
+            onChange={handleChange}
+          >
+            <option value="" disabled hidden>
+              Sede
+            </option>
+            <option value="Leve">Leve</option>
+            <option value="Moderada">Moderada</option>
+            <option value="Alta">Alta</option>
           </select>
           <textarea name="sintomas" placeholder="Sintomas" onChange={handleChange} />
           <textarea name="hidratacao" placeholder="Histórico de hidratação" onChange={handleChange} />
