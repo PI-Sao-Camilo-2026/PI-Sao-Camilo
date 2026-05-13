@@ -1,0 +1,454 @@
+/* ══════════════════════════════════════════════════
+   Guia.css — Guia de Hidratação · HydroTrack
+   Paleta: #9B1C2E (vermelho), #1E2A4A (azul escuro),
+           #F5F0E8 (creme), #2E86AB (azul médio)
+   ══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --red: #9B1C2E;
+    --red-light: #C4384F;
+    --red-faint: #FBE9EC;
+    --navy: #1E2A4A;
+    --navy-light: #2E3F6A;
+    --blue: #2E86AB;
+    --blue-faint: #E6F4FA;
+    --cream: #F5F0E8;
+    --text: #1A1A2E;
+    --text-muted: #6B7280;
+    --border: #E2DDD6;
+    --white: #FFFFFF;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --shadow-sm: 0 2px 8px rgba(30, 42, 74, 0.08);
+    --shadow-md: 0 6px 24px rgba(30, 42, 74, 0.12);
+}
+
+/* ── Reset & base ── */
+.guia-root {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+}
+
+/* ── Hero header ── */
+.guia-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--red) 100%);
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.guia-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 220px;
+    height: 220px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.guia-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: 20%;
+    width: 160px;
+    height: 160px;
+    background: rgba(155, 28, 46, 0.3);
+    border-radius: 50%;
+}
+
+.guia-hero-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.guia-hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--white);
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+}
+
+.guia-hero p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    max-width: 280px;
+}
+
+/* ── Índice rápido ── */
+.guia-indice {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.guia-indice::-webkit-scrollbar {
+    display: none;
+}
+
+.indice-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.indice-pill:hover,
+.indice-pill.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+}
+
+.indice-pill span {
+    font-size: 14px;
+}
+
+/* ── Corpo ── */
+.guia-body {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* ── Seção geral ── */
+.guia-secao {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s ease;
+}
+
+.guia-secao:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.secao-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.secao-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.secao-icon.pre {
+    background: #E8F5E9;
+}
+
+.secao-icon.dur {
+    background: var(--blue-faint);
+}
+
+.secao-icon.pos {
+    background: var(--red-faint);
+}
+
+.secao-icon.urina {
+    background: #FFF8E1;
+}
+
+.secao-icon.clima {
+    background: #F3E5F5;
+}
+
+.secao-titulo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--text);
+    margin: 0;
+}
+
+.secao-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 2px 0 0;
+}
+
+.secao-body {
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Item de dica ── */
+.dica-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.dica-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dica-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.dica-bullet.pre {
+    background: #4CAF50;
+}
+
+.dica-bullet.dur {
+    background: var(--blue);
+}
+
+.dica-bullet.pos {
+    background: var(--red);
+}
+
+.dica-bullet.urina {
+    background: #FFC107;
+}
+
+.dica-bullet.clima {
+    background: #9C27B0;
+}
+
+.dica-texto {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.dica-texto strong {
+    color: var(--navy);
+}
+
+/* ── Escala de cor da urina ── */
+.urina-escala {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.urina-bloco {
+    flex: 1;
+    height: 20px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.urina-legenda {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.urina-faixas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.urina-faixa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+}
+
+.urina-faixa.ok {
+    background: #E8F5E9;
+    border-left: 3px solid #4CAF50;
+}
+
+.urina-faixa.warn {
+    background: #FFF8E1;
+    border-left: 3px solid #FFC107;
+}
+
+.urina-faixa.crit {
+    background: var(--red-faint);
+    border-left: 3px solid var(--red);
+}
+
+.urina-faixa .faixa-range {
+    font-weight: 600;
+    font-size: 15px;
+    width: 40px;
+    flex-shrink: 0;
+}
+
+.urina-faixa .faixa-label {
+    font-weight: 600;
+}
+
+.urina-faixa .faixa-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+/* ── Card de alerta clima ── */
+.clima-alerta {
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border: 1px solid #FFB74D;
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 8px;
+}
+
+.clima-alerta-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.clima-alerta-text {
+    font-size: 13px;
+    color: #5D4037;
+    line-height: 1.5;
+}
+
+.clima-alerta-text strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* ── Tabela de ajuste de volume ── */
+.tabela-ajuste {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.tabela-ajuste th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.tabela-ajuste th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.tabela-ajuste th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.tabela-ajuste td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+.tabela-ajuste tr:last-child td {
+    border-bottom: none;
+}
+
+.tabela-ajuste tr:nth-child(even) td {
+    background: var(--cream);
+}
+
+.tag-baixo {
+    color: #2196F3;
+    font-weight: 600;
+}
+
+.tag-moderado {
+    color: #FF9800;
+    font-weight: 600;
+}
+
+.tag-alto {
+    color: var(--red);
+    font-weight: 600;
+}
+
+/* ── Footer de referência ── */
+.guia-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ── Responsivo ── */
+@media (max-width: 400px) {
+    .guia-hero h1 {
+        font-size: 24px;
+    }
+
+    .guia-body {
+        padding: 16px 14px;
+    }
+
+    .secao-header {
+        padding: 14px 16px 12px;
+    }
+
+    .secao-body {
+        padding: 12px 16px 16px;
+    }
+}

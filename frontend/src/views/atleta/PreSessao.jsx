@@ -1,285 +1,202 @@
+// src/views/atleta/PreSessao.jsx
 import "../../css/Pre-Sessao.css";
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { sessoesApi, climaApi } from "../../services/api";
+import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../../contexts/AuthContext";
+import { usuariosApi } from "../../services/api";
+import BottomNav from "../../components/BottomNav";
+
+const InfoIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+  </svg>
+);
 
 export default function PreSessao() {
   const navigate = useNavigate();
-  const [carregandoClima, setCarregandoClima] = useState(true);
 
-  const [form, setForm] = useState({
-    peso: "",
-    bexiga: false,
-    vestimentaPadrao: false,
-    temperatura: "",
-    umidade: "",
-    sensacaoTermica: "",
-    vento: "",
-    radiacao: "",
-    condicao: "",
-    sol: "",
-    modalidade: "",
-    duracao: "",
-    intensidade: "",
-    vestimenta: "",
-    urina: "",
-    sede: "",
-    sintomas: "",
-    hidratacao: "",
-  });
+  const [peso, setPeso] = useState("");
+  const [urina, setUrina] = useState("");
+  const [temp, setTemp] = useState("");
+  const [umidade, setUmidade] = useState("");
+  const [clima, setClima] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [climaLoading, setClimaLoading] = useState(true);
+  const [erro, setErro] = useState("");
 
+  // Busca clima automático ao carregar
   useEffect(() => {
-    carregarClima();
+    climaApi.buscarAutomatico()
+      .then((c) => {
+        setClima(c);
+        setTemp(String(c.temperatura ?? ""));
+        setUmidade(String(c.umidade ?? ""));
+      })
+      .catch(() => {
+        setTemp("25");
+        setUmidade("60");
+      })
+      .finally(() => setClimaLoading(false));
   }, []);
 
-  async function carregarClima() {
-    setCarregandoClima(true);
-    try {
-      const dados = await climaApi.buscarAutomatico();
-      setForm((prev) => ({ ...prev, ...dados }));
-    } catch (err) {
-      console.error("Erro ao buscar clima:", err);
-    } finally {
-      setCarregandoClima(false);
-    }
-  }
+  const nivelUrina = Number(urina);
+  const msgUrina =
+    nivelUrina >= 1 && nivelUrina <= 3 ? { texto: "Hidratado ✓", cor: "#0A7C59" } :
+    nivelUrina >= 4 && nivelUrina <= 5 ? { texto: "Atenção — beba água", cor: "#E68A10" } :
+    nivelUrina >= 6 ? { texto: "Desidratado — beba água agora!", cor: "#9B1C2E" } : null;
 
-  function handleChange(e) {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  }
-
-  async function handleSubmit() {
-    const pesoConvertido = Number(form.peso.replace(",", "."));
-
-    if (isNaN(pesoConvertido) || pesoConvertido <= 0) {
-      alert("Digite um peso válido");
-      return;
-    }
-
-    if (!form.urina) {
-      alert("Selecione a cor da urina");
-      return;
-    }
+  async function handleIniciar() {
+    const pesoNum = Number(peso.replace(",", "."));
+    if (!peso || isNaN(pesoNum) || pesoNum <= 0) { setErro("Informe sua massa corporal"); return; }
+    if (!urina) { setErro("Selecione a cor da urina"); return; }
+    setErro("");
 
     try {
-      const payload = {
-        peso_pre: pesoConvertido,
-        temp_celsius: form.temperatura !== "" ? Number(form.temperatura) : null,
-        umidade_pct: form.umidade !== "" ? Number(form.umidade) : null,
-        cor_urina_basal: form.urina !== "" ? Number(form.urina) : null,
-        sensacao_termica: form.sensacaoTermica !== "" ? Number(form.sensacaoTermica) : null,
-        vento: form.vento !== "" ? Number(form.vento) : null,
-        radiacao: form.radiacao !== "" ? Number(form.radiacao) : null,
-        condicao: form.condicao || null,
-        sol: form.sol || null,
-        bexiga_esvaziada: form.bexiga,
-        vestimenta_padrao: form.vestimentaPadrao,
-        modalidade: form.modalidade || null,
-        duracao: form.duracao !== "" ? Number(form.duracao) : null,
-        intensidade: form.intensidade || null,
-        vestimenta: form.vestimenta || null,
-        sede: form.sede || null,
-        sintomas: form.sintomas || null,
-        hidratacao: form.hidratacao || null,
-      };
+      setLoading(true);
+      const data = await sessoesApi.iniciarPreTreino({
+        peso_pre: pesoNum,
+        temp_celsius: temp ? Number(temp) : null,
+        umidade_pct: umidade ? Number(umidade) : null,
+        cor_urina_basal: Number(urina),
+        sensacao_termica: clima?.sensacaoTermica ? Number(clima.sensacaoTermica) : null,
+        vento: clima?.vento ? Number(clima.vento) : null,
+        condicao: clima?.condicao || null,
+        sol: clima?.sol || null,
+        bexiga_esvaziada: true,
+      });
 
-      const data = await sessoesApi.iniciarPreTreino(payload);
-
-      localStorage.setItem("sessao_id", data.id);
-      localStorage.setItem("peso_pre", String(pesoConvertido));
-      localStorage.setItem("inicioSessao", Date.now().toString());
+      localStorage.setItem("sessao_id", String(data.id));
+      localStorage.setItem("peso_pre", String(pesoNum));
+      localStorage.setItem("inicioSessao", String(Date.now()));
+      localStorage.setItem("climaSessao", JSON.stringify(clima || {}));
       localStorage.removeItem("tempoPausado");
-      localStorage.removeItem("inicioPausa");
-
-      localStorage.setItem("climaSessao", JSON.stringify({
-        temperatura: form.temperatura,
-        umidade: form.umidade,
-        vento: form.vento,
-        sol: form.sol,
-        condicao: form.condicao,
-      }));
 
       navigate("/sessao");
     } catch (err) {
-      console.error("Erro:", err);
-      alert("Erro ao iniciar sessão: " + err.message);
+      setErro(err.message || "Erro ao iniciar sessão");
+    } finally {
+      setLoading(false);
     }
   }
 
-  const nivelUrina = Number(form.urina);
-  let mensagemUrina = "";
-  let classeMensagem = "";
-  if (nivelUrina >= 1 && nivelUrina <= 3) {
-    mensagemUrina = "VOCÊ ESTÁ HIDRATADO, PARABÉNS!";
-    classeMensagem = "good";
-  } else if (nivelUrina >= 4 && nivelUrina <= 5) {
-    mensagemUrina = "VOCÊ NÃO ESTÁ BEM HIDRATADO, BEBA ÁGUA!";
-    classeMensagem = "medium";
-  } else if (nivelUrina >= 6 && nivelUrina <= 8) {
-    mensagemUrina = "ATENÇÃO: BEBA ÁGUA! VOCÊ ESTÁ MUITO DESIDRATADO";
-    classeMensagem = "bad";
-  }
-
   return (
-    <div className="pre-page">
-      <header className="pre-header">
-        <div className="brand-area">
-          <div className="brand-logo">
-            <img className="brand-logo" src="/R.png" alt="logo_sao_camilo" />
+    <div className="atleta-page">
+      <div className="atleta-screen">
+
+        {/* Hero */}
+        <div className="atleta-hero">
+          <h1>Novo Registro</h1>
+          <p>Acompanhe sua hidratação</p>
+          <div className="progress-dots">
+            <span className="active" />
+            <span /><span /><span />
           </div>
-          <div>
-            <h1>SÃO CAMILO</h1>
-            <p>Nutri - Esportiva</p>
+        </div>
+
+        <div className="atleta-body">
+
+          {/* Card Pré-Treino */}
+          <div className="a-card">
+            <div className="a-card-title">
+              <div className="a-card-icon">⚖️</div>
+              <h3>Pré-Treino</h3>
+            </div>
+
+            <div className="a-label">
+              Massa Corporal (kg) <InfoIcon />
+            </div>
+            <input
+              className="a-input"
+              type="number"
+              step="0.1"
+              placeholder="00.0"
+              value={peso}
+              onChange={(e) => setPeso(e.target.value)}
+            />
+
+            <div className="a-input-row">
+              <div className="a-input-half">
+                <div className="a-label">Temp (°C)</div>
+                <input
+                  className="a-input-sm"
+                  type="number"
+                  placeholder={climaLoading ? "..." : "25"}
+                  value={temp}
+                  onChange={(e) => setTemp(e.target.value)}
+                />
+              </div>
+              <div className="a-input-half">
+                <div className="a-label">Umidade (%)</div>
+                <input
+                  className="a-input-sm"
+                  type="number"
+                  placeholder={climaLoading ? "..." : "60"}
+                  value={umidade}
+                  onChange={(e) => setUmidade(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Clima chips */}
+            {clima && (
+              <div className="weather-chips" style={{ marginBottom: 16 }}>
+                <div className="weather-chip">
+                  <span className="w-icon">☀️</span>
+                  <small>Sensação</small>
+                  <strong>{clima.sensacaoTermica ? `${clima.sensacaoTermica}°` : "--"}</strong>
+                </div>
+                <div className="weather-chip">
+                  <span className="w-icon">💨</span>
+                  <small>Vento</small>
+                  <strong>{clima.vento ? `${clima.vento}km/h` : "--"}</strong>
+                </div>
+                <div className="weather-chip">
+                  <span className="w-icon">☁️</span>
+                  <small>Condição</small>
+                  <strong style={{ fontSize: 9 }}>{clima.condicao?.slice(0, 10) || "--"}</strong>
+                </div>
+                <div className="weather-chip">
+                  <span className="w-icon">🌤️</span>
+                  <small>Radiação</small>
+                  <strong>{clima.sol || "--"}</strong>
+                </div>
+              </div>
+            )}
+
+            {/* Urina */}
+            <div className="a-label">Cor da Urina Basal</div>
+            <div className="urina-scale">
+              {[1,2,3,4,5,6,7,8].map((n) => (
+                <label
+                  key={n}
+                  className={`urina-box urina-${n} ${urina === String(n) ? "selected" : ""}`}
+                >
+                  <input type="radio" name="urina" value={n} onChange={() => setUrina(String(n))} />
+                  {n}
+                </label>
+              ))}
+            </div>
+            <div className="urina-labels">
+              <span>Hidratado</span>
+              <span>Desidratado</span>
+            </div>
+
+            {msgUrina && (
+              <div style={{ fontSize: 12, fontWeight: 600, color: msgUrina.cor, marginBottom: 8, textAlign: "center" }}>
+                {msgUrina.texto}
+              </div>
+            )}
           </div>
-        </div>
-        <div className="header-actions">
-          <span className="status-pill">SESSÃO ATIVA</span>
-          <span className="bell">🔔</span>
-          <span className="menu">☰</span>
-        </div>
-      </header>
 
-      <section className="atleta-area">
-        <img className="atleta-icon" src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png" alt="silhueta atleta" />
-        <div>
-          <h2>Olá, Atleta!</h2>
-          <p>Pronto para iniciar uma nova avaliação?</p>
-        </div>
-        <span className="atleta-codigo">SC / ATL - 0000</span>
-      </section>
+          {erro && <div className="a-erro">{erro}</div>}
 
-      <section className="steps-line">
-        <div className="step-item complete"><span>1</span><p>ATLETA</p></div>
-        <div className="line complete-line"></div>
-        <div className="step-item active"><span>2</span><p>PRÉ-SESSÃO</p></div>
-        <div className="line"></div>
-        <div className="step-item"><span>3</span><p>DURANTE</p></div>
-        <div className="line"></div>
-        <div className="step-item"><span>4</span><p>PÓS-SESSÃO</p></div>
-        <div className="line"></div>
-        <div className="step-item"><span>5</span><p>RELATÓRIO</p></div>
-      </section>
-
-      <section className="sessao-titulo">
-        <span></span>
-        <h2>DADOS PRÉ - SESSÃO</h2>
-      </section>
-
-      <section className="weather-grid">
-        <div className="weather-card">
-          <div className="weather-icon red">☀</div>
-          <small>TEMPERATURA</small>
-          <strong>{form.temperatura ? `${form.temperatura}°C` : "--"}</strong>
+          <button className="btn-primary" onClick={handleIniciar} disabled={loading}>
+            {loading ? "Iniciando..." : "Iniciar Treino"} <span style={{ fontSize: 18 }}>›</span>
+          </button>
         </div>
-        <div className="weather-card">
-          <div className="weather-icon blue">💧</div>
-          <small>UMIDADE</small>
-          <strong>{form.umidade ? `${form.umidade}%` : "--"}</strong>
-        </div>
-        <div className="weather-card">
-          <div className="weather-icon yellow">☀</div>
-          <small>RADIAÇÃO</small>
-          <strong>{form.sol || "--"}</strong>
-        </div>
-        <div className="weather-card">
-          <div className="weather-icon green">🍃</div>
-          <small>VENTO</small>
-          <strong>{form.vento ? `${form.vento} km/h` : "--"}</strong>
-        </div>
-      </section>
 
-      {carregandoClima && (
-        <p className="weather-loading">Buscando clima da sua localização...</p>
-      )}
-
-      <button type="button" className="weather-refresh" onClick={carregarClima}>
-        Atualizar clima
-      </button>
-
-      <section className="check-card">
-        <div className="check-title">
-          <span>✓</span>
-          <h3>Checklist de Padronização</h3>
-        </div>
-        <label className="check-row">
-          <input type="checkbox" name="bexiga" onChange={handleChange} />
-          <span>Bexiga esvaziada antes das pesagens?</span>
-        </label>
-        <label className="check-row">
-          <input type="checkbox" name="vestimentaPadrao" onChange={handleChange} />
-          <span>Mesma balança e superfície nivelada?</span>
-        </label>
-        <div className="peso-area">
-          <label>Peso (kg)</label>
-          <input
-            name="peso"
-            placeholder="Exemplo: 73,6"
-            value={form.peso}
-            onChange={handleChange}
-          />
-        </div>
-      </section>
-
-      <section className="urina-area">
-        <h3>COLORAÇÃO DA URINA</h3>
-        <div className="urina-scale">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-            <label
-              key={n}
-              className={`urina-box urina-${n} ${form.urina === String(n) ? "selected" : ""}`}
-            >
-              <input type="radio" name="urina" value={n} onChange={handleChange} />
-              {n}
-            </label>
-          ))}
-        </div>
-        <div className="urina-texts">
-          {mensagemUrina && <p className={classeMensagem}>{mensagemUrina}</p>}
-        </div>
-      </section>
-
-      <section className="extra-fields">
-        <details>
-          <summary>Dados adicionais do treino</summary>
-          <input name="modalidade" placeholder="Modalidade" onChange={handleChange} />
-          <input name="duracao" placeholder="Duração (min)" onChange={handleChange} />
-          <select
-            name="intensidade"
-            value={form.intensidade}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              Intensidade
-            </option>
-            <option value="Leve">Leve</option>
-            <option value="Moderada">Moderada</option>
-            <option value="Alta">Alta</option>
-          </select>
-          <input name="vestimenta" placeholder="Vestimenta" onChange={handleChange} />
-          <select
-            name="sede"
-            value={form.sede}
-            onChange={handleChange}
-          >
-            <option value="" disabled hidden>
-              Sede
-            </option>
-            <option value="Leve">Leve</option>
-            <option value="Moderada">Moderada</option>
-            <option value="Alta">Alta</option>
-          </select>
-          <textarea name="sintomas" placeholder="Sintomas" onChange={handleChange} />
-          <textarea name="hidratacao" placeholder="Histórico de hidratação" onChange={handleChange} />
-        </details>
-      </section>
-
-      <button className="start-prototype" onClick={handleSubmit}>
-        INICIAR SESSÃO DE TREINO <span>➜</span>
-      </button>
+        <BottomNav active="registro" />
+      </div>
     </div>
   );
 }

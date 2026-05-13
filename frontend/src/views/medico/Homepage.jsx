@@ -1,152 +1,154 @@
-import "../../css/Homepage.css";
-import { useNavigate } from "react-router-dom";
+// src/views/medico/Homepage.jsx
+import "../../css/profissional.css";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { relatoriosApi } from "../../services/api";
-import {
-  AiOutlineUser, AiOutlineBell, AiFillBell,
-  AiOutlineExclamationCircle, AiFillHome,
-} from "react-icons/ai";
-import { HiOutlineUserGroup } from "react-icons/hi";
+import { relatoriosApi, usuariosApi } from "../../services/api";
+import Sidebar from "../../components/Sidebar";
 
 export default function Homepage() {
-  const navigate = useNavigate();
-  const { usuario, logout } = useAuth();
+  const { usuario } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function carregar() {
-      try {
-        const data = await relatoriosApi.dashboardStats();
-        setStats(data);
-      } catch (err) {
-        console.error("Erro ao carregar dashboard:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    carregar();
+    relatoriosApi.dashboardStats()
+      .then(setStats)
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
-  const temDados = stats && (stats.total_atletas > 0 || stats.total_sessoes > 0);
+  const taxaMedia = stats?.taxa_media_l_h ?? null;
+  const perdaMedia = stats?.perda_media_pct ?? null;
+  const totalAtletas = stats?.total_atletas ?? 0;
+  const totalSessoes = stats?.total_sessoes ?? 0;
+  const alertas = stats?.alertas ?? [];
+  const porMod = stats?.por_modalidade ?? [];
 
   return (
-    <div className="homepage-page">
-      <div className="phone-screen">
-        <header className="homepage-header">
-          <img src="/R.png" alt="Logo São Camilo" />
-          <h1>SÃO CAMILO</h1>
-          <p>Nutri - Esportiva</p>
-          <span className="active">ATIVO</span>
-          <button className="header-icon">
-            <AiOutlineBell className="notificacao-vazia" />
-          </button>
-        </header>
+    <div className="prof-layout">
+      <Sidebar active="dashboard" />
+      <main className="prof-main">
 
-        <main className="homepage-main">
-          <section className={temDados ? "medico-area" : "medico-area vazio"}>
-            <img
-              className="medico-icon"
-              src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png"
-              alt="silhueta medicina"
-            />
-            <div>
-              <h2>Olá, {usuario?.nome?.split(" ")[0] || "Doutor"}!</h2>
-              <p>
-                {loading
-                  ? "Carregando dados..."
-                  : temDados
-                  ? "Aqui está o panorama geral dos atletas."
-                  : "Quando atletas forem vinculados e sessões forem concluídas, os indicadores aparecerão aqui."}
-              </p>
-            </div>
-          </section>
+        {/* Header */}
+        <div className="page-header">
+          <div className="page-header-left">
+            <h1>Visão Geral</h1>
+            <p>Acompanhamento de hidratação e performance da equipe</p>
+          </div>
+        </div>
 
-          {!loading && temDados && (
-            <>
-              {/* Stats reais */}
-              <section>
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <h3 className="stat-label">ATLETAS</h3>
-                    <strong>{stats.total_atletas}</strong>
-                    <p className="stat-growth">Ativos</p>
-                  </div>
-                  <div className="stat-card">
-                    <h3 className="stat-label">SESSÕES</h3>
-                    <strong>{stats.total_sessoes}</strong>
-                    <p className="stat-growth">Concluídas</p>
-                  </div>
-                </div>
-              </section>
+        {/* Stat cards */}
+        <div className="stats-row">
+          <StatCard
+            icon="👤"
+            label="Total de Atletas"
+            value={loading ? "..." : totalAtletas}
+            sub={totalAtletas > 0 ? "Ativos" : "Nenhum vinculado"}
+          />
+          <StatCard
+            icon="💧"
+            label="Taxa Média de Sudorese"
+            value={loading ? "..." : taxaMedia ? `${taxaMedia} L/h` : "—"}
+            sub={taxaMedia ? (taxaMedia >= 1.5 ? "Excelente" : "Regular") : "Sem dados"}
+            subClass={taxaMedia && taxaMedia < 1 ? "warn" : ""}
+          />
+          <StatCard
+            icon="⚖️"
+            label="Perda Média de Massa"
+            value={loading ? "..." : perdaMedia ? `${perdaMedia}%` : "—"}
+            sub={perdaMedia ? (perdaMedia <= 2 ? "Adequado (< 2%)" : "Atenção") : "Sem dados"}
+            subClass={perdaMedia && perdaMedia > 2 ? "danger" : ""}
+          />
+          <StatCard
+            icon="📊"
+            label="Sessões Registradas"
+            value={loading ? "..." : totalSessoes}
+            sub="Total acumulado"
+          />
+        </div>
 
-              {/* Resumo hidratação */}
-              <section className="section-title">
-                <h2>RESUMO HIDRATAÇÃO <span>(MÉDIA)</span></h2>
-              </section>
-
-              <section className="hydration-grid">
-                <div className="hydration-card">
-                  <p>Taxa média</p>
-                  <strong>{stats.taxa_media_l_h ? `${stats.taxa_media_l_h} L/h` : "--"}</strong>
-                  <span>{stats.taxa_media_l_h > 1.5 ? "Excelente" : "Regular"}</span>
-                </div>
-                <div className="hydration-card">
-                  <p>Perda média</p>
-                  <strong>{stats.perda_media_pct ? `${stats.perda_media_pct}%` : "--"}</strong>
-                  <span>{stats.perda_media_pct <= 2 ? "Dentro da meta" : "Atenção"}</span>
-                </div>
-                {stats.por_modalidade?.slice(0, 1).map((m) => (
-                  <div className="hydration-card" key={m.modalidade}>
-                    <p>{m.modalidade}</p>
-                    <strong>{m.taxa_media} L/h</strong>
-                    <span>Taxa modal.</span>
-                  </div>
-                ))}
-              </section>
-
-              {/* Alertas reais */}
-              {stats.alertas?.length > 0 && (
-                <section className="insights-box">
-                  <h2>ALERTAS</h2>
-                  {stats.alertas.slice(0, 3).map((a, i) => (
-                    <div className="insight-item danger" key={i}>
-                      <AiOutlineExclamationCircle />
-                      <p>
-                        {a.atleta_nome} — perda de {a.variacao_pct?.toFixed(1)}% de massa
-                      </p>
+        {/* Por modalidade */}
+        {porMod.length > 0 && (
+          <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px", marginBottom: 20 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 16, color: "var(--text)" }}>
+              Taxa de Sudorese por Modalidade
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {porMod.map((m) => {
+                const maxTaxa = Math.max(...porMod.map(x => x.taxa_media));
+                const pct = maxTaxa > 0 ? (m.taxa_media / maxTaxa) * 100 : 0;
+                return (
+                  <div key={m.modalidade} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ width: 90, fontSize: 12, color: "var(--text-2)", flexShrink: 0 }}>
+                      {m.modalidade}
+                    </span>
+                    <div style={{ flex: 1, height: 8, background: "#f0f0f0", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${pct}%`, background: "var(--red)", borderRadius: 4, transition: "width 0.6s ease" }} />
                     </div>
-                  ))}
-                </section>
-              )}
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--red)", width: 60, textAlign: "right" }}>
+                      {m.taxa_media} L/h
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-              <button className="atletas-btn" onClick={() => navigate("/atletas")}>
-                <span>VER ATLETAS INDIVIDUALMENTE</span>
-              </button>
-            </>
-          )}
-        </main>
+        {/* Alertas */}
+        {alertas.length > 0 && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>Alertas Recentes</h3>
+            </div>
+            <div className="alertas-grid">
+              {alertas.slice(0, 3).map((a, i) => (
+                <div key={i} className="alerta-card">
+                  <div className="alerta-card-header">
+                    <div className="alerta-icon">⚠️</div>
+                    <div>
+                      <h4>Desidratação Grave</h4>
+                      <div className="alerta-time">
+                        {a.data ? new Date(a.data).toLocaleDateString("pt-BR") : "—"}
+                      </div>
+                    </div>
+                  </div>
+                  <p>
+                    Atleta <strong>{a.atleta_nome}</strong> registrou perda de massa de{" "}
+                    <strong>{a.variacao_pct?.toFixed(1)}%</strong> na sessão.
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <nav className="bottom-nav">
-          <div className="nav-item active-nav">
-            <span className="nav-icon"><AiFillHome /></span>
-            <p>INÍCIO</p>
+        {!loading && totalSessoes === 0 && (
+          <div style={{
+            background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)",
+            padding: "40px", textAlign: "center", color: "var(--text-3)"
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>📊</div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-2)", marginBottom: 6 }}>
+              Nenhuma sessão registrada ainda
+            </h3>
+            <p style={{ fontSize: 13 }}>
+              Quando seus atletas concluírem sessões, os dados aparecerão aqui.
+            </p>
           </div>
-          <div className="nav-item" onClick={() => navigate("/atletas")}>
-            <span className="nav-icon vazio"><HiOutlineUserGroup /></span>
-            <p>ATLETAS</p>
-          </div>
-          <div className="nav-item">
-            <span className="nav-icon vazio"><AiOutlineBell /></span>
-            <p>ALERTAS</p>
-          </div>
-          <div className="nav-item" onClick={() => logout(navigate)}>
-            <span className="nav-icon vazio"><AiOutlineUser /></span>
-            <p>SAIR</p>
-          </div>
-        </nav>
-      </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub, subClass = "" }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-card-icon" style={{ fontSize: 16 }}>{icon}</div>
+      <label>{label}</label>
+      <div className="stat-val">{value}</div>
+      {sub && <div className={`stat-sub ${subClass}`}>{sub}</div>}
     </div>
   );
 }

@@ -1,290 +1,321 @@
+// src/views/atleta/Sessao.jsx
 import "../../css/Sessao.css";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { sessoesApi } from "../../services/api";
+// import { useAuth } from "../../contexts/AuthContext";
+import { usuariosApi } from "../../services/api";
+import BottomNav from "../../components/BottomNav";
 
+/* ── Garrafa animada ───────────────────────────────────────────────────────── */
+function GarrafaAgua({ totalMl, metaMl = 2000 }) {
+  const pct = Math.min((totalMl / metaMl) * 100, 100);
+
+  return (
+    <div style={{
+      display: "flex", flexDirection: "column", alignItems: "center",
+      margin: "20px 0 24px",
+    }}>
+      {/* Garrafa SVG com água animada */}
+      <div style={{ position: "relative", width: 90, height: 160 }}>
+        <svg viewBox="0 0 90 160" width="90" height="160">
+          {/* Corpo da garrafa */}
+          <rect x="10" y="30" width="70" height="120" rx="12" fill="#f0f4ff" stroke="#dde3f0" strokeWidth="2"/>
+          {/* Gargalo */}
+          <rect x="28" y="12" width="34" height="22" rx="4" fill="#e8edf8" stroke="#dde3f0" strokeWidth="2"/>
+          {/* Tampa */}
+          <rect x="32" y="6" width="26" height="12" rx="4" fill="#9B1C2E"/>
+
+          {/* Água animada — clipPath para ficar dentro da garrafa */}
+          <defs>
+            <clipPath id="garrafa-clip">
+              <rect x="10" y="30" width="70" height="120" rx="12"/>
+            </clipPath>
+          </defs>
+
+          {/* Nível da água */}
+          <g clipPath="url(#garrafa-clip)">
+            {/* Fundo da água */}
+            <rect
+              x="10"
+              y={30 + 120 - (pct / 100) * 120}
+              width="70"
+              height={(pct / 100) * 120}
+              fill="#fdeaed"
+              style={{ transition: "y 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+            />
+            {/* Onda da água */}
+            <path
+              d={`M10,${30 + 120 - (pct / 100) * 120} q17.5,-8 35,0 q17.5,8 35,0`}
+              fill="none"
+              stroke="#9B1C2E"
+              strokeWidth="2.5"
+              opacity="0.6"
+              style={{ transition: "all 0.8s ease" }}
+            />
+          </g>
+        </svg>
+
+        {/* Texto ml no centro */}
+        <div style={{
+          position: "absolute",
+          top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          textAlign: "center",
+          pointerEvents: "none",
+        }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: "#1E2A4A" }}>{totalMl}</div>
+          <div style={{ fontSize: 11, color: "#9B1C2E", fontWeight: 600 }}>ml</div>
+        </div>
+      </div>
+
+      {/* Barra de progresso abaixo */}
+      <div style={{ width: 200, height: 4, background: "#f0f0f0", borderRadius: 2, marginTop: 8 }}>
+        <div style={{
+          height: "100%", width: `${pct}%`,
+          background: "#9B1C2E", borderRadius: 2,
+          transition: "width 0.8s ease",
+        }} />
+      </div>
+      <div style={{ fontSize: 11, color: "#999", marginTop: 6 }}>
+        Meta: {metaMl} ml
+      </div>
+    </div>
+  );
+}
+
+/* ── Componente principal ──────────────────────────────────────────────────── */
 export default function Sessao() {
   const navigate = useNavigate();
-
   const [total, setTotal] = useState(0);
   const [urina, setUrina] = useState(0);
   const [tempo, setTempo] = useState(0);
   const [pausado, setPausado] = useState(false);
   const [registrando, setRegistrando] = useState(false);
+  const intervalRef = useRef(null);
 
-  const [clima, setClima] = useState({
-    temperatura: "", umidade: "", vento: "", sol: "", condicao: "",
-  });
-
-  useEffect(() => {
-    const climaSalvo = localStorage.getItem("climaSessao");
-    if (climaSalvo) setClima(JSON.parse(climaSalvo));
-
-    let inicio = localStorage.getItem("inicioSessao");
-    if (!inicio) {
-      inicio = Date.now().toString();
-      localStorage.setItem("inicioSessao", inicio);
-    }
-
-    const intervalo = setInterval(() => {
-      if (!pausado) setTempo(calcularTempoAtual());
-    }, 1000);
-
-    return () => clearInterval(intervalo);
-  }, [pausado]);
-
-  const calcularTempoAtual = () => {
-    const inicio = Number(localStorage.getItem("inicioSessao"));
-    const tempoPausado = Number(localStorage.getItem("tempoPausado") || 0);
-    if (!inicio) return 0;
-    return Math.floor((Date.now() - inicio - tempoPausado) / 1000);
+  const calcularTempo = () => {
+    const inicio = Number(localStorage.getItem("inicioSessao") || 0);
+    const pausado = Number(localStorage.getItem("tempoPausado") || 0);
+    return Math.floor((Date.now() - inicio - pausado) / 1000);
   };
 
-  const pausarOuContinuar = () => {
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      if (!pausado) setTempo(calcularTempo());
+    }, 1000);
+    return () => clearInterval(intervalRef.current);
+  }, [pausado]);
+
+  const fmt = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+  };
+
+  function pausar() {
     if (!pausado) {
-      localStorage.setItem("inicioPausa", Date.now().toString());
+      localStorage.setItem("inicioPausa", String(Date.now()));
       setPausado(true);
     } else {
-      const inicioPausa = Number(localStorage.getItem("inicioPausa"));
-      const anterior = Number(localStorage.getItem("tempoPausado") || 0);
-      localStorage.setItem("tempoPausado", (anterior + Date.now() - inicioPausa).toString());
+      const ini = Number(localStorage.getItem("inicioPausa") || 0);
+      const ant = Number(localStorage.getItem("tempoPausado") || 0);
+      localStorage.setItem("tempoPausado", String(ant + Date.now() - ini));
       localStorage.removeItem("inicioPausa");
       setPausado(false);
     }
-  };
-
-  const formatarTempo = (segundos) => {
-    const h = Math.floor(segundos / 3600);
-    const m = Math.floor((segundos % 3600) / 60);
-    const s = segundos % 60;
-    return `${String(h).padStart(2, "0")} : ${String(m).padStart(2, "0")} : ${String(s).padStart(2, "0")}`;
-  };
+  }
 
   async function adicionarFluido(ml) {
-    if (registrando) return;
+    if (registrando || ml === 0) return;
     const sessaoId = localStorage.getItem("sessao_id");
     if (!sessaoId) { alert("Sessão não encontrada"); return; }
 
+    const novoTotal = Math.max(0, total + ml);
+    if (novoTotal < 0) return;
+
     try {
       setRegistrando(true);
-      const res = await sessoesApi.registrarFluido(sessaoId, ml);
-      setTotal(res.ingestao_total_ml);
-    } catch (err) {
-      console.error("Erro ao registrar fluido:", err);
-      setTotal((prev) => prev + ml);
+      const res = await sessoesApi.registrarFluido(sessaoId, Math.abs(ml));
+      setTotal(ml > 0 ? res.ingestao_total_ml : Math.max(0, total - Math.abs(ml)));
+    } catch {
+      setTotal((prev) => Math.max(0, prev + ml));
     } finally {
       setRegistrando(false);
     }
   }
 
-  const alterarUrina = (ml) => setUrina((prev) => Math.max(0, prev + ml));
-
-  const encerrarSessao = async () => {
+  async function encerrar() {
     const sessaoId = localStorage.getItem("sessao_id");
     if (!sessaoId) { alert("Sessão não encontrada"); return; }
+    const tempoFinal = calcularTempo();
 
     try {
-      const tempoFinal = pausado ? tempo : calcularTempoAtual();
-
-      localStorage.setItem("tempoFinalSessao", tempoFinal.toString());
-      localStorage.setItem("totalIngerido", total.toString());
-      localStorage.setItem("volumeUrina", urina.toString());
-
       await sessoesApi.finalizarSessao(sessaoId, {
         tempo_total_segundos: tempoFinal,
         ingestao_ml: total,
         volume_urina_ml: urina,
       });
-
+      localStorage.setItem("tempoFinalSessao", String(tempoFinal));
+      localStorage.setItem("totalIngerido", String(total));
+      localStorage.setItem("volumeUrina", String(urina));
       localStorage.removeItem("inicioSessao");
       localStorage.removeItem("inicioPausa");
       localStorage.removeItem("tempoPausado");
-
       navigate("/possessao");
     } catch (err) {
-      console.error(err);
-      alert("Erro ao encerrar sessão: " + err.message);
+      alert("Erro ao encerrar: " + err.message);
     }
-  };
+  }
+
+  const botoesFluido = [
+    { label: "+200ml", ml: 200 },
+    { label: "+500ml", ml: 500 },
+    { label: "+750ml", ml: 750 },
+  ];
 
   return (
-    <div className="sessao-page">
-      <header className="sessao-header">
-        <div className="brand-area">
-          <div className="brand-logo">
-            <img className="brand-logo-img" src="/R.png" alt="São Camilo" />
+    <div className="atleta-page">
+      <div className="atleta-screen">
+
+        {/* Hero */}
+        <div className="atleta-hero">
+          <button className="atleta-hero-back" onClick={() => navigate("/presessao")}>←</button>
+          <h1>Novo Registro</h1>
+          <p>Acompanhe sua hidratação</p>
+          <div className="progress-dots">
+            <span className="done" />
+            <span className="active" />
+            <span /><span />
           </div>
-          <div>
-            <h1>SÃO CAMILO</h1>
-            <p>Nutri - Esportiva</p>
+        </div>
+
+        <div className="atleta-body">
+
+          {/* Card durante */}
+          <div className="a-card" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 4 }}>🫧</div>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E2A4A", marginBottom: 4 }}>
+              Durante o Treino
+            </h2>
+            <p style={{ fontSize: 13, color: "#999", marginBottom: 0 }}>
+              Registre sua ingestão de líquidos
+            </p>
+
+            {/* Cronômetro */}
+            <div style={{
+              fontSize: 28, fontWeight: 800, color: "#9B1C2E",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              letterSpacing: 2, margin: "12px 0 0",
+            }}>
+              {fmt(tempo)}
+            </div>
+            <div style={{ fontSize: 10, color: "#bbb", fontWeight: 600, letterSpacing: 1 }}>
+              {pausado ? "PAUSADO" : "EM ANDAMENTO"}
+            </div>
+
+            {/* Garrafa animada */}
+            <GarrafaAgua totalMl={total} />
+
+            {/* Botões de fluido */}
+            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+              {botoesFluido.map(({ label, ml }) => (
+                <button
+                  key={ml}
+                  onClick={() => adicionarFluido(ml)}
+                  disabled={registrando}
+                  style={{
+                    flex: 1, padding: "14px 0",
+                    border: "1.5px solid #fdeaed",
+                    borderRadius: 12, background: "#fff",
+                    cursor: "pointer", fontFamily: "'Barlow', sans-serif",
+                    fontWeight: 700, fontSize: 13, color: "#9B1C2E",
+                    display: "flex", flexDirection: "column",
+                    alignItems: "center", gap: 4,
+                    transition: "background 0.15s",
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>💧</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {/* Ajustes finos */}
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button
+                onClick={() => setTotal((p) => Math.max(0, p - 100))}
+                style={{ flex: 1, padding: "8px 0", border: "1px solid #eee", borderRadius: 8, background: "#fafafa", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer" }}
+              >
+                -100 mL
+              </button>
+              <button
+                onClick={() => adicionarFluido(100)}
+                style={{ flex: 1, padding: "8px 0", border: "1px solid #eee", borderRadius: 8, background: "#fafafa", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer" }}
+              >
+                +100 mL
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="header-actions">
-          <span className={pausado ? "status-pill paused" : "status-pill"}>
-            ● {pausado ? "SESSÃO PAUSADA" : "SESSÃO ATIVA"}
-          </span>
-          <span className="bell">🔔</span>
-          <span className="menu">☰</span>
-        </div>
-      </header>
 
-      <section className="atleta-area">
-        <img className="atleta-icon" src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png" alt="Atleta" />
-        <div>
-          <h2>Sessão em andamento</h2>
-          <p>Registre hidratação e volume urinário durante o treino.</p>
-        </div>
-        <span className="atleta-codigo">SC / ATL - 0000</span>
-      </section>
+          {/* Alerta */}
+          <div style={{
+            background: "#fff8e1", border: "1px solid #ffe082",
+            borderRadius: 10, padding: "10px 14px",
+            fontSize: 12, color: "#8a6400", fontWeight: 600,
+            marginBottom: 14,
+          }}>
+            ⚠️ Beba ~200 mL a cada 15 minutos
+          </div>
 
-      <section className="steps-line">
-        <div className="step-item complete"><span>1</span><p>PRÉ</p></div>
-        <div className="line complete-line"></div>
-        <div className="step-item active"><span>2</span><p>DURANTE</p></div>
-        <div className="line"></div>
-        <div className="step-item"><span>3</span><p>PÓS</p></div>
-        <div className="line"></div>
-        <div className="step-item"><span>4</span><p>RELATÓRIO</p></div>
-      </section>
+          {/* Volume urinário */}
+          <div className="a-card">
+            <div className="a-card-title">
+              <div className="a-card-icon">🚻</div>
+              <h3>Volume Urinário</h3>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {[100, 250, 500].map((ml) => (
+                <button
+                  key={ml}
+                  onClick={() => setUrina((p) => p + ml)}
+                  style={{
+                    flex: 1, padding: "12px 0",
+                    border: "1.5px solid #eee", borderRadius: 10,
+                    background: "#fafafa", cursor: "pointer",
+                    fontFamily: "'Barlow', sans-serif",
+                    fontSize: 12, fontWeight: 700, color: "#555",
+                  }}
+                >
+                  +{ml} mL
+                </button>
+              ))}
+            </div>
+            <p style={{ textAlign: "center", marginTop: 8, fontSize: 13, color: "#666", fontWeight: 600 }}>
+              Total: {urina} mL
+            </p>
+          </div>
 
-      <section className="tempo-card">
-        <p>TEMPO DA SESSÃO</p>
-        <h1>{formatarTempo(tempo)}</h1>
-      </section>
-
-      <section className="sessao-titulo">
-        <span></span>
-        <h2>CONDIÇÕES DE TEMPO</h2>
-      </section>
-
-      <section className="weather-grid">
-        <div className="weather-card">
-          <img className="weather-icon red" src="/temperatura-removebg-preview.png" alt="temperatura imagem"></img>
-          <small>TEMPERATURA</small>
-          <strong>{clima.temperatura ? `${clima.temperatura}°C` : "--"}</strong>
-        </div>
-
-        <div className="weather-card">
-          <div className="weather-icon blue">💧</div>
-          <small>UMIDADE</small>
-          <strong>{clima.umidade ? `${clima.umidade}%` : "--"}</strong>
-        </div>
-
-        <div className="weather-card">
-          <div className="weather-icon yellow">☀</div>
-          <small>RADIAÇÃO</small>
-          <strong>{clima.sol || "--"}</strong>
-        </div>
-
-        <div className="weather-card">
-          <img className="weather-icon green" src="/imaa-removebg-preview.png" alt="vento imagem"></img>
-          <small>VENTO</small>
-          <strong>{clima.vento ? `${clima.vento} km/h` : "--"}</strong>
-        </div>
-      </section>
-
-      <section className="session-card">
-        <div className="card-title">
-          <span>💧</span>
-          <h3>Ingestão de Fluidos</h3>
-        </div>
-
-        <p className="subtitle">Registre por evento simples</p>
-
-        <div className="quick-grid">
-          {[250, 500, 750].map((ml) => (
-            <button
-              key={ml}
-              type="button"
-              onClick={() => adicionarFluido(ml)}
-              disabled={registrando}
-            >
-              <strong>{ml} mL</strong>
-              <span>{ml === 250 ? "Copo" : ml === 500 ? "Garrafa" : "Squeeze"}</span>
-            </button>
-          ))}
-        </div>
-
-        <p className="total">Total ingerido: {total} mL</p>
-
-        <div className="adjust-actions">
-          <button
-            type="button"
-            onClick={() => adicionarFluido(-50)}
-            disabled={registrando}
-          >
-            -50 mL
+          {/* Botões de ação */}
+          <button className="btn-secondary" onClick={encerrar}>
+            Finalizar Treino <span>✓</span>
           </button>
 
           <button
-            type="button"
-            onClick={() => adicionarFluido(50)}
-            disabled={registrando}
+            onClick={pausar}
+            style={{
+              width: "100%", padding: "12px", marginTop: 8,
+              background: "transparent", border: "1.5px solid #eee",
+              borderRadius: 14, fontFamily: "'Barlow', sans-serif",
+              fontSize: 14, fontWeight: 600, color: "#888", cursor: "pointer",
+            }}
           >
-            +50 mL
+            {pausado ? "▶ Retomar" : "⏸ Pausar sessão"}
           </button>
         </div>
-      </section>
 
-      <section className="alerta">
-        ⚠️ Beba 200 mL a cada 15 min
-      </section>
-
-      <section className="session-card">
-        <div className="card-title">
-          <span>🚻</span>
-          <h3>Volume urinário</h3>
-        </div>
-
-        <p className="subtitle">
-          Registrar apenas se houver micção
-        </p>
-
-        <div className="quick-grid">
-          {[100, 250, 500].map((ml) => (
-            <button
-              key={ml}
-              type="button"
-              onClick={() => alterarUrina(ml)}
-            >
-              <strong>{ml} mL</strong>
-              <span>{ml === 100 ? "Pouco" : ml === 250 ? "Médio" : "Alto"}</span>
-            </button>
-          ))}
-        </div>
-
-        <p className="total">
-          Volume urinário: {urina} mL
-        </p>
-
-        <div className="adjust-actions">
-          <button
-            type="button"
-            onClick={() => alterarUrina(-50)}
-          >
-            -50 mL
-          </button>
-
-          <button
-            type="button"
-            onClick={() => alterarUrina(50)}
-          >
-            +50 mL
-          </button>
-        </div>
-      </section>
-
-      <button className="encerrar" onClick={encerrarSessao}>
-        ENCERRAR SESSÃO <span>➜</span>
-      </button>
-
-      <button
-        type="button"
-        className={pausado ? "floating-btn paused" : "floating-btn"}
-        onClick={pausarOuContinuar}
-      >
-        {pausado ? "▶" : "⏸"}
-      </button>
+        <BottomNav active="registro" />
+      </div>
     </div>
   );
 }
