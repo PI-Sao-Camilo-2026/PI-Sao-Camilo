@@ -125,7 +125,7 @@ export default function Atletas() {
                         <span className="nav-icon vazio"><AiOutlineBell /></span>
                         <p>ALERTAS</p>
                     </div>
-                    <div className="nav-item">
+                    <div className="nav-item" onClick={() => navigate("/perfil")}>
                         <span className="nav-icon vazio"><AiOutlineUser /></span>
                         <p>PERFIL</p>
                     </div>

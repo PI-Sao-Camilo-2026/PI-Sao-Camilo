@@ -12,6 +12,7 @@ import Historico from "./views/atleta/Historico";
 import Homepage from "./views/medico/Homepage";
 import Atletas from "./views/medico/Atletas";
 import PerfilAtleta from "./views/medico/PerfilAtleta";
+import Perfil from "./views/medico/Perfil";
 
 function App() {
   return (
@@ -52,6 +53,9 @@ function App() {
           } />
           <Route path="/atletas/:id" element={
             <PrivateRoute tipo="profissional"><PerfilAtleta /></PrivateRoute>
+          } />
+          <Route path="/perfil" element={
+            <PrivateRoute tipo="profissional"><Perfil /></PrivateRoute>
           } />
 
           {/* ── Fallback ── */}
