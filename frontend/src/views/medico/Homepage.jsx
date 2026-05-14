@@ -38,7 +38,7 @@ export default function Homepage() {
           <img src="/R.png" alt="Logo São Camilo" />
           <h1>SÃO CAMILO</h1>
           <p>Nutri - Esportiva</p>
-          <span className="active">ATIVO</span>
+          <span className="active">● SESSÃO ATIVA</span>
           <button className="header-icon">
             <AiOutlineBell className="notificacao-vazia" />
           </button>
@@ -143,7 +143,7 @@ export default function Homepage() {
           </div>
           <div className="nav-item" onClick={() => logout(navigate)}>
             <span className="nav-icon vazio"><AiOutlineUser /></span>
-            <p>SAIR</p>
+            <p>PERFIL</p>
           </div>
         </nav>
       </div>

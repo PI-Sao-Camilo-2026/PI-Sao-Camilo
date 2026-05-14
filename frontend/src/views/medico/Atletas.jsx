@@ -41,7 +41,7 @@ export default function Atletas() {
                     <img src="/R.png" alt="Logo São Camilo" />
                     <h1>SÃO CAMILO</h1>
                     <p>Nutri - Esportiva</p>
-                    <span className="active">● ATIVO</span>
+                    <span className="active">● SESSÃO ATIVA</span>
                     <button className="header-icon">
                         <AiOutlineBell className="notificacao-vazia" />
                     </button>

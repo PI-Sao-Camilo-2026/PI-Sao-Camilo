@@ -2,6 +2,11 @@ import "../../css/Pre-Sessao.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { sessoesApi, climaApi } from "../../services/api";
+import {
+  AiOutlineUser, AiOutlineBell, AiFillBell,
+  AiFillHome, AiOutlineHeart
+} from "react-icons/ai";
+import { LuClipboardList } from "react-icons/lu";
 
 export default function PreSessao() {
   const navigate = useNavigate();
@@ -280,6 +285,24 @@ export default function PreSessao() {
       <button className="start-prototype" onClick={handleSubmit}>
         INICIAR SESSÃO DE TREINO <span>➜</span>
       </button>
+      <nav className="bottom-nav">
+        <div className="nav-item active-nav" onClick={() => navigate("/home")}>
+          <span className="nav-icon"><AiFillHome /></span>
+          <p>INÍCIO</p>
+        </div>
+        <div className="nav-item">
+          <span className="nav-icon vazio"><LuClipboardList /> /</span>
+          <p>HISTÓRICO</p>
+        </div>
+        <div className="nav-item">
+          <span className="nav-icon vazio"><AiOutlineHeart /></span>
+          <p>OBSERVAÇÕES</p>
+        </div>
+        <div className="nav-item">
+          <span className="nav-icon vazio"><AiOutlineUser /></span>
+          <p>PERFIL</p>
+        </div>
+      </nav>
     </div>
   );
 }

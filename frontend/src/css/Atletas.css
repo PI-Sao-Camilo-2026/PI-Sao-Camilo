@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .phone-screen {
@@ -45,6 +47,7 @@ body {
     font-size: 18px;
     font-weight: 800;
     letter-spacing: 2px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .atletas-header p {
@@ -56,6 +59,7 @@ body {
     color: #991b1f;
     font-size: 12px;
     letter-spacing: 3px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .atletas-header .active {
@@ -64,9 +68,7 @@ body {
     position: relative;
     top: -90px;
     font-size: 8px;
-    font-family:
-        "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-        "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     letter-spacing: 1px;
     border: 2px solid #0a9b2d;
     border-radius: 30px;
@@ -146,6 +148,7 @@ body {
     color: #0d2b57;
     font-size: 22px;
     font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .search-box {
@@ -171,10 +174,12 @@ body {
     margin-left: 8px;
     font-size: 12px;
     color: #333;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .search-box input::placeholder {
     color: #b6b6b6;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .filter-icon {
@@ -195,6 +200,7 @@ body {
     color: #444;
     padding: 0 0 8px;
     cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .active-tab {
@@ -236,17 +242,20 @@ body {
     font-size: 13px;
     color: #111;
     font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .athlete-info p {
     margin: 3px 0;
     font-size: 11px;
     color: #444;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .athlete-info span {
     font-size: 10px;
     color: #777;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .risk-area {
@@ -258,6 +267,7 @@ body {
     margin: 0 0 4px;
     font-size: 9px;
     color: #777;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .risk {
@@ -266,6 +276,7 @@ body {
     border-radius: 12px;
     font-size: 9px;
     font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .risk.baixo {
@@ -292,7 +303,7 @@ body {
     height: 50px;
     color: white;
     font-size: 12px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     background: linear-gradient(#b32025, #991b1f);
     display: flex;
     justify-content: space-around;
@@ -319,6 +330,10 @@ body {
 .nav-item {
     opacity: 0.95;
     transition: 0.2s;
+}
+
+.nav-item p {
+    font-family: 'Montserrat', sans-serif;
 }
 
 .active-nav {

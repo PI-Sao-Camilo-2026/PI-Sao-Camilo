@@ -532,3 +532,45 @@ button {
 .floating-btn.paused {
   background: var(--sc-warning);
 }
+
+.bottom-nav {
+  height: 50px;
+  color: white;
+  font-size: 12px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background: linear-gradient(#b32025, #991b1f);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: auto;
+}
+
+.nav-icon {
+  display: flex;
+  color: white;
+  flex-direction: column;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.nav-item {
+  opacity: 0.92;
+  transition: 0.2s;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.nav-item p {
+  color: white;
+  margin-top: 10px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.active-nav {
+  opacity: 1;
+}
