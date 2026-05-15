@@ -46,16 +46,16 @@ function App() {
 
           {/* ── Profissional ── */}
           <Route path="/homepage" element={
-            <PrivateRoute tipo="profissional"><Homepage /></PrivateRoute>
+            <Homepage />
           } />
           <Route path="/atletas" element={
-            <PrivateRoute tipo="profissional"><Atletas /></PrivateRoute>
+            <Atletas />
           } />
           <Route path="/atletas/:id" element={
-            <PrivateRoute tipo="profissional"><PerfilAtleta /></PrivateRoute>
+            <PerfilAtleta />
           } />
           <Route path="/perfil" element={
-            <PrivateRoute tipo="profissional"><Perfil /></PrivateRoute>
+           <Perfil />
           } />
 
           {/* ── Fallback ── */}

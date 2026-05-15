@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
     AiOutlineHome,
     AiOutlineBell,
+    AiFillBell,
     AiOutlineSetting,
     AiOutlineLock,
     AiOutlineQuestionCircle,
@@ -14,6 +15,7 @@ import { FaUser } from "react-icons/fa";
 
 export default function Perfil() {
     const navigate = useNavigate();
+    const temNotificacao = true;
 
     return (
         <div className="perfil-medico-page">
@@ -22,10 +24,16 @@ export default function Perfil() {
                     <img src="/R.png" alt="Logo São Camilo" />
                     <h1>SÃO CAMILO</h1>
                     <p>Nutri - Esportiva</p>
-
                     <span className="active">● SESSÃO ATIVA</span>
-                    <AiOutlineBell className="header-bell" />
-                    <span className="menu">☰</span>
+                    <button className="header-icon">
+                        {temNotificacao ? (
+                            <AiFillBell className="notificacao-ativa" />
+                        ) : (
+                            <AiOutlineBell className="notificacao-vazia" />
+                        )}
+
+                        {temNotificacao && <span className="notification-dot"></span>}
+                    </button>
                 </header>
 
                 <main className="perfil-medico-main">

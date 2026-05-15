@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { usuariosApi } from "../../services/api";
 import {
     AiOutlineUser, AiOutlineBell, AiOutlineSearch,
-    AiOutlineFilter, AiOutlineHome,
+    AiOutlineFilter, AiOutlineHome, AiFillBell
 } from "react-icons/ai";
 import { HiUserGroup } from "react-icons/hi";
 
 export default function Atletas() {
     const navigate = useNavigate();
+    const temNotificacao = true;
     const [atletas, setAtletas] = useState([]);
     const [busca, setBusca] = useState("");
     const [loading, setLoading] = useState(true);
@@ -43,7 +44,13 @@ export default function Atletas() {
                     <p>Nutri - Esportiva</p>
                     <span className="active">● SESSÃO ATIVA</span>
                     <button className="header-icon">
-                        <AiOutlineBell className="notificacao-vazia" />
+                        {temNotificacao ? (
+                            <AiFillBell className="notificacao-ativa" />
+                        ) : (
+                            <AiOutlineBell className="notificacao-vazia" />
+                        )}
+
+                        {temNotificacao && <span className="notification-dot"></span>}
                     </button>
                 </header>
 

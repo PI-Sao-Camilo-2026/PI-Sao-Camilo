@@ -64,6 +64,8 @@ export default function Login() {
             </div>
           )}
 
+          <button onClick={() => navigate("/homepage")}>medico</button>
+
           <label className="label-email">E-mail</label>
           <div className="input-box">
             <input

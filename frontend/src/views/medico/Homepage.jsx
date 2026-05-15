@@ -11,6 +11,7 @@ import { HiOutlineUserGroup } from "react-icons/hi";
 
 export default function Homepage() {
   const navigate = useNavigate();
+  const temNotificacao = true;
   const { usuario, logout } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,7 +41,13 @@ export default function Homepage() {
           <p>Nutri - Esportiva</p>
           <span className="active">● SESSÃO ATIVA</span>
           <button className="header-icon">
-            <AiOutlineBell className="notificacao-vazia" />
+            {temNotificacao ? (
+              <AiFillBell className="notificacao-ativa" />
+            ) : (
+              <AiOutlineBell className="notificacao-vazia" />
+            )}
+
+            {temNotificacao && <span className="notification-dot"></span>}
           </button>
         </header>
 
@@ -57,8 +64,8 @@ export default function Homepage() {
                 {loading
                   ? "Carregando dados..."
                   : temDados
-                  ? "Aqui está o panorama geral dos atletas."
-                  : "Quando atletas forem vinculados e sessões forem concluídas, os indicadores aparecerão aqui."}
+                    ? "Aqui está o panorama geral dos atletas."
+                    : "Quando atletas forem vinculados e sessões forem concluídas, os indicadores aparecerão aqui."}
               </p>
             </div>
           </section>
