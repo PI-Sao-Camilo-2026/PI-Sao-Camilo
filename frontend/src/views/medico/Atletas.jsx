@@ -302,6 +302,7 @@ function ActionMenu({ atleta, onEdit, onDesvincular }) {
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function Atletas() {
     const navigate = useNavigate();
+    const temNotificacao = true;
     const [atletas, setAtletas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busca, setBusca] = useState("");

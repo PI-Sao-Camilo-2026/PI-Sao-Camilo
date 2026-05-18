@@ -292,6 +292,7 @@ select.a-input-sm {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
 }
 
 /* ── Bottom nav ── */

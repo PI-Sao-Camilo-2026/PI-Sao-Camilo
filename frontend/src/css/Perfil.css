@@ -1,0 +1,291 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.perfil-medico-page {
+  min-height: 100vh;
+  background: #eef0f3;
+  display: flex;
+  justify-content: center;
+}
+
+.perfil-medico-header img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  display: block;
+  margin: 0 16px 50px;
+  margin-top: -11px;
+}
+
+.perfil-medico-header {
+  height: 90px;
+  text-align: center;
+  padding-top: 30px;
+  border-bottom: 6px solid #a5161b;
+}
+
+.perfil-medico-header h1 {
+  margin-top: -98px;
+  margin-right: 138px;
+  color: #991b1f;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.perfil-medico-header p {
+  display: flex;
+  align-items: center;
+  margin-bottom: 60px;
+  margin-top: -11px;
+  margin-left: 74px;
+  color: #991b1f;
+  font-size: 12px;
+  letter-spacing: 3px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.perfil-medico-header .active {
+  color: white;
+  margin-left: 223px;
+  position: relative;
+  top: -90px;
+  font-size: 8px;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  border: 2px solid #0a9b2d;
+  border-radius: 30px;
+  background: #0a9b2d;
+  padding: 3px 3px;
+}
+
+.header-icon {
+  font-size: 23px;
+  border: none;
+  background: transparent;
+  display: flex;
+  position: relative;
+  align-items: center;
+  top: -110px;
+  margin-left: 373px;
+  cursor: pointer;
+}
+
+.notificacao-vazia {
+  color: #991b1f;
+}
+
+.notificacao-ativa {
+  color: #991b1f;
+  animation: tocarSino 1.5s infinite;
+}
+
+@keyframes tocarSino {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(15deg);
+  }
+
+  20% {
+    transform: rotate(-15deg);
+  }
+
+  30% {
+    transform: rotate(10deg);
+  }
+
+  40% {
+    transform: rotate(-10deg);
+  }
+
+  50% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.notification-dot {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c52323;
+  border: 2px solid white;
+}
+
+
+.menu {
+  position: absolute;
+  right: 18px;
+  top: 25px;
+  color: #991b1f;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.perfil-medico-main {
+  flex: 1;
+  padding: 18px 22px 18px;
+}
+
+.perfil-medico-main h2 {
+  margin: 0 0 18px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0d2b57;
+}
+
+.perfil-medico-content {
+  display: flex;
+  gap: 14px;
+}
+
+.doctor-card {
+  width: 145px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  box-shadow:
+    1px 2px 18px rgba(0, 0, 0, 0.08),
+    1px 5px 10px rgba(0, 0, 0, 0.08);
+}
+
+.doctor-photo {
+  width: 92px;
+  height: 92px;
+  border-radius: 10px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.doctor-card h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: #111;
+}
+
+.doctor-card p {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: #444;
+}
+
+.doctor-card span {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  color: #666;
+}
+
+.doctor-card button {
+  width: 100%;
+  height: 28px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: 1px solid #b11217;
+  background: white;
+  color: #b11217;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.profile-options {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 8px 0;
+  box-shadow:
+    1px 2px 18px rgba(0, 0, 0, 0.08),
+    1px 5px 10px rgba(0, 0, 0, 0.08);
+}
+
+.profile-option {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 9px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #333;
+}
+
+.profile-option:last-child {
+  border-bottom: none;
+}
+
+.profile-option svg {
+  font-size: 15px;
+  color: #333;
+}
+
+.profile-option span {
+  flex: 1;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.bottom-nav {
+  height: 50px;
+  color: white;
+  font-size: 12px;
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(#b32025, #991b1f);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: auto;
+}
+
+.nav-icon {
+  display: flex;
+  color: white;
+  flex-direction: column;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.nav-item {
+  opacity: 0.75;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+}
+
+.nav-item svg {
+  font-size: 17px;
+}
+
+.nav-item p {
+  color: white;
+  margin: 6px;
+  margin-top: 10px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.active-nav {
+  opacity: 1;
+  font-weight: 800;
+}
