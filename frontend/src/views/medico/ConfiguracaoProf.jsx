@@ -5,34 +5,95 @@ import { useAuth } from "../../contexts/AuthContext";
 import { usuariosApi } from "../../services/api";
 import Sidebar from "../../components/Sidebar";
 
+const IconUser = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+    </svg>
+);
+const IconBell = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+);
+const IconLock = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);
+const IconStar = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+);
+const IconSave = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+        <polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />
+    </svg>
+);
+
+const TABS = [
+    { id: "perfil", label: "Meu Perfil", icon: <IconUser /> },
+    { id: "notificacoes", label: "Notificações", icon: <IconBell /> },
+    { id: "seguranca", label: "Segurança", icon: <IconLock /> },
+    { id: "assinatura", label: "Assinatura Pro", icon: <IconStar /> },
+];
+
 export default function ConfiguracaoProf() {
-    const { usuario, logout } = useAuth();
+    const { logout } = useAuth();
+    const [tabAtiva, setTabAtiva] = useState("perfil");
     const [perfil, setPerfil] = useState(null);
-    const [editando, setEditando] = useState(false);
-    const [form, setForm] = useState({ nome: "", modalidade: "", sexo: "" });
+    const [form, setForm] = useState({
+        nome: "",
+        email: "",
+        telefone: "",
+        crn: "",
+        bio: "",
+        modalidade: "",
+        sexo: "",
+    });
     const [loading, setLoading] = useState(false);
-    const [notifHidrat, setNotifHidrat] = useState(true);
-    const [notifAlerta, setNotifAlerta] = useState(true);
     const [salvo, setSalvo] = useState(false);
     const [erro, setErro] = useState("");
+
+    // Notificações
+    const [notifHidrat, setNotifHidrat] = useState(true);
+    const [notifAlerta, setNotifAlerta] = useState(true);
+    const [notifRelatorio, setNotifRelatorio] = useState(false);
 
     useEffect(() => {
         usuariosApi.me().then(data => {
             setPerfil(data);
-            setForm({ nome: data.nome || "", modalidade: data.modalidade || "", sexo: data.sexo || "" });
+            setForm({
+                nome: data.nome || "",
+                email: data.email || "",
+                telefone: data.telefone || "",
+                crn: data.crn || "",
+                bio: data.bio || "",
+                modalidade: data.modalidade || "",
+                sexo: data.sexo || "",
+            });
         }).catch(console.error);
     }, []);
+
+    function handleChange(e) {
+        const { name, value } = e.target;
+        setForm(p => ({ ...p, [name]: value }));
+    }
 
     async function salvarPerfil() {
         setErro("");
         if (!form.nome.trim()) { setErro("Nome obrigatório"); return; }
         try {
             setLoading(true);
-            await usuariosApi.atualizarPerfil({ nome: form.nome.trim(), modalidade: form.modalidade, sexo: form.sexo });
-            setPerfil(p => ({ ...p, nome: form.nome.trim(), modalidade: form.modalidade, sexo: form.sexo }));
-            setEditando(false);
+            await usuariosApi.atualizarPerfil({
+                nome: form.nome.trim(),
+                modalidade: form.modalidade || null,
+                sexo: form.sexo || null,
+            });
             setSalvo(true);
-            setTimeout(() => setSalvo(false), 2500);
+            setTimeout(() => setSalvo(false), 3000);
         } catch (err) {
             setErro(err.message || "Erro ao salvar");
         } finally {
@@ -44,151 +105,266 @@ export default function ConfiguracaoProf() {
         <div className="prof-layout">
             <Sidebar active="config" />
             <main className="prof-main">
+
                 <div className="page-header">
                     <div className="page-header-left">
-                        <h1>Meu Perfil</h1>
-                        <p>Gerencie sua conta e preferências</p>
+                        <h1>Configurações</h1>
+                        <p>Gerencie seu perfil, preferências e segurança.</p>
                     </div>
                 </div>
 
-                {/* Card perfil */}
-                <div style={{
-                    background: "linear-gradient(135deg, var(--sidebar-bg) 0%, var(--red) 100%)",
-                    borderRadius: "var(--radius)", padding: "24px", marginBottom: 24,
-                    display: "flex", alignItems: "center", gap: 20, color: "#fff",
-                }}>
-                    <div style={{
-                        width: 64, height: 64, borderRadius: "50%",
-                        background: "rgba(255,255,255,0.2)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 28, fontWeight: 800, flexShrink: 0,
-                    }}>
-                        {perfil?.nome?.charAt(0)?.toUpperCase() || "?"}
+                <div className="config-layout">
+                    {/* Tabs laterais */}
+                    <div className="config-tabs">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.id}
+                                className={`config-tab-btn ${tabAtiva === tab.id ? "active" : ""}`}
+                                onClick={() => setTabAtiva(tab.id)}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
-                    <div style={{ flex: 1 }}>
-                        <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 2 }}>{perfil?.nome || "..."}</h2>
-                        <p style={{ fontSize: 13, opacity: 0.75 }}>
-                            {perfil?.tipo === "profissional" ? "Profissional de Nutrição Esportiva" : "Atleta"}
-                        </p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-                            <span style={{ fontSize: 11, background: "rgba(255,255,255,0.2)", padding: "3px 10px", borderRadius: 20, fontWeight: 600 }}>
-                                ✓ Conta Verificada
-                            </span>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => setEditando(true)}
-                        style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", padding: "8px 16px", borderRadius: 8, cursor: "pointer", fontFamily: "var(--font)", fontSize: 13, fontWeight: 600 }}
-                    >
-                        ✏️ Editar
-                    </button>
-                </div>
 
-                {salvo && (
-                    <div style={{ background: "var(--green-light)", border: "1px solid #a7d7c5", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "var(--green)", marginBottom: 16, fontWeight: 600 }}>
-                        ✓ Perfil atualizado com sucesso!
-                    </div>
-                )}
+                    {/* Conteúdo da tab */}
+                    <div className="config-content">
 
-                {/* Seção: Dados pessoais */}
-                <div className="config-section">
-                    <div className="config-section-title">Configurações Pessoais</div>
-                    <div className="config-card">
-                        {editando ? (
-                            <div style={{ padding: "20px" }}>
-                                <div className="form-field">
-                                    <label>Nome</label>
-                                    <input className="form-input" value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} />
+                        {/* ── Tab: Meu Perfil ── */}
+                        {tabAtiva === "perfil" && (
+                            <div className="config-panel">
+                                <div className="config-panel-header">
+                                    <h2>Dados do Profissional</h2>
+                                    <p>Essas informações poderão ser vistas pelos seus atletas associados.</p>
                                 </div>
+
+                                {/* Foto de perfil */}
+                                <div className="perfil-foto-row">
+                                    <div className="perfil-foto-circle">
+                                        <span>{perfil?.nome?.charAt(0)?.toUpperCase() || "?"}</span>
+                                        <div className="perfil-foto-label">MUDAR FOTO</div>
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>Foto de Perfil</div>
+                                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
+                                            Recomendado: 400x400px, formato JPG ou PNG.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {salvo && (
+                                    <div className="config-sucesso">✓ Perfil atualizado com sucesso!</div>
+                                )}
+
+                                {/* Campos */}
                                 <div className="form-row">
                                     <div className="form-field">
-                                        <label>Sexo</label>
-                                        <select className="form-input" value={form.sexo} onChange={e => setForm(p => ({ ...p, sexo: e.target.value }))}>
-                                            <option value="">Selecione</option>
-                                            <option value="Masculino">Masculino</option>
-                                            <option value="Feminino">Feminino</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
+                                        <label>Nome Completo</label>
+                                        <input
+                                            className="form-input"
+                                            name="nome"
+                                            value={form.nome}
+                                            onChange={handleChange}
+                                            placeholder="Dr. Carlos Mendes"
+                                        />
                                     </div>
                                     <div className="form-field">
-                                        <label>Especialidade/Modalidade</label>
-                                        <input className="form-input" value={form.modalidade} onChange={e => setForm(p => ({ ...p, modalidade: e.target.value }))} placeholder="Ex: Futebol, Corrida" />
+                                        <label>E-mail Profissional</label>
+                                        <input
+                                            className="form-input"
+                                            name="email"
+                                            value={form.email}
+                                            onChange={handleChange}
+                                            placeholder="carlos.mendes@clinica.com"
+                                            disabled
+                                            style={{ background: "#fafafa", color: "var(--text-3)" }}
+                                        />
                                     </div>
                                 </div>
+
+                                <div className="form-row">
+                                    <div className="form-field">
+                                        <label>Telefone / Celular</label>
+                                        <input
+                                            className="form-input"
+                                            name="telefone"
+                                            value={form.telefone}
+                                            onChange={handleChange}
+                                            placeholder="(11) 98888-7777"
+                                        />
+                                    </div>
+                                    <div className="form-field">
+                                        <label>CRN / CRM / Registro</label>
+                                        <input
+                                            className="form-input"
+                                            name="crn"
+                                            value={form.crn}
+                                            onChange={handleChange}
+                                            placeholder="CRN 12345/SP"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-field">
+                                    <label>Breve Biografia (Exibida para atletas)</label>
+                                    <textarea
+                                        className="form-input"
+                                        name="bio"
+                                        value={form.bio}
+                                        onChange={handleChange}
+                                        rows={4}
+                                        placeholder="Especialista em nutrição esportiva avançada com 10 anos de experiência..."
+                                        style={{ resize: "vertical", lineHeight: 1.6 }}
+                                    />
+                                </div>
+
                                 {erro && <div className="prof-erro">{erro}</div>}
-                                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-                                    <button className="btn-ghost" onClick={() => { setEditando(false); setErro(""); }}>Cancelar</button>
-                                    <button className="btn-red" onClick={salvarPerfil} disabled={loading}>{loading ? "Salvando..." : "Salvar"}</button>
+
+                                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                                    <button
+                                        className="btn-red"
+                                        onClick={salvarPerfil}
+                                        disabled={loading}
+                                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 22px" }}
+                                    >
+                                        <IconSave />
+                                        {loading ? "Salvando..." : "Salvar Alterações"}
+                                    </button>
                                 </div>
                             </div>
-                        ) : (
-                            <>
-                                <ConfigRow icon="👤" title="Dados Pessoais" desc={`${perfil?.nome || "—"} · ${perfil?.sexo || "Sexo não informado"}`} onClick={() => setEditando(true)} />
-                                <ConfigRow icon="📧" title="E-mail" desc={perfil?.email || "—"} />
-                                <ConfigRow icon="🏃" title="Modalidade/Especialidade" desc={perfil?.modalidade || "Não informada"} onClick={() => setEditando(true)} />
-                            </>
                         )}
-                    </div>
-                </div>
 
-                {/* Seção: Privacidade */}
-                <div className="config-section">
-                    <div className="config-section-title">Privacidade e Suporte</div>
-                    <div className="config-card">
-                        <div className="config-row" onClick={() => setNotifHidrat(p => !p)}>
-                            <div className="config-row-left">
-                                <div className="config-row-icon">🔔</div>
-                                <div>
-                                    <strong>Alertas de hidratação</strong>
-                                    <span>Notificações de risco nos atletas</span>
+                        {/* ── Tab: Notificações ── */}
+                        {tabAtiva === "notificacoes" && (
+                            <div className="config-panel">
+                                <div className="config-panel-header">
+                                    <h2>Preferências de Notificação</h2>
+                                    <p>Escolha quais alertas deseja receber.</p>
                                 </div>
-                            </div>
-                            <div className={`toggle-switch ${notifHidrat ? "on" : ""}`} />
-                        </div>
-                        <div className="config-row" onClick={() => setNotifAlerta(p => !p)}>
-                            <div className="config-row-left">
-                                <div className="config-row-icon">⚠️</div>
-                                <div>
-                                    <strong>Alertas críticos</strong>
-                                    <span>Desidratação grave e anomalias</span>
-                                </div>
-                            </div>
-                            <div className={`toggle-switch ${notifAlerta ? "on" : ""}`} />
-                        </div>
-                        <div className="config-row">
-                            <div className="config-row-left">
-                                <div className="config-row-icon">📋</div>
-                                <div>
-                                    <strong>Termos de Uso</strong>
-                                    <span>Privacidade e consentimento LGPD</span>
-                                </div>
-                            </div>
-                            <span style={{ color: "var(--text-3)" }}>›</span>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Sair */}
-                <div style={{ background: "#fff", border: "1.5px solid #f5c0c0", borderRadius: "var(--radius)", padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
-                    onClick={() => logout()}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--red)" }}>↪ Sair da conta</span>
+                                <div className="config-card">
+                                    <NotifRow
+                                        titulo="Alertas de hidratação"
+                                        desc="Notificações quando um atleta está em risco"
+                                        ativo={notifHidrat}
+                                        onToggle={() => setNotifHidrat(p => !p)}
+                                    />
+                                    <NotifRow
+                                        titulo="Alertas críticos"
+                                        desc="Desidratação grave e anomalias detectadas"
+                                        ativo={notifAlerta}
+                                        onToggle={() => setNotifAlerta(p => !p)}
+                                    />
+                                    <NotifRow
+                                        titulo="Relatórios semanais"
+                                        desc="Resumo de performance dos seus atletas"
+                                        ativo={notifRelatorio}
+                                        onToggle={() => setNotifRelatorio(p => !p)}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Tab: Segurança ── */}
+                        {tabAtiva === "seguranca" && (
+                            <div className="config-panel">
+                                <div className="config-panel-header">
+                                    <h2>Segurança da Conta</h2>
+                                    <p>Gerencie senha e acesso à sua conta.</p>
+                                </div>
+
+                                <div className="config-card" style={{ padding: "20px" }}>
+                                    <div className="form-field">
+                                        <label>Senha atual</label>
+                                        <input className="form-input" type="password" placeholder="••••••••" />
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-field">
+                                            <label>Nova senha</label>
+                                            <input className="form-input" type="password" placeholder="••••••••" />
+                                        </div>
+                                        <div className="form-field">
+                                            <label>Confirmar nova senha</label>
+                                            <input className="form-input" type="password" placeholder="••••••••" />
+                                        </div>
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                        <button className="btn-red" style={{ padding: "11px 22px" }}>
+                                            Atualizar Senha
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: 20 }}>
+                                    <div className="config-section-title">Zona de Perigo</div>
+                                    <div className="config-card" style={{ padding: "16px 20px" }}>
+                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                            <div>
+                                                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>Sair da conta</div>
+                                                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>Encerrar sessão em todos os dispositivos</div>
+                                            </div>
+                                            <button
+                                                onClick={() => logout()}
+                                                style={{
+                                                    padding: "9px 18px", background: "transparent",
+                                                    border: "1.5px solid #f5c0c0", borderRadius: 8,
+                                                    color: "var(--red)", fontWeight: 700, fontSize: 13,
+                                                    cursor: "pointer", fontFamily: "var(--font)",
+                                                }}
+                                            >
+                                                ↪ Sair
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Tab: Assinatura Pro ── */}
+                        {tabAtiva === "assinatura" && (
+                            <div className="config-panel">
+                                <div className="config-panel-header">
+                                    <h2>Assinatura Pro</h2>
+                                    <p>Gerencie seu plano e benefícios.</p>
+                                </div>
+
+                                <div className="config-card" style={{ padding: "24px" }}>
+                                    <div style={{
+                                        background: "linear-gradient(135deg, var(--red-dark), var(--red))",
+                                        borderRadius: 12, padding: "20px 24px",
+                                        color: "#fff", marginBottom: 20,
+                                    }}>
+                                        <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 4 }}>PLANO ATUAL</div>
+                                        <div style={{ fontSize: 22, fontWeight: 800 }}>Profissional Pro</div>
+                                        <div style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
+                                            Atletas ilimitados · Relatórios avançados · Suporte prioritário
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.6 }}>
+                                        Para gerenciar sua assinatura, entre em contato com o suporte ou acesse o portal de pagamentos.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
                 </div>
             </main>
         </div>
     );
 }
 
-function ConfigRow({ icon, title, desc, onClick }) {
+function NotifRow({ titulo, desc, ativo, onToggle }) {
     return (
-        <div className="config-row" onClick={onClick}>
+        <div className="config-row" onClick={onToggle}>
             <div className="config-row-left">
-                <div className="config-row-icon">{icon}</div>
                 <div>
-                    <strong>{title}</strong>
+                    <strong>{titulo}</strong>
                     <span>{desc}</span>
                 </div>
             </div>
-            {onClick && <span style={{ color: "var(--text-3)" }}>›</span>}
+            <div className={`toggle-switch ${ativo ? "on" : ""}`} />
         </div>
     );
 }

@@ -1,5 +1,5 @@
 // src/services/api.js
-const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const BASE_URL = 'http://localhost:8000';
 
 export function getToken() { return localStorage.getItem("@token"); }
 export function setToken(t) { t ? localStorage.setItem("@token", t) : localStorage.removeItem("@token"); }
@@ -45,6 +45,7 @@ export const authApi = {
         return data;
     },
 
+    // Cadastro público (auto-registro)
     async registrar(payload) { return request("/auth/registrar", "POST", payload); },
 
     logout() { setToken(null); setUsuario(null); },
@@ -68,12 +69,11 @@ export const usuariosApi = {
     atualizarPerfil: (p) => request("/usuarios/me", "PUT", p),
     listarAtletas: () => request("/usuarios/atletas"),
     detalheAtleta: (id) => request(`/usuarios/atletas/${id}`),
-
-    // Atualiza dados de um atleta (pelo profissional)
     atualizarAtleta: (id, p) => request(`/usuarios/atletas/${id}`, "PUT", p),
-
-    // Desvincula atleta do profissional
     desvincularAtleta: (id) => request(`/usuarios/atletas/${id}/desvincular`, "POST"),
+
+    // ✅ Cadastra atleta já vinculado ao profissional logado (usa token)
+    cadastrarAtleta: (payload) => request("/usuarios/atletas", "POST", payload),
 };
 
 // ── Relatórios ────────────────────────────────────────────────────────────────

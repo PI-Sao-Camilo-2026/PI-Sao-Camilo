@@ -2,6 +2,7 @@
 import "../../css/PerfilAtleta.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../../contexts/AuthContext";
 import { usuariosApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";

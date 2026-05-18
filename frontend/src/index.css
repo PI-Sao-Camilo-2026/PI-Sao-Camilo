@@ -1,3 +1,582 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap');
+
+:root {
+    --red: #9B1C2E;
+    --red-dark: #7a1020;
+    --red-light: #fdeaed;
+    --navy: #1E2A4A;
+    --text: #1a1a1a;
+    --text-2: #555;
+    --text-3: #999;
+    --border: #ebebeb;
+    --bg: #f4f4f6;
+    --white: #fff;
+    --green: #0A7C59;
+    --green-light: #e6f5f1;
+    --font: 'Barlow', sans-serif;
+    --font-display: 'Barlow Condensed', sans-serif;
+    --radius: 12px;
+    --shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    font-family: var(--font);
+    cursor: pointer;
+}
+
+input,
+select,
+textarea {
+    font-family: var(--font);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ── Atleta mobile shell ── */
+.atleta-page {
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.atleta-screen {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.10);
+}
+
+/* ── Hero header (atleta) ── */
+.atleta-hero {
+    background: linear-gradient(150deg, var(--red-dark) 0%, var(--red) 100%);
+    padding: 52px 20px 28px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.atleta-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+}
+
+.atleta-hero-back {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.atleta-hero h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+}
+
+.atleta-hero p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+}
+
+.progress-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.progress-dots span {
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    flex: 1;
+    transition: background 0.3s;
+}
+
+.progress-dots span.done {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.progress-dots span.active {
+    background: #fff;
+}
+
+/* ── Scroll body ── */
+.atleta-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 100px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── Cards ── */
+.a-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 18px 16px;
+    margin-bottom: 14px;
+}
+
+.a-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.a-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: var(--red-light);
+    flex-shrink: 0;
+}
+
+.a-card-title h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--red);
+}
+
+/* ── Labels e inputs ── */
+.a-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-3);
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.a-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-3);
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, color 0.2s;
+    margin-bottom: 14px;
+}
+
+.a-input:focus {
+    border-color: var(--red);
+    color: var(--text);
+    background: #fff;
+}
+
+.a-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.a-input-half {
+    flex: 1;
+}
+
+.a-input-sm {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.a-input-sm:focus {
+    border-color: var(--red);
+    background: #fff;
+}
+
+/* ── Botões ── */
+.btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 4px 16px rgba(155, 28, 46, 0.35);
+    letter-spacing: 0.3px;
+}
+
+.btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    width: 100%;
+    padding: 16px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(30, 42, 74, 0.25);
+    transition: opacity 0.2s;
+}
+
+.btn-outline {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: var(--text-2);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0 14px;
+    z-index: 100;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    color: var(--text-3);
+    transition: color 0.2s;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.nav-item.active {
+    color: var(--red);
+}
+
+.nav-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* ── Erro ── */
+.a-erro {
+    background: #fef0f0;
+    border: 1px solid #f5c0c0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #c0392b;
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+/* ── Urina scale ── */
+.urina-scale {
+    display: flex;
+    gap: 4px;
+    margin: 8px 0 4px;
+}
+
+.urina-box {
+    flex: 1;
+    height: 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: border-color 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.urina-box input[type="radio"] {
+    display: none;
+}
+
+.urina-box.selected {
+    border-color: var(--navy);
+    transform: scale(1.08);
+}
+
+.urina-1 {
+    background: #FFF176;
+}
+
+.urina-2 {
+    background: #FDD835;
+}
+
+.urina-3 {
+    background: #F9C02A;
+}
+
+.urina-4 {
+    background: #F6A820;
+}
+
+.urina-5 {
+    background: #E68A10;
+}
+
+.urina-6 {
+    background: #C86B08;
+}
+
+.urina-7 {
+    background: #A84D04;
+}
+
+.urina-8 {
+    background: #8B3A02;
+}
+
+.urina-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--text-3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+}
+
+/* ── Radio options ── */
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.radio-option.selected {
+    border-color: var(--red);
+    background: var(--red-light);
+}
+
+.radio-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s;
+}
+
+.radio-option.selected .radio-circle {
+    border-color: var(--red);
+    background: var(--red);
+}
+
+.radio-option.selected .radio-circle::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.radio-option span {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+/* ── Slider ── */
+.slider-wrap {
+    padding: 4px 0 8px;
+}
+
+.slider-value {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.slider-value strong {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--red);
+}
+
+.slider-value span {
+    font-size: 12px;
+    color: var(--text-3);
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--red);
+    height: 6px;
+    cursor: pointer;
+}
+
+/* ── Weather chips ── */
+.weather-chips {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.weather-chip {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.weather-chip .w-icon {
+    font-size: 18px;
+}
+
+.weather-chip small {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+}
+
+.weather-chip strong {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ── Responsive: desktop centering for mobile screens ── */
+@media (min-width: 600px) {
+    .atleta-page {
+        padding: 32px 0;
+        align-items: flex-start;
+    }
+
+    .atleta-screen {
+        border-radius: 24px;
+        min-height: auto;
+        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.14);
+    }
+
+    .bottom-nav {
+        border-radius: 0 0 24px 24px;
+        position: sticky;
+        transform: none;
+        left: unset;
+    }
+}

@@ -1,6 +1,7 @@
-// import { useAuth } from "../../contexts/AuthContext";
-// import { usuariosApi } from "../../services/api";
+// src/views/atleta/Guia.jsx
+import "../../css/Guia.css";
 import BottomNav from "../../components/BottomNav";
+
 
 const SECOES = [
     {

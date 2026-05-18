@@ -1,465 +1,140 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap');
+/* Relatorios.css — tela de resultado pós-sessão */
 
-:root {
-  --sc-red: #991b1f;
-  --sc-red-dark: #6f1216;
-  --sc-blue: #245b9f;
-  --sc-blue-dark: #183f73;
-  --sc-bg: #edf1f5;
-  --sc-panel: #ffffff;
-  --sc-card: #f7f9fb;
-  --sc-border: #c9d3df;
-  --sc-text: #1f2933;
-  --sc-muted: #5f6b7a;
-  --sc-success: #2f8e3f;
-  --sc-warning: #ca8a04;
-  --sc-danger: #b91c1c;
-  --sc-shadow: rgba(31, 41, 51, 0.16);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #111217;
-  font-family: 'Open Sans', sans-serif;
-  color: var(--sc-text);
-}
-
-button {
-  font-family: 'Montserrat', sans-serif;
-}
-
-.rel-container {
-  width: 430px;
-  min-height: 100vh;
-  margin: 0 auto;
-  background: var(--sc-bg);
-  padding-bottom: 90px;
-  overflow-x: hidden;
-}
-
-/* HEADER */
-.rel-header {
-  height: 90px;
-  padding: 17px 20px 12px;
-  border-bottom: 6px solid var(--sc-red);
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  background: var(--sc-panel);
-}
-
-.brand-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-logo {
-  width: 50px;
-  height: 50px;
-}
-
-.brand-logo-img {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
-
-.brand-area h1 {
-  margin: 0;
-  color: var(--sc-red);
-  font-size: 21px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.brand-area p {
-  margin: 5px 0 0;
-  color: var(--sc-red-dark);
-  font-size: 14px;
-  line-height: 1;
-  font-weight: 600;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 16px;
-}
-
-.status-pill {
-  background: var(--sc-blue);
-  color: #ffffff;
-  border-radius: 999px;
-  padding: 4px 9px;
-  font-size: 8.5px;
-  font-weight: 800;
-  white-space: nowrap;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.bell {
-  color: var(--sc-red);
-  font-size: 18px;
-}
-
-.menu {
-  color: var(--sc-red);
-  font-size: 28px;
-  line-height: 1;
-  font-weight: 800;
-}
-
-/* ATLETA / RESUMO */
-.rel-atleta-area {
-  padding: 14px 20px 6px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  position: relative;
-}
-
-.atleta-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--sc-red);
-  object-fit: cover;
-}
-
-.rel-atleta-area h2 {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1;
-  font-weight: 800;
-  color: var(--sc-text);
-  font-family: 'Montserrat', sans-serif;
-}
-
-.rel-atleta-area p {
-  margin: 5px 0 0;
-  color: var(--sc-muted);
-  font-size: 11px;
-  max-width: 245px;
-}
-
-.atleta-codigo {
-  position: absolute;
-  right: 22px;
-  bottom: 8px;
-  background: var(--sc-panel);
-  color: var(--sc-muted);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 7px;
-  box-shadow: 0 5px 14px var(--sc-shadow);
-  font-family: 'Montserrat', sans-serif;
-}
-
-/* STEPS */
-.steps-line {
-  padding: 8px 22px 3px;
-  display: flex;
-  align-items: flex-start;
-}
-
-.step-item {
-  width: 48px;
+.relatorio-badge {
   text-align: center;
-  flex-shrink: 0;
+  margin-bottom: 4px;
 }
 
-.step-item span {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #ead4d6;
-  color: var(--sc-red-dark);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
+.relatorio-badge span {
+  background: #fdeaed;
+  color: #9B1C2E;
+  font-size: 10px;
   font-weight: 800;
-  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1.2px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
 }
 
-.step-item.complete span {
-  background: var(--sc-success);
-  color: #ffffff;
+.relatorio-titulo {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 20px;
 }
 
-.step-item.active span {
-  background: var(--sc-blue);
-  color: #ffffff;
+.metricas-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.step-item p {
-  margin: 6px 0 0;
-  font-size: 8px;
-  color: var(--sc-muted);
-  font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.line {
-  height: 1px;
-  background: #d8b3b6;
+.metrica-card {
   flex: 1;
-  margin-top: 12px;
-  border-top: 1px dashed #d8b3b6;
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+  padding: 16px 12px;
+  text-align: center;
 }
 
-.complete-line {
-  border-top-color: var(--sc-success);
-  background: var(--sc-success);
+.metrica-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
 }
 
-/* TÍTULO */
-.rel-titulo {
+.metrica-valor {
+  font-size: 32px;
+  font-weight: 800;
+  color: #9B1C2E;
+  line-height: 1;
+}
+
+.metrica-unit {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.metrica-status {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.rec-ia-card {
+  background: #fdeaed;
+  border: 1px solid #f5c0c0;
+  border-radius: 14px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+}
+
+.rec-ia-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 18px 18px 8px;
+  margin-bottom: 12px;
 }
 
-.rel-titulo span {
-  width: 31px;
-  height: 2px;
-  background: var(--sc-red);
-}
-
-.rel-titulo h2 {
-  margin: 0;
-  color: var(--sc-text);
-  font-size: 18px;
+.rec-ia-titulo {
+  font-size: 14px;
   font-weight: 800;
-  letter-spacing: 0.6px;
-  font-family: 'Montserrat', sans-serif;
+  color: #9B1C2E;
 }
 
-/* CARDS */
-.rel-card {
-  background: var(--sc-card);
-  margin: 22px;
-  box-shadow: 0 13px 22px var(--sc-shadow);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--sc-border);
-}
-
-.card-title {
-  height: 36px;
-  background: var(--sc-red);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 11px;
-  border-radius: 12px 12px 0 0;
-}
-
-.card-title.blue {
-  background: var(--sc-blue);
-}
-
-.card-title span {
-  font-size: 18px;
-}
-
-.card-title h3 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 800;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.rel-text {
-  margin: 14px;
-  color: var(--sc-text);
+.rec-ia-texto {
   font-size: 13px;
-  line-height: 1.55;
+  color: #5a0a1a;
+  line-height: 1.65;
+  margin-bottom: 14px;
 }
 
-/* MÉTRICAS */
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  padding: 14px;
+.rec-ia-metricas {
+  display: flex;
+  gap: 10px;
 }
 
-.metric-card {
-  background: var(--sc-panel);
-  border: 1px solid var(--sc-border);
-  border-radius: 12px;
-  padding: 12px 8px;
+.rec-ia-metrica {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  padding: 12px 10px;
   text-align: center;
-  box-shadow: 0 6px 14px rgba(31, 41, 51, 0.08);
 }
 
-.metric-card p {
-  margin: 0 0 6px;
-  color: var(--sc-muted);
+.rec-ia-metrica-label {
   font-size: 10px;
+  color: #9B1C2E;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
-.metric-card strong {
-  display: block;
-  color: var(--sc-red);
-  font-size: 24px;
-  line-height: 1;
+.rec-ia-metrica-valor {
+  font-size: 20px;
   font-weight: 800;
-  font-family: 'Montserrat', sans-serif;
+  color: #9B1C2E;
+  margin-top: 4px;
 }
 
-.metric-card span {
-  display: block;
-  margin-top: 5px;
-  color: var(--sc-muted);
-  font-size: 10px;
-  font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
+.rec-ia-metrica-unit {
+  font-size: 11px;
+  color: #9B1C2E;
 }
 
-.metric-card.success {
-  border-color: rgba(47, 142, 63, 0.45);
-}
-
-.metric-card.success strong,
-.metric-card.success span {
-  color: var(--sc-success);
-}
-
-.metric-card.danger {
-  border-color: rgba(185, 28, 28, 0.45);
-  background: #fff5f5;
-}
-
-.metric-card.danger strong,
-.metric-card.danger span {
-  color: var(--sc-danger);
-}
-
-/* LISTAS E DADOS */
-.rel-list {
-  margin: 0;
-  padding: 14px 20px 16px 34px;
-}
-
-.rel-list li {
-  color: var(--sc-text);
+.alerta-perda {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
   font-size: 13px;
+  color: #8a6400;
   line-height: 1.5;
-  margin-bottom: 6px;
-}
-
-.data-list {
-  padding: 14px;
-}
-
-.data-list p {
-  margin: 0 0 9px;
-  color: var(--sc-text);
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.data-list strong {
-  color: var(--sc-red);
-  font-family: 'Montserrat', sans-serif;
-}
-
-/* BOTÕES */
-.btn {
-  width: 344px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 24px auto 0;
-  border: none;
-  border-radius: 8px;
-  background: var(--sc-red);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.7px;
-  cursor: pointer;
-  box-shadow: 0 9px 18px rgba(153, 27, 31, 0.28);
-}
-
-.btn:hover {
-  background: var(--sc-red-dark);
-}
-
-.btn-sair {
-  width: 344px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px auto 0;
-  background: var(--sc-panel);
-  color: var(--sc-blue);
-  border: 1px solid var(--sc-blue);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.btn-sair:hover {
-  background: var(--sc-blue);
-  color: #ffffff;
-}
-
-/* NAV INFERIOR */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 430px;
-  height: 64px;
-  background: var(--sc-panel);
-  border-top: 1px solid var(--sc-border);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  box-shadow: 0 -8px 18px rgba(31, 41, 51, 0.12);
-}
-
-.bottom-nav div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  color: var(--sc-muted);
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.bottom-nav div:hover {
-  color: var(--sc-red);
-}
-
-.bottom-nav span {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.bottom-nav p {
-  margin: 0;
-  font-size: 8px;
-  font-weight: 800;
 }

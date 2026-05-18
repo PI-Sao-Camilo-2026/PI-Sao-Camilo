@@ -2,8 +2,7 @@
 import "../../css/Historico.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { usuariosApi } from "../../services/api";
+import { sessoesApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
 
 // Ícone de modalidade

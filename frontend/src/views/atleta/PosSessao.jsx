@@ -3,8 +3,9 @@ import "../../css/Pos-Sessao.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useAuth } from "../../contexts/AuthContext";
-import { usuariosApi } from "../../services/api";
+// import { usuariosApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
+import { usuariosApi, sessoesApi } from "../../services/api";
 
 const vestimentaOpts = [
   { value: "seco",       label: "Sem alteração (seco)" },

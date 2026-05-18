@@ -3,8 +3,9 @@ import "../../css/Sessao.css";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useAuth } from "../../contexts/AuthContext";
-import { usuariosApi } from "../../services/api";
+// import { usuariosApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
+import { usuariosApi, sessoesApi } from "../../services/api";
 
 /* ── Garrafa animada ───────────────────────────────────────────────────────── */
 function GarrafaAgua({ totalMl, metaMl = 2000 }) {

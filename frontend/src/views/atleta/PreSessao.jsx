@@ -2,13 +2,13 @@
 import "../../css/Pre-Sessao.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import { useAuth } from "../../contexts/AuthContext";
-import { usuariosApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
+import { climaApi, sessoesApi } from "../../services/api";
+
 
 const InfoIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
   </svg>
 );
 
@@ -26,8 +26,11 @@ export default function PreSessao() {
 
   // Busca clima automático ao carregar
   useEffect(() => {
+    let ativo = true;
+
     climaApi.buscarAutomatico()
       .then((c) => {
+        if (!ativo) return;
         setClima(c);
         setTemp(String(c.temperatura ?? ""));
         setUmidade(String(c.umidade ?? ""));
@@ -37,13 +40,15 @@ export default function PreSessao() {
         setUmidade("60");
       })
       .finally(() => setClimaLoading(false));
+
+    return () => { ativo = false; };
   }, []);
 
   const nivelUrina = Number(urina);
   const msgUrina =
     nivelUrina >= 1 && nivelUrina <= 3 ? { texto: "Hidratado ✓", cor: "#0A7C59" } :
-    nivelUrina >= 4 && nivelUrina <= 5 ? { texto: "Atenção — beba água", cor: "#E68A10" } :
-    nivelUrina >= 6 ? { texto: "Desidratado — beba água agora!", cor: "#9B1C2E" } : null;
+      nivelUrina >= 4 && nivelUrina <= 5 ? { texto: "Atenção — beba água", cor: "#E68A10" } :
+        nivelUrina >= 6 ? { texto: "Desidratado — beba água agora!", cor: "#9B1C2E" } : null;
 
   async function handleIniciar() {
     const pesoNum = Number(peso.replace(",", "."));
@@ -166,7 +171,7 @@ export default function PreSessao() {
             {/* Urina */}
             <div className="a-label">Cor da Urina Basal</div>
             <div className="urina-scale">
-              {[1,2,3,4,5,6,7,8].map((n) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <label
                   key={n}
                   className={`urina-box urina-${n} ${urina === String(n) ? "selected" : ""}`}

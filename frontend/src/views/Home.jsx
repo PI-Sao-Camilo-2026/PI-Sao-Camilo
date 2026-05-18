@@ -1,13 +1,15 @@
+// src/views/Home.jsx
+import "../css/HomePage.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../contexts/AuthContext";
 import { sessoesApi } from "../services/api";
+import BottomNav from "../components/BottomNav";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { usuario, logout } = useAuth();
-  const isProfissional = usuario?.tipo === "profissional";
-
+  const { usuario } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,139 +20,154 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  function handleLogout() {
-    logout(navigate);
-    navigate("/");
-  }
+  const primeiroNome = usuario?.nome?.split(" ")[0] || "Atleta";
 
-  if (isProfissional) {
-    return (
-      <div className="home-root profissional">
-        <header className="home-header">
-          <div className="header-brand">
-            <span className="brand-drop">💧</span>
-            <span className="brand-name">HydroTrack</span>
-            <span className="brand-badge prof">Profissional</span>
-          </div>
-          <button className="btn-logout" onClick={handleLogout}>Sair</button>
-        </header>
-
-        <section className="home-hero prof-hero">
-          <h1>Painel do Profissional</h1>
-          <p>Monitore e analise a hidratação dos seus atletas em tempo real.</p>
-        </section>
-
-        <div className="home-grid">
-          <button className="home-card card-atletas" onClick={() => navigate("/atletas")}>
-            <span className="card-icon">👥</span>
-            <div className="card-info">
-              <strong>Meus Atletas</strong>
-              <small>Gerencie e acompanhe cada atleta</small>
-            </div>
-            <span className="card-arrow">→</span>
-          </button>
-
-          <button className="home-card card-relatorios" onClick={() => navigate("/relatorios-prof")}>
-            <span className="card-icon">📊</span>
-            <div className="card-info">
-              <strong>Relatórios</strong>
-              <small>Análises e gráficos de desempenho</small>
-            </div>
-            <span className="card-arrow">→</span>
-          </button>
-
-          <button className="home-card card-historico" onClick={() => navigate("/historico-prof")}>
-            <span className="card-icon">📅</span>
-            <div className="card-info">
-              <strong>Histórico</strong>
-              <small>Sessões detalhadas por atleta</small>
-            </div>
-            <span className="card-arrow">→</span>
-          </button>
-
-          <button className="home-card card-config" onClick={() => navigate("/configuracoes")}>
-            <span className="card-icon">⚙️</span>
-            <div className="card-info">
-              <strong>Configurações</strong>
-              <small>Perfil e preferências</small>
-            </div>
-            <span className="card-arrow">→</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Hora do dia para saudação
+  const hora = new Date().getHours();
+  const saudacao = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
 
   return (
-    <div className="home-root atleta">
-      <header className="home-header">
-        <div className="header-brand">
-          <span className="brand-drop">💧</span>
-          <span className="brand-name">HydroTrack</span>
+    <div className="atleta-page">
+      <div className="atleta-screen">
+
+        {/* Hero */}
+        <div className="atleta-hero" style={{ paddingBottom: 36 }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginBottom: 4 }}>
+            {saudacao},
+          </div>
+          <h1 style={{ fontSize: 26, marginBottom: 2 }}>{primeiroNome} 👋</h1>
+          <p>Pronto para registrar seu treino?</p>
         </div>
-        <button className="btn-logout" onClick={handleLogout}>Sair</button>
-      </header>
 
-      <section className="home-hero atleta-hero">
-        <h1>Pronto para treinar?</h1>
-        <p>Registre sua hidratação e acompanhe sua evolução.</p>
-        <button className="btn-cta" onClick={() => navigate("/presessao")}>
-          Iniciar Treino
-        </button>
-      </section>
+        <div className="atleta-body">
 
-      {!loading && stats && (
-        <section className="home-stats">
-          <h2>Seu resumo</h2>
-          <div className="stats-row">
-            <div className="stat-card">
-              <span className="stat-value">{stats.total_sessoes ?? 0}</span>
-              <span className="stat-label">Sessões</span>
+          {/* Botão iniciar sessão */}
+          <button
+            className="btn-primary"
+            style={{ marginBottom: 20, fontSize: 16, padding: "18px" }}
+            onClick={() => navigate("/presessao")}
+          >
+            🏃 Iniciar novo treino <span style={{ fontSize: 20 }}>›</span>
+          </button>
+
+          {/* Stats rápidas */}
+          {!loading && stats && stats.total_sessoes > 0 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <StatCard
+                icon="📅"
+                label="Sessões"
+                value={stats.total_sessoes}
+                sub="Total registradas"
+                onClick={() => navigate("/historico")}
+              />
+              <StatCard
+                icon="💧"
+                label="Taxa Média"
+                value={stats.taxa_media ? `${stats.taxa_media} L/h` : "—"}
+                sub="de sudorese"
+                onClick={() => navigate("/historico")}
+              />
             </div>
-            <div className="stat-card">
-              <span className="stat-value">
-                {stats.taxa_media ? Number(stats.taxa_media).toFixed(2) : "—"}
-              </span>
-              <span className="stat-label">Taxa média (L/h)</span>
+          )}
+
+          {/* Ações rápidas */}
+          <div className="a-card" style={{ marginBottom: 14 }}>
+            <div className="a-card-title">
+              <div className="a-card-icon">⚡</div>
+              <h3>Acesso Rápido</h3>
             </div>
-            <div className="stat-card">
-              <span className="stat-value">
-                {stats.maior_perda_pct ? `${Number(stats.maior_perda_pct).toFixed(1)}%` : "—"}
-              </span>
-              <span className="stat-label">Maior perda</span>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <AcaoRow
+                icon="📋"
+                titulo="Histórico de Sessões"
+                desc="Veja todas as suas sessões registradas"
+                onClick={() => navigate("/historico")}
+              />
+              <AcaoRow
+                icon="💡"
+                titulo="Guia de Hidratação"
+                desc="Aprenda a registrar corretamente"
+                onClick={() => navigate("/guia")}
+              />
+              <AcaoRow
+                icon="👤"
+                titulo="Meu Perfil"
+                desc="Gerencie seus dados pessoais"
+                onClick={() => navigate("/perfil")}
+              />
             </div>
           </div>
-        </section>
-      )}
 
-      <div className="home-grid">
-        <button className="home-card card-historico" onClick={() => navigate("/historico")}>
-          <span className="card-icon">📅</span>
-          <div className="card-info">
-            <strong>Histórico</strong>
-            <small>Veja suas sessões anteriores</small>
-          </div>
-          <span className="card-arrow">→</span>
-        </button>
+          {/* Se não tem sessões ainda */}
+          {!loading && (!stats || stats.total_sessoes === 0) && (
+            <div style={{
+              textAlign: "center", padding: "24px 16px",
+              background: "#fafafa", borderRadius: 14,
+              border: "1px dashed #ddd",
+            }}>
+              <div style={{ fontSize: 36, marginBottom: 10 }}>🏋️</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#333", marginBottom: 6 }}>
+                Nenhuma sessão ainda
+              </div>
+              <div style={{ fontSize: 12, color: "#999", lineHeight: 1.5 }}>
+                Inicie seu primeiro treino e comece a monitorar sua hidratação.
+              </div>
+            </div>
+          )}
+        </div>
 
-        <button className="home-card card-guia" onClick={() => navigate("/guia")}>
-          <span className="card-icon">💡</span>
-          <div className="card-info">
-            <strong>Guia de Hidratação</strong>
-            <small>Dicas e recomendações</small>
-          </div>
-          <span className="card-arrow">→</span>
-        </button>
-
-        <button className="home-card card-perfil" onClick={() => navigate("/perfil")}>
-          <span className="card-icon">👤</span>
-          <div className="card-info">
-            <strong>Meu Perfil</strong>
-            <small>Edite seus dados</small>
-          </div>
-          <span className="card-arrow">→</span>
-        </button>
+        <BottomNav active="registro" />
       </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: "#fff", border: "1px solid #ebebeb",
+        borderRadius: 14, padding: "16px 14px",
+        cursor: onClick ? "pointer" : "default",
+      }}
+    >
+      <div style={{ fontSize: 20, marginBottom: 8 }}>{icon}</div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 0.7 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: "#1a1a1a", margin: "4px 0 2px" }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 11, color: "#bbb" }}>{sub}</div>
+    </div>
+  );
+}
+
+function AcaoRow({ icon, titulo, desc, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "12px 0", borderBottom: "1px solid #f5f5f5",
+        cursor: "pointer",
+      }}
+    >
+      <div style={{
+        width: 38, height: 38, borderRadius: 10,
+        background: "#fdeaed",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 18, flexShrink: 0,
+      }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a1a" }}>{titulo}</div>
+        <div style={{ fontSize: 11, color: "#999", marginTop: 1 }}>{desc}</div>
+      </div>
+      <span style={{ color: "#ccc", fontSize: 20 }}>›</span>
     </div>
   );
 }
