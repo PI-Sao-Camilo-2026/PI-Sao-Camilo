@@ -3,10 +3,31 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
+const IconActivity = () => (
+  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </svg>
+);
+
+const IconMail = () => (
+  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const IconLock = () => (
+  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const [tipo, setTipo] = useState("atleta");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,16 +36,11 @@ export default function Login() {
   async function handleLogin(e) {
     e.preventDefault();
     setErro("");
-
-    if (!email || !senha) {
-      setErro("Preencha e-mail e senha");
-      return;
-    }
+    if (!email || !senha) { setErro("Preencha e-mail e senha"); return; }
 
     try {
       setLoading(true);
       const usuario = await login(email.trim().toLowerCase(), senha);
-
       if (usuario.tipo === "profissional") {
         navigate("/homepage");
       } else {
@@ -39,89 +55,85 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <div className="phone-screen">
-        <header className="login-header">
-          <img src="/R.png" alt="Logo São Camilo" />
-          <h1>SÃO CAMILO</h1>
-          <p>Nutri - Esportiva</p>
+      <div className="login-screen">
+
+        {/* Hero */}
+        <header className="login-hero">
+          <div className="login-logo-box">
+            <IconActivity />
+          </div>
+          <h1>Nutri-Esportiva</h1>
+          <p>Hidratação inteligente para alta performance</p>
         </header>
 
-        <main className="login-main">
-          <div className="atleta-box">
-            <img
-              className="atleta"
-              src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png"
-              alt="Silhueta Atleta"
-            />
-          </div>
+        {/* Form */}
+        <div className="login-body">
 
-          <h2>Bem-vindo!</h2>
-          <p className="subtitle">Acesse sua conta para continuar</p>
-
-          {erro && (
-            <div className="erro-msg">
-              {erro}
-            </div>
-          )}
-
-          <button onClick={() => navigate("/homepage")}>medico</button>
-
-          <label className="label-email">E-mail</label>
-          <div className="input-box">
-            <input
-              type="email"
-              placeholder="exemplo@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
-              disabled={loading}
-            />
-            <img src="png-transparent-email-email.png" className="simbolo-email" alt="E-mail" />
-          </div>
-
-          <label className="label-senha">Senha</label>
-          <div className="input-box">
-            <input
-              type="password"
-              placeholder="Digite sua senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
-              disabled={loading}
-            />
-            <img src="698630.png" className="cadeado-senha" alt="Cadeado Senha" />
-          </div>
-
-          <div className="opcoes">
-            <div className="relembrar">
-              <div className="checkbox"></div>
-              <span>Lembrar de mim</span>
-            </div>
-            <a href="#">Esqueceu sua senha?</a>
-          </div>
-
-          <div>
+          {/* Toggle */}
+          <div className="tipo-toggle">
             <button
-              className="enter-btn"
-              onClick={handleLogin}
-              disabled={loading}
+              type="button"
+              className={tipo === "atleta" ? "active" : ""}
+              onClick={() => setTipo("atleta")}
             >
-              <img src="9e0b1a9c-eb86-453d-988f-1a95fd1e8dd4-removebg-preview.png" className="cadeado-btn" alt="Cadeado Entrar" />
-              {loading ? "ENTRANDO..." : "ENTRAR"}
+              Sou Atleta
+            </button>
+            <button
+              type="button"
+              className={tipo === "profissional" ? "active" : ""}
+              onClick={() => setTipo("profissional")}
+            >
+              Sou Profissional
             </button>
           </div>
 
-          <div className="divider">
-            <div></div>
-            <span>OU</span>
-            <div></div>
+          {erro && <div className="erro-msg">{erro}</div>}
+
+          {/* E-mail */}
+          <div className="campo-group">
+            <label>E-MAIL</label>
+            <div className="input-wrap">
+              <IconMail />
+              <input
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
+                disabled={loading}
+              />
+            </div>
           </div>
 
-          <button className="register-btn" onClick={() => navigate("/cadastro")}>
-            <img src="91f0148c-ff2c-4bc2-9a93-62aa1cdbdb02-removebg-preview.png" className="cadastrar-btn" alt="Ícone Cadastrar" />
-            + CADASTRE-SE
+          {/* Senha */}
+          <div className="campo-group">
+            <label>SENHA</label>
+            <div className="input-wrap">
+              <IconLock />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <button
+            className="btn-entrar"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Entrando..." : "Entrar"} {!loading && <span>›</span>}
           </button>
-        </main>
+
+          <div className="link-cadastro">
+            Ainda não tem conta?{" "}
+            <strong onClick={() => navigate("/cadastro")}>Cadastre-se</strong>
+          </div>
+        </div>
       </div>
     </div>
   );

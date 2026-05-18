@@ -1,257 +1,195 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.phone-screen {
-  width: 430px;
-  min-height: 100vh;
-  background: #dde1e7;
-  display: flex;
-  flex-direction: column;
-}
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap');
 
 .login-page {
   min-height: 100vh;
-  background: #eef0f3;
-  display: flex;
-  justify-content: center;
-}
-
-.login-header img {
-  text-align: center;
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-  display: flex;
-  margin: 0 117px 50px;
-}
-
-.login-header {
-  height: 110px;
-  text-align: center;
-  padding-top: 30px;
-  border-bottom: 6px solid #a5161b;
-}
-
-.login-header h1 {
-  margin-top: -98px;
-  margin-left: 64px;
-  color: #991b1f;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-.login-header p {
-  display: flex;
-  align-items: center;
-  margin-bottom: 60px;
-  margin-top: -11px;
-  margin-left: 175px;
-  color: #991b1f;
-  font-size: 12px;
-  letter-spacing: 3px;
-}
-
-.login-main {
-  flex: 1;
-  padding: 42px 34px 20px;
-}
-
-.atleta-box {
-  width: 92px;
-  height: 92px;
-  background: #991b1f;
-  border-radius: 50%;
-  margin: auto auto;
+  background: #f4f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Barlow', sans-serif;
+  padding: 16px;
 }
 
-.atleta {
-  width: 78px;
-  height: 78px;
-  object-fit: contain;
+.login-screen {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
 }
 
-.login-main h2 {
-  margin: 10px 0 5px;
-  text-align: center;
-  font-size: 34px;
-  font-weight: 800;
-  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  color: #000;
-}
-
-.subtitle {
-  margin: 0 0 28px;
-  text-align: center;
-  font-size: 15px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  color: #444;
-}
-
-.login-main label {
-  display: block;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 15px;
-  font-weight: bold;
-  padding-left: 2px;
-  margin-bottom: 10px;
-}
-
-.label-email {
-  margin-top: 40px;
-}
-
-.input-box {
+/* ── Header hero ── */
+.login-hero {
+  background: linear-gradient(150deg, #7a1020 0%, #9B1C2E 60%, #b02035 100%);
+  padding: 40px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   position: relative;
-  width: 100%;
+  overflow: hidden;
 }
 
-.input-box input {
-  width: 100%;
-  padding: 12px 40px 12px 12px;
-  margin-bottom: 30px;
-  border-radius: 8px;
-  color: #9a9a9a;
-  border: 1px solid #ccc;
-}
-
-.input-box .simbolo-email {
+.login-hero::before {
+  content: '';
   position: absolute;
-  right: 12px;
-  top: 30%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 15px;
-  opacity: 0.29;
+  top: -50px; right: -50px;
+  width: 180px; height: 180px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
 }
 
-.input-box .cadeado-senha {
-  position: absolute;
-  right: 12px;
-  margin-top: -10px;
-  top: 42%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  opacity: 0.5;
+.login-logo-box {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  margin-bottom: 4px;
 }
 
-.input-box input::placeholder {
-  color: #9a9a9a;
+.login-logo-box svg {
+  width: 26px; height: 26px;
+  stroke: #fff;
 }
 
-.opcoes {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 4px 0 28px;
-  margin-top: -10px;
+.login-hero h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px; font-weight: 800;
+  color: #fff; margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.login-hero p {
   font-size: 13px;
-}
-
-.relembrar {
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  gap: 9px;
-  color: #333;
-}
-
-.checkbox {
-  width: 19px;
-  height: 18px;
-  background: white;
-  border: 2px solid #999;
-  border-radius: 5px;
-}
-
-.options a {
-  color: #245b9f;
-  text-decoration: none;
-  font-size: 17px;
-}
-
-.enter-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 50px;
-  border: white;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #245b9f, #4b96e8);
-  color: white;
-  font-size: 17px;
-  font-weight: 800;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  margin-top: 50px;
-  letter-spacing: 1px;
-  box-shadow: 0 16px 20px rgba(0, 0, 0, 0.22);
-}
-
-.cadeado-btn {
-  width: 32px;
-  height: 32px;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin: 32px 0 26px;
-}
-
-.divider div {
-  height: 1px;
-  background: #9ca3af;
-  flex: 1;
-}
-
-.divider span {
-  font-size: 18px;
-  color: #222;
-}
-
-.register-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 50px;
-  border: 1px solid #245b9f;
-  border-radius: 10px;
-  background: white;
-  color: #245b9f;
-  font-size: 17px;
-  font-weight: 800;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  letter-spacing: 1px;
-  box-shadow: 0 16px 20px rgba(0, 0, 0, 0.22);
-}
-
-.cadastrar-btn {
-  width: 37px;
-  height: 37px;
-}
-
-.create-account {
+  color: rgba(255,255,255,0.75);
+  margin: 0; font-weight: 400;
   text-align: center;
-  font-size: 17px;
-  color: #444;
-  margin-top: 24px;
 }
 
-.create-account a {
-  color: #245b9f;
-  text-decoration: none;
+/* ── Form body ── */
+.login-body {
+  padding: 24px 24px 28px;
 }
 
+/* ── Toggle atleta/profissional ── */
+.tipo-toggle {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+
+.tipo-toggle button {
+  flex: 1; padding: 10px 0;
+  border: none; border-radius: 7px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent; color: #888;
+}
+
+.tipo-toggle button.active {
+  background: #9B1C2E; color: #fff;
+  box-shadow: 0 2px 8px rgba(155,28,46,0.35);
+}
+
+/* ── Campo ── */
+.campo-group {
+  display: flex; flex-direction: column;
+  gap: 6px; margin-bottom: 16px;
+}
+
+.campo-group label {
+  font-size: 11px; font-weight: 700;
+  color: #888; letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex; align-items: center;
+}
+
+.input-wrap svg {
+  position: absolute; left: 12px;
+  width: 16px; height: 16px;
+  color: #bbb; pointer-events: none; flex-shrink: 0;
+  stroke: #bbb;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 12px 14px 12px 38px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px; color: #222;
+  background: #fff;
+  transition: border-color 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input-wrap input::placeholder { color: #c0c0c0; }
+.input-wrap input:focus { border-color: #9B1C2E; }
+
+/* ── Erro ── */
+.erro-msg {
+  background: #fef0f0;
+  border: 1px solid #f5c0c0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px; color: #c0392b;
+  margin-bottom: 16px; text-align: center;
+}
+
+/* ── Botão entrar ── */
+.btn-entrar {
+  width: 100%; padding: 14px;
+  background: #9B1C2E; color: #fff;
+  border: none; border-radius: 12px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: opacity 0.2s, transform 0.1s;
+  box-shadow: 0 4px 14px rgba(155,28,46,0.4);
+  margin-bottom: 20px;
+  letter-spacing: 0.3px;
+}
+
+.btn-entrar:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+.btn-entrar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Link cadastro ── */
+.link-cadastro {
+  text-align: center;
+  font-size: 13px; color: #888;
+}
+
+.link-cadastro button {
+  background: none; border: none;
+  color: #9B1C2E; font-weight: 700;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px; cursor: pointer;
+  text-decoration: none; padding: 0;
+}
+
+.link-cadastro strong {
+  color: #9B1C2E; font-weight: 700; cursor: pointer;
+}
+
+/* ── Responsive ── */
+@media (max-width: 440px) {
+  .login-page { padding: 0; align-items: flex-start; }
+  .login-screen {
+    border-radius: 0; min-height: 100vh;
+    box-shadow: none;
+  }
+}

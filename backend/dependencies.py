@@ -12,21 +12,39 @@ def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> Usuario:
-    """Valida o token JWT e retorna o usuário logado."""
     payload = decodificar_token(token)
-    if not payload or payload.get("token_type") != "access":
+
+    if not payload:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido ou expirado",
+            status_code=401,
+            detail="Token inválido"
         )
-    user = buscar_usuario_por_id(db, int(payload["sub"]))
+
+    user_id = payload.get("sub")
+
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Token sem usuário"
+        )
+
+    try:
+        user_id = int(user_id)
+    except:
+        raise HTTPException(
+            status_code=401,
+            detail="Token corrompido"
+        )
+
+    user = buscar_usuario_por_id(db, user_id)
+
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não encontrado",
+            status_code=401,
+            detail="Usuário não existe"
         )
-    return user
 
+    return user
 
 def require_profissional(
     current: Usuario = Depends(get_current_user),

@@ -1,29 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap');
 
 .cadastro-page {
     min-height: 100vh;
-    background: #f4f4f4;
+    background: #f4f4f6;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Barlow', sans-serif;
+    padding: 16px;
 }
 
 .cadastro-screen {
     width: 100%;
-    max-width: 390px;
-    min-height: 100vh;
+    max-width: 400px;
     background: #fff;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
     overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
 }
 
-/* ── Header ── */
 .cadastro-header {
-    background: linear-gradient(160deg, #7a1020 0%, #9B1C2E 50%, #b02035 100%);
-    padding: 36px 24px 40px;
+    background: linear-gradient(150deg, #7a1020 0%, #9B1C2E 60%, #b02035 100%);
+    padding: 36px 28px 32px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -43,22 +41,11 @@
     border-radius: 50%;
 }
 
-.cadastro-header::after {
-    content: '';
-    position: absolute;
-    bottom: -20px;
-    left: -20px;
-    width: 100px;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 50%;
-}
-
 .cadastro-logo-box {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -68,14 +55,14 @@
 }
 
 .cadastro-logo-box svg {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     stroke: #fff;
 }
 
 .cadastro-header h1 {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     color: #fff;
     margin: 0;
@@ -86,25 +73,21 @@
     font-size: 13px;
     color: rgba(255, 255, 255, 0.75);
     margin: 0;
-    font-weight: 400;
+    text-align: center;
 }
 
-/* ── Formulário ── */
 .cadastro-form {
-    padding: 28px 24px 32px;
+    padding: 24px 24px 28px;
     display: flex;
     flex-direction: column;
-    gap: 0;
-    flex: 1;
 }
 
-/* Toggle atleta/profissional */
 .tipo-toggle {
     display: flex;
     background: #f0f0f0;
     border-radius: 10px;
     padding: 4px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     gap: 4px;
 }
 
@@ -128,12 +111,11 @@
     box-shadow: 0 2px 8px rgba(155, 28, 46, 0.35);
 }
 
-/* Campos */
 .campo-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .campo-group label {
@@ -167,6 +149,7 @@
     color: #bbb;
     pointer-events: none;
     flex-shrink: 0;
+    stroke: #bbb;
 }
 
 .input-wrap input,
@@ -208,12 +191,11 @@
     font-size: 12px;
 }
 
-/* Termos */
 .termos-row {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     margin-top: 4px;
 }
 
@@ -239,7 +221,6 @@
     font-weight: 600;
 }
 
-/* Erro */
 .erro-cadastro {
     background: #fef0f0;
     border: 1px solid #f5c0c0;
@@ -251,10 +232,9 @@
     text-align: center;
 }
 
-/* Botão */
 .btn-criar-conta {
     width: 100%;
-    padding: 15px;
+    padding: 14px;
     background: #9B1C2E;
     color: #fff;
     border: none;
@@ -269,7 +249,7 @@
     gap: 8px;
     letter-spacing: 0.3px;
     transition: opacity 0.2s, transform 0.1s;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     box-shadow: 0 4px 14px rgba(155, 28, 46, 0.4);
 }
 
@@ -288,7 +268,6 @@
     font-weight: 400;
 }
 
-/* Link login */
 .link-login {
     text-align: center;
     font-size: 13px;
@@ -303,6 +282,19 @@
     font-family: 'Barlow', sans-serif;
     font-size: 13px;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
     padding: 0;
+}
+
+@media (max-width: 440px) {
+    .cadastro-page {
+        padding: 0;
+        align-items: flex-start;
+    }
+
+    .cadastro-screen {
+        border-radius: 0;
+        min-height: 100vh;
+        box-shadow: none;
+    }
 }

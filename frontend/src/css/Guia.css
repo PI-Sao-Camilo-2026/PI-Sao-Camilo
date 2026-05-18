@@ -1,0 +1,151 @@
+/* Guia.css */
+/* Usa .atleta-page, .atleta-screen, .atleta-hero, .atleta-body, .a-card, .bottom-nav do index.css */
+
+.guia-hero-icon {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    backdrop-filter: blur(4px);
+}
+
+.guia-secao-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.guia-secao-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.guia-secao-titulo {
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.guia-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+
+.guia-item.alerta {
+    background: #f0f4ff;
+    border-left: 3px solid #1E2A4A;
+}
+
+.guia-item.aviso {
+    background: #fff8e1;
+    border-left: 3px solid #F59E0B;
+}
+
+.guia-item.normal {
+    background: #fafafa;
+}
+
+.guia-item-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.guia-item-titulo {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+}
+
+.guia-item-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.55;
+}
+
+.guia-destaque-card {
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.guia-destaque-texto {
+    font-size: 13px;
+    color: #fff;
+    line-height: 1.65;
+}
+
+/* Escala urina no guia */
+.urina-escala-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.urina-escala-bloco {
+    flex: 1;
+    height: 28px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.urina-legenda-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #999;
+    font-weight: 600;
+}
+
+.urina-faixa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 6px;
+}
+
+.urina-faixa-range {
+    font-size: 13px;
+    font-weight: 800;
+    min-width: 36px;
+}
+
+.urina-faixa-label {
+    font-size: 12px;
+    font-weight: 600;
+}

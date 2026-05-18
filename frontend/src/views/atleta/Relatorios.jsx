@@ -1,6 +1,11 @@
+// src/views/atleta/Relatorios.jsx
 import "../../css/Relatorios.css";
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BottomNav from "../../components/BottomNav";
+
+import { useAuth } from "../../contexts/AuthContext";
+import { usuariosApi } from "../../services/api";
 
 export default function Relatorios() {
   const navigate = useNavigate();
@@ -11,153 +16,190 @@ export default function Relatorios() {
     if (raw) setResultado(JSON.parse(raw));
   }, []);
 
-  const taxa = resultado?.taxa_sudorese?.toFixed(2) ?? "--";
-  const variacao = resultado?.variacao_peso_pct?.toFixed(1) ?? "--";
+  const taxa = resultado?.taxa_sudorese;
+  const variacao = resultado?.variacao_peso_pct;
   const rec = resultado?.recomendacao;
-  const textoRec = rec?.texto_ia || rec?.texto || null;
-  const mlH = rec?.ingestao_recomendada_ml_h ?? "--";
-  const intervalo = rec?.intervalo_minutos ?? "--";
-  const variacaoNumero = Number(variacao);
-  const variacaoAlta = variacaoNumero > 2;
+  const textoIA = rec?.texto_ia || rec?.texto;
+  const mlH = rec?.ingestao_recomendada_ml_h;
+  const intervalo = rec?.intervalo_minutos;
+
+  // Classificação da variação de massa
+  const classificarVariacao = (v) => {
+    if (!v) return { label: "—", cor: "#999", bg: "#f5f5f5" };
+    if (v <= 1) return { label: "Excelente", cor: "#0A7C59", bg: "#e6f5f1" };
+    if (v <= 2) return { label: "Adequado", cor: "#B45309", bg: "#fef3c7" };
+    return { label: "Atenção", cor: "#9B1C2E", bg: "#fdeaed" };
+  };
+
+  const varClass = classificarVariacao(variacao);
+
+  function novoRegistro() {
+    localStorage.removeItem("resultado_sessao");
+    navigate("/presessao");
+  }
 
   return (
-    <div className="rel-container">
-      <header className="rel-header">
-        <div className="brand-area">
-          <div className="brand-logo">
-            <img className="brand-logo-img" src="/R.png" alt="São Camilo" />
-          </div>
-          <div>
-            <h1>SÃO CAMILO</h1>
-            <p>Nutri - Esportiva</p>
-          </div>
-        </div>
+    <div className="atleta-page">
+      <div className="atleta-screen">
 
-        <div className="header-actions">
-          <span className="status-pill">● RELATÓRIO</span>
-          <span className="bell">🔔</span>
-          <span className="menu">☰</span>
-        </div>
-      </header>
-
-      <section className="rel-atleta-area">
-        <img
-          className="atleta-icon"
-          src="/ChatGPT Image 30 de abr. de 2026, 09_33_34.png"
-          alt="Atleta"
-        />
-        <div>
-          <h2>Relatório final</h2>
-          <p>Resumo da hidratação, sudorese e recomendações pós-sessão.</p>
-        </div>
-        <span className="atleta-codigo">SC / ATL - 0000</span>
-      </section>
-
-      <section className="steps-line">
-        <div className="step-item complete"><span>1</span><p>PRÉ</p></div>
-        <div className="line complete-line"></div>
-        <div className="step-item complete"><span>2</span><p>DURANTE</p></div>
-        <div className="line complete-line"></div>
-        <div className="step-item complete"><span>3</span><p>PÓS</p></div>
-        <div className="line complete-line"></div>
-        <div className="step-item active"><span>4</span><p>RELATÓRIO</p></div>
-      </section>
-
-      <section className="rel-titulo">
-        <span></span>
-        <h2>RELATÓRIO FINAL DA SESSÃO</h2>
-      </section>
-
-      <section className="rel-card">
-        <div className="card-title">
-          <span>📊</span>
-          <h3>Resultados da Sessão</h3>
-        </div>
-
-        <div className="metric-grid">
-          <div className="metric-card">
-            <p>Taxa de Sudorese</p>
-            <strong>{taxa}</strong>
-            <span>L/h</span>
-          </div>
-
-          <div className={variacaoAlta ? "metric-card danger" : "metric-card success"}>
-            <p>Variação de Massa</p>
-            <strong>{variacao}%</strong>
-            <span>{variacaoAlta ? "⚠ Atenção" : "Adequado"}</span>
+        {/* Hero */}
+        <div className="atleta-hero">
+          <h1>Novo Registro</h1>
+          <p>Acompanhe sua hidratação</p>
+          <div className="progress-dots">
+            <span className="done" />
+            <span className="done" />
+            <span className="done" />
+            <span className="active" />
           </div>
         </div>
-      </section>
 
-      {textoRec && (
-        <section className="rel-card">
-          <div className="card-title blue">
-            <span>🤖</span>
-            <h3>Recomendação Personalizada</h3>
+        <div className="atleta-body">
+
+          {/* Badge análise concluída */}
+          <div style={{
+            textAlign: "center", marginBottom: 4,
+          }}>
+            <span style={{
+              background: "#fdeaed", color: "#9B1C2E",
+              fontSize: 10, fontWeight: 800, letterSpacing: 1.2,
+              padding: "4px 12px", borderRadius: 20,
+              textTransform: "uppercase",
+            }}>
+              Análise Concluída
+            </span>
           </div>
 
-          <p className="rel-text">{textoRec}</p>
+          <h2 style={{
+            textAlign: "center", fontSize: 22, fontWeight: 800,
+            color: "#1a1a1a", marginBottom: 20,
+          }}>
+            Seu Relatório
+          </h2>
 
-          <div className="metric-grid">
-            <div className="metric-card">
-              <p>Ingestão recomendada</p>
-              <strong>{mlH}</strong>
-              <span>ml/h</span>
+          {/* Métricas principais */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+            {/* Taxa de sudorese */}
+            <div style={{
+              flex: 1, background: "#fff", border: "1px solid #ebebeb",
+              borderRadius: 14, padding: "16px 12px", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+                Taxa de Sudorese
+              </div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: "#9B1C2E", lineHeight: 1 }}>
+                {taxa ? taxa.toFixed(2) : "—"}
+              </div>
+              <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>L/h</div>
             </div>
 
-            <div className="metric-card">
-              <p>Intervalo</p>
-              <strong>{intervalo}</strong>
-              <span>min</span>
+            {/* Variação de peso */}
+            <div style={{
+              flex: 1, background: "#fff", border: "1px solid #ebebeb",
+              borderRadius: 14, padding: "16px 12px", textAlign: "center",
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+                Variação de Peso
+              </div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: varClass.cor, lineHeight: 1 }}>
+                {variacao ? `${variacao.toFixed(1)}%` : "—"}
+              </div>
+              <div style={{ fontSize: 11, color: varClass.cor, marginTop: 4, fontWeight: 600 }}>
+                {varClass.label}
+              </div>
             </div>
           </div>
-        </section>
-      )}
 
-      <section className="rel-card">
-        <div className="card-title">
-          <span>💧</span>
-          <h3>Recomendações Pós-Treino</h3>
+          {/* Recomendação da IA */}
+          {textoIA && (
+            <div style={{
+              background: "#fdeaed",
+              border: "1px solid #f5c0c0",
+              borderRadius: 14, padding: "18px 16px",
+              marginBottom: 16,
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                marginBottom: 12,
+              }}>
+                <span style={{ fontSize: 16 }}>〜</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: "#9B1C2E" }}>
+                  Recomendação da IA
+                </span>
+              </div>
+              <p style={{ fontSize: 13, color: "#5a0a1a", lineHeight: 1.65, marginBottom: 14 }}>
+                {textoIA}
+              </p>
+
+              {/* Métricas da recomendação */}
+              {(mlH || intervalo) && (
+                <div style={{ display: "flex", gap: 10 }}>
+                  {mlH && (
+                    <div style={{
+                      flex: 1, background: "rgba(255,255,255,0.6)",
+                      borderRadius: 10, padding: "12px 10px", textAlign: "center",
+                    }}>
+                      <div style={{ fontSize: 10, color: "#9B1C2E", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                        Ingestão
+                      </div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: "#9B1C2E", marginTop: 4 }}>
+                        {mlH.toFixed(0)}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9B1C2E" }}>ml/h</div>
+                    </div>
+                  )}
+                  {intervalo && (
+                    <div style={{
+                      flex: 1, background: "rgba(255,255,255,0.6)",
+                      borderRadius: 10, padding: "12px 10px", textAlign: "center",
+                    }}>
+                      <div style={{ fontSize: 10, color: "#9B1C2E", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                        Intervalo
+                      </div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: "#9B1C2E", marginTop: 4 }}>
+                        {intervalo}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#9B1C2E" }}>min</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Alerta de variação alta */}
+          {variacao > 2 && (
+            <div style={{
+              background: "#fff8e1", border: "1px solid #ffe082",
+              borderRadius: 12, padding: "14px 16px", marginBottom: 16,
+              fontSize: 13, color: "#8a6400", lineHeight: 1.5,
+            }}>
+              ⚠️ <strong>Perda de massa acima de 2%.</strong> Aumente a hidratação pré-treino e consulte seu profissional.
+            </div>
+          )}
+
+          {/* Dicas pós-treino */}
+          <div className="a-card" style={{ marginBottom: 16 }}>
+            <div className="a-card-title">
+              <div className="a-card-icon">💡</div>
+              <h3>Dicas Pós-Treino</h3>
+            </div>
+            <ul style={{ paddingLeft: 16, fontSize: 13, color: "#555", lineHeight: 1.8 }}>
+              <li>Reidrate com {mlH ? `~${mlH.toFixed(0)} ml` : "bastante líquido"} nas próximas horas</li>
+              <li>Priorize água e isotônicos para repor eletrólitos</li>
+              <li>Adicione sódio e potássio à alimentação</li>
+              <li>Monitore a cor da urina para confirmar reidratação</li>
+            </ul>
+          </div>
+
+          {/* Botão novo registro */}
+          <button className="btn-outline" onClick={novoRegistro}>
+            Novo Registro
+          </button>
         </div>
 
-        <ul className="rel-list">
-          <li>Reidrate com {mlH !== "--" ? `~${mlH} ml/h` : "fluidos adequados"}</li>
-          <li>Priorize água e isotônicos</li>
-          <li>Adicione sódio e potássio à dieta</li>
-        </ul>
-      </section>
-
-      <section className="rel-card">
-        <div className="card-title blue">
-          <span>📝</span>
-          <h3>Dados da Sessão</h3>
-        </div>
-
-        <div className="data-list">
-          <p><strong>Taxa de sudorese:</strong> {taxa} L/h</p>
-          <p><strong>Variação de massa:</strong> -{variacao}%</p>
-          {resultado && <p><strong>Sessão ID:</strong> {resultado.sessao_id}</p>}
-        </div>
-      </section>
-
-      <button className="btn">COMPARTILHAR COM O STAFF</button>
-
-      <button
-        className="btn-sair"
-        onClick={() => {
-          localStorage.removeItem("resultado_sessao");
-          navigate("/home");
-        }}
-      >
-        SAIR
-      </button>
-
-      <nav className="bottom-nav">
-        <div onClick={() => navigate("/home")}><span>⌂</span><p>INÍCIO</p></div>
-        <div onClick={() => navigate("/historico")}><span>▤</span><p>HISTÓRICO</p></div>
-        <div><span>♡</span><p>OBSERVAÇÕES</p></div>
-        <div><span>♙</span><p>PERFIL</p></div>
-      </nav>
+        <BottomNav active="registro" />
+      </div>
     </div>
   );
 }

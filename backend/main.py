@@ -24,18 +24,15 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",       # Vite web dev
+        "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "http://localhost:8081",       # Expo web
-        "http://localhost:19006",      # Expo Go alternativo
-        # Para celular físico na rede local, adicione o IP da sua máquina:
-        # "http://192.168.X.X:8000",
+        "http://localhost:5174",      
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(auth.router,       prefix="/auth",       tags=["Autenticação"])
 app.include_router(usuarios.router,   prefix="/usuarios",   tags=["Usuários"])
