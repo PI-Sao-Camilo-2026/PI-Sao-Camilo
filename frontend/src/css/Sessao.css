@@ -1,125 +1,390 @@
-/* Sessao.css — tela durante o treino */
+/* =========================================================
+   DESKTOP LAYOUT ORGANIZADO
+========================================================= */
 
-.cronometro-wrap {
-  text-align: center;
-  margin: 12px 0 0;
+@media (min-width: 900px) {
+
+  .atleta-page {
+    padding: 32px;
+  }
+
+  .atleta-screen {
+    width: 100%;
+    max-width: 100% !important;
+  }
+
+  /* BODY */
+  .atleta-body {
+    display: flex;
+    flex-direction: column;
+
+    gap: 22px;
+
+    width: 100%;
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    padding: 32px;
+  }
+
+  /* =====================================================
+     CARD PRINCIPAL
+  ===================================================== */
+
+  .atleta-body > .a-card:first-child {
+
+    display: grid;
+
+    grid-template-columns:
+      320px
+      1fr;
+
+    grid-template-areas:
+      "timer garrafa"
+      "timer botoes"
+      "timer ajustes";
+
+    gap: 28px;
+
+    align-items: center;
+
+    padding: 34px;
+
+    border-radius: 28px;
+  }
+
+  /* =====================================================
+     ESQUERDA — TIMER
+  ===================================================== */
+
+  .cronometro-wrap {
+    grid-area: timer;
+
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    text-align: left;
+
+    padding-right: 20px;
+
+    border-right:
+      1px solid #f0f0f0;
+  }
+
+  .cronometro-valor {
+    font-size: 72px;
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+
+  .cronometro-status {
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  /* =====================================================
+     DIREITA — GARRAFA
+  ===================================================== */
+
+  .garrafa-wrap {
+    grid-area: garrafa;
+
+    margin: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .garrafa-progress {
+    width: 340px;
+    height: 6px;
+  }
+
+  .garrafa-meta {
+    font-size: 13px;
+  }
+
+  /* =====================================================
+     BOTÕES GRANDES
+  ===================================================== */
+
+  .fluido-btns {
+    grid-area: botoes;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 14px;
+
+    width: 100%;
+  }
+
+  .fluido-btn {
+    height: 120px;
+
+    border-radius: 22px;
+
+    font-size: 16px;
+
+    justify-content: center;
+
+    box-shadow:
+      0 6px 18px rgba(0,0,0,0.04);
+  }
+
+  .fluido-btn-icon {
+    font-size: 28px;
+  }
+
+  /* =====================================================
+     AJUSTES FINOS
+  ===================================================== */
+
+  .ajuste-btns {
+    grid-area: ajustes;
+
+    display: flex;
+
+    gap: 14px;
+
+    width: 100%;
+  }
+
+  .ajuste-btn {
+    height: 52px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+  }
+
+  /* =====================================================
+     ALERTA
+  ===================================================== */
+
+  .alerta-hidratacao {
+    width: 100%;
+
+    padding: 18px 20px;
+
+    border-radius: 18px;
+
+    font-size: 14px;
+
+    text-align: center;
+  }
+
+  /* =====================================================
+     CARD URINA
+  ===================================================== */
+
+  .atleta-body > .a-card:nth-child(3) {
+
+    padding: 28px;
+
+    border-radius: 24px;
+  }
+
+  .urina-btns {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 14px;
+  }
+
+  .urina-btn {
+    height: 70px;
+
+    border-radius: 16px;
+
+    font-size: 15px;
+  }
+
+  .urina-total {
+    margin-top: 16px;
+
+    font-size: 16px;
+  }
+
+  /* =====================================================
+     BOTÕES FINAIS
+  ===================================================== */
+
+  .btn-secondary,
+  .pausar-btn {
+
+    width: 100%;
+
+    max-width: 500px;
+
+    align-self: center;
+  }
+
+  .btn-secondary {
+    height: 62px;
+
+    font-size: 17px;
+
+    border-radius: 18px;
+  }
+
+  .pausar-btn {
+    height: 56px;
+
+    font-size: 15px;
+
+    border-radius: 16px;
+  }
 }
 
-.cronometro-valor {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 36px; font-weight: 800;
-  color: #9B1C2E;
-  letter-spacing: 3px;
-  line-height: 1;
+/* =========================================================
+   ORGANIZAÇÃO DESKTOP MELHORADA
+========================================================= */
+
+@media (min-width: 900px) {
+
+  .atleta-body > .a-card:first-child {
+
+    display: grid;
+
+    grid-template-columns:
+      320px
+      1fr;
+
+    grid-template-areas:
+      "header header"
+      "timer garrafa"
+      "timer botoes"
+      "timer ajustes";
+
+    gap: 28px;
+
+    align-items: center;
+
+    padding: 36px;
+  }
+
+  /* =====================================================
+     HEADER SUPERIOR
+  ===================================================== */
+
+  .atleta-body > .a-card:first-child > div:first-child {
+    grid-area: header;
+
+    text-align: center;
+
+    margin-bottom: 10px;
+  }
+
+  .atleta-body > .a-card:first-child h2 {
+    font-size: 28px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .atleta-body > .a-card:first-child p {
+    font-size: 15px !important;
+  }
+
+  /* =====================================================
+     TIMER
+  ===================================================== */
+
+  .cronometro-wrap {
+    grid-area: timer;
+
+    text-align: left;
+
+    border-right: 1px solid #f1f1f1;
+
+    padding-right: 24px;
+
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cronometro-valor {
+    font-size: 72px;
+  }
+
+  /* =====================================================
+     GARRAFA
+  ===================================================== */
+
+  .garrafa-wrap {
+    grid-area: garrafa;
+
+    margin: 0 0 10px;
+
+    align-items: center;
+  }
+
+  /* =====================================================
+     BOTÕES GRANDES ACIMA
+  ===================================================== */
+
+  .fluido-btns {
+    grid-area: botoes;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 16px;
+
+    width: 100%;
+  }
+
+  .fluido-btn {
+    height: 130px;
+
+    border-radius: 24px;
+
+    font-size: 17px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+  }
+
+  .fluido-btn-icon {
+    font-size: 30px;
+  }
+
+  /* =====================================================
+     AJUSTES ABAIXO DOS GRANDES
+  ===================================================== */
+
+  .ajuste-btns {
+    grid-area: ajustes;
+
+    display: flex;
+
+    gap: 14px;
+
+    margin-top: 6px;
+  }
+
+  .ajuste-btn {
+    height: 54px;
+
+    font-size: 14px;
+
+    border-radius: 14px;
+  }
 }
-
-.cronometro-status {
-  font-size: 10px; color: #bbb;
-  font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-top: 4px;
-}
-
-.garrafa-wrap {
-  display: flex; flex-direction: column;
-  align-items: center;
-  margin: 20px 0 24px;
-}
-
-.garrafa-progress {
-  width: 200px; height: 4px;
-  background: #f0f0f0; border-radius: 2px;
-  margin-top: 8px;
-  overflow: hidden;
-}
-
-.garrafa-progress-bar {
-  height: 100%; background: #9B1C2E;
-  border-radius: 2px;
-  transition: width 0.8s ease;
-}
-
-.garrafa-meta {
-  font-size: 11px; color: #999; margin-top: 6px;
-}
-
-.fluido-btns {
-  display: flex; gap: 8px;
-  justify-content: center;
-}
-
-.fluido-btn {
-  flex: 1; padding: 14px 0;
-  border: 1.5px solid #fdeaed;
-  border-radius: 12px; background: #fff;
-  cursor: pointer;
-  font-family: 'Barlow', sans-serif;
-  font-weight: 700; font-size: 13px; color: #9B1C2E;
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.fluido-btn:hover:not(:disabled) {
-  background: #fdeaed;
-}
-
-.fluido-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.fluido-btn-icon { font-size: 18px; }
-
-.ajuste-btns {
-  display: flex; gap: 8px; margin-top: 8px;
-}
-
-.ajuste-btn {
-  flex: 1; padding: 8px 0;
-  border: 1px solid #eee; border-radius: 8px;
-  background: #fafafa;
-  font-size: 12px; font-weight: 600; color: #888;
-  cursor: pointer; font-family: 'Barlow', sans-serif;
-  transition: background 0.15s;
-}
-
-.ajuste-btn:hover { background: #f0f0f0; }
-
-.alerta-hidratacao {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 12px; color: #8a6400;
-  font-weight: 600; margin-bottom: 14px;
-}
-
-.urina-btns { display: flex; gap: 8px; }
-
-.urina-btn {
-  flex: 1; padding: 12px 0;
-  border: 1.5px solid #eee;
-  border-radius: 10px; background: #fafafa;
-  cursor: pointer;
-  font-family: 'Barlow', sans-serif;
-  font-size: 12px; font-weight: 700; color: #555;
-  transition: background 0.15s;
-}
-
-.urina-btn:hover { background: #f0f0f0; }
-
-.urina-total {
-  text-align: center; margin-top: 8px;
-  font-size: 13px; color: #666; font-weight: 600;
-}
-
-.pausar-btn {
-  width: 100%; padding: 12px; margin-top: 8px;
-  background: transparent;
-  border: 1.5px solid #eee;
-  border-radius: 14px;
-  font-family: 'Barlow', sans-serif;
-  font-size: 14px; font-weight: 600; color: #888;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.pausar-btn:hover { background: #f5f5f5; }
