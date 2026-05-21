@@ -1,176 +1,364 @@
-import "../../css/PerfilAtleta.css";
+// src/views/medico/PerfilAtleta.jsx
+import "../../css/profissional.css";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-    AiOutlineUser,
-    AiOutlineBell,
-    AiFillBell,
-    AiFillHome,
-} from "react-icons/ai";
-import { HiOutlineUserGroup } from "react-icons/hi";
+import { usuariosApi, sessoesApi } from "../../services/api";
+import Sidebar from "../../components/Sidebar";
+
+const IconArrow = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+    </svg>
+);
+const IconDroplet = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+    </svg>
+);
+const IconScale = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+        <path d="M12 3v18M3 9l9-6 9 6M3 15l9 6 9-6" />
+    </svg>
+);
+const IconCalendar = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+        <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+);
+const IconActivity = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+);
+
+function formatarData(iso) {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function iconeModalidade(m) {
+    if (!m) return "🏃";
+    const k = m.toLowerCase();
+    if (k.includes("futebol")) return "⚽";
+    if (k.includes("corrida") || k.includes("atletismo")) return "🏃";
+    if (k.includes("natação") || k.includes("natacao")) return "🏊";
+    if (k.includes("ciclismo")) return "🚴";
+    if (k.includes("musculação") || k.includes("academia")) return "🏋️";
+    if (k.includes("basquete")) return "🏀";
+    if (k.includes("vôlei") || k.includes("volei")) return "🏐";
+    return "🏃";
+}
 
 export default function PerfilAtleta() {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const temNotificacao = false;
+    const [atleta, setAtleta] = useState(null);
+    const [sessoes, setSessoes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [tabAtiva, setTabAtiva] = useState("resumo");
 
-    const atleta = {
-        id,
-        nome: "João Silva",
-        esporte: "Futebol",
-        idade: 23,
-        foto: "/medico1.png",
-        sessoesMes: 12,
-        suor: "1,8 L/h",
-        perdaPeso: "1,6%",
-        hidratacao: "1,7 L/h",
-        ultimaSessao: "Hoje • 01:25:54",
-        ingestao: "1,6 L/h",
-        taxaSudorese: "1,9 L/h",
-    };
+    useEffect(() => {
+        async function carregar() {
+            try {
+                const [dadosAtleta, dadosSessoes] = await Promise.all([
+                    usuariosApi.detalheAtleta(id),
+                    sessoesApi.sessoesAtleta(id, 30),
+                ]);
+                setAtleta(dadosAtleta);
+                setSessoes(dadosSessoes);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        }
+        carregar();
+    }, [id]);
+
+    const taxas = sessoes.map(s => s.taxa_sudorese).filter(Boolean);
+    const perdas = sessoes.map(s => s.variacao_peso_pct).filter(Boolean);
+    const ingestoes = sessoes.map(s => s.ingestao_ml).filter(Boolean);
+
+    const taxaMedia = taxas.length ? (taxas.reduce((a, b) => a + b, 0) / taxas.length).toFixed(2) : null;
+    const perdaMedia = perdas.length ? (perdas.reduce((a, b) => a + b, 0) / perdas.length).toFixed(1) : null;
+    const ingestaoMedia = ingestoes.length ? Math.round(ingestoes.reduce((a, b) => a + b, 0) / ingestoes.length) : null;
+    const ultimaSessao = sessoes[0] || null;
+
+    const TABS = ["resumo", "sessões", "dados"];
+
+    if (loading) {
+        return (
+            <div className="prof-layout">
+                <Sidebar active="atletas" />
+                <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ textAlign: "center", color: "var(--text-3)" }}>
+                        <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+                        <p>Carregando perfil do atleta...</p>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
+    if (!atleta) {
+        return (
+            <div className="prof-layout">
+                <Sidebar active="atletas" />
+                <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ textAlign: "center", color: "var(--text-3)" }}>
+                        <div style={{ fontSize: 40, marginBottom: 12 }}>😕</div>
+                        <p>Atleta não encontrado.</p>
+                        <button className="btn-ghost" style={{ marginTop: 16 }} onClick={() => navigate("/atletas")}>
+                            Voltar para Atletas
+                        </button>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
-        <div className="perfil-page">
-            <div className="phone-screen">
-                <header className="perfil-header">
-                    <img src="/R.png" alt="Logo São Camilo" />
-                    <h1>SÃO CAMILO</h1>
-                    <p>Nutri - Esportiva</p>
+        <div className="prof-layout">
+            <Sidebar active="atletas" />
+            <main className="prof-main">
 
-                    <span className="active">● SESSÃO ATIVA</span>
+                {/* Header */}
+                <div className="page-header">
+                    <div className="page-header-left">
+                        <button
+                            onClick={() => navigate("/atletas")}
+                            style={{
+                                display: "flex", alignItems: "center", gap: 6,
+                                background: "none", border: "none", cursor: "pointer",
+                                color: "var(--text-3)", fontSize: 13, fontWeight: 600,
+                                fontFamily: "var(--font)", marginBottom: 8, padding: 0,
+                            }}
+                        >
+                            <IconArrow /> Voltar para Atletas
+                        </button>
+                        <h1>{atleta.nome}</h1>
+                        <p>
+                            {iconeModalidade(atleta.modalidade)} {atleta.modalidade || "Modalidade não informada"}
+                            {atleta.sexo ? ` · ${atleta.sexo}` : ""}
+                        </p>
+                    </div>
+                </div>
 
-                    <button className="header-icon">
-                        {temNotificacao ? (
-                            <AiFillBell className="notificacao-ativa" />
+                {/* Card do atleta */}
+                <div className="atleta-perfil-hero">
+                    <div className="atleta-perfil-avatar">
+                        {atleta.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="atleta-perfil-info">
+                        <h2>{atleta.nome}</h2>
+                        <p>{atleta.email}</p>
+                        <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                            {atleta.modalidade && (
+                                <span className="chip chip-green">{atleta.modalidade}</span>
+                            )}
+                            {atleta.sexo && (
+                                <span className="chip chip-gray">{atleta.sexo}</span>
+                            )}
+                            <span className="chip chip-gray">
+                                Código: {atleta.codigo_anonimizado || "—"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="atleta-perfil-sessoes">
+                        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>
+                            {sessoes.length}
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", fontWeight: 600 }}>
+                            Sessões registradas
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="perfil-atleta-tabs">
+                    {TABS.map(tab => (
+                        <button
+                            key={tab}
+                            className={`perfil-atleta-tab ${tabAtiva === tab ? "active" : ""}`}
+                            onClick={() => setTabAtiva(tab)}
+                        >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </button>
+                    ))}
+                </div>
+
+                {/* ── Tab: Resumo ── */}
+                {tabAtiva === "resumo" && (
+                    <>
+                        {/* Stat cards */}
+                        <div className="stats-row" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 20 }}>
+                            <div className="stat-card">
+                                <div className="stat-card-icon"><IconDroplet /></div>
+                                <label>Taxa Média de Sudorese</label>
+                                <div className="stat-val">{taxaMedia ? `${taxaMedia}` : "—"}</div>
+                                <div className="stat-sub">{taxaMedia ? "L/h" : "Sem dados"}</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-card-icon"><IconScale /></div>
+                                <label>Perda Média de Massa</label>
+                                <div className="stat-val" style={{ color: perdaMedia > 2 ? "var(--red)" : "inherit" }}>
+                                    {perdaMedia ? `${perdaMedia}%` : "—"}
+                                </div>
+                                <div className={`stat-sub ${perdaMedia > 2 ? "danger" : ""}`}>
+                                    {perdaMedia > 2 ? "Atenção" : "de massa corporal"}
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-card-icon"><IconActivity /></div>
+                                <label>Ingestão Média</label>
+                                <div className="stat-val">{ingestaoMedia ? `${ingestaoMedia}` : "—"}</div>
+                                <div className="stat-sub">{ingestaoMedia ? "ml por sessão" : "Sem dados"}</div>
+                            </div>
+                        </div>
+
+                        {/* Última sessão */}
+                        {ultimaSessao ? (
+                            <div className="atletas-table-wrap" style={{ marginBottom: 20 }}>
+                                <div className="table-toolbar">
+                                    <span style={{ fontWeight: 700, color: "var(--text)" }}>Última Sessão</span>
+                                    <span style={{ fontSize: 12, color: "var(--text-3)" }}>
+                                        {formatarData(ultimaSessao.criado_em)}
+                                    </span>
+                                </div>
+                                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                                    <UltimaInfo label="Taxa de Sudorese" value={ultimaSessao.taxa_sudorese ? `${ultimaSessao.taxa_sudorese} L/h` : "—"} />
+                                    <UltimaInfo label="Variação de Peso" value={ultimaSessao.variacao_peso_pct ? `${ultimaSessao.variacao_peso_pct?.toFixed(1)}%` : "—"} alerta={ultimaSessao.variacao_peso_pct > 2} />
+                                    <UltimaInfo label="Ingestão" value={ultimaSessao.ingestao_ml ? `${ultimaSessao.ingestao_ml?.toFixed(0)} mL` : "—"} />
+                                    <UltimaInfo label="Duração" value={ultimaSessao.duracao_minutos ? `${ultimaSessao.duracao_minutos?.toFixed(0)} min` : "—"} />
+                                    <UltimaInfo label="Modalidade" value={ultimaSessao.modalidade || atleta.modalidade || "—"} />
+                                    <UltimaInfo label="Status" value="Concluída" verde />
+                                </div>
+                            </div>
                         ) : (
-                            <AiOutlineBell className="notificacao-vazia" />
+                            <div style={{
+                                background: "#fff", border: "1px solid var(--border)",
+                                borderRadius: "var(--radius)", padding: "32px",
+                                textAlign: "center", color: "var(--text-3)",
+                            }}>
+                                <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+                                <p>Nenhuma sessão registrada ainda.</p>
+                            </div>
                         )}
-                    </button>
-                </header>
+                    </>
+                )}
 
-                <main className="perfil-main">
-                    <section className="perfil-top">
-                        <button className="back-btn" onClick={() => navigate("/atletas")}>
-                            ←
-                        </button>
-
-                        <img className="perfil-foto" src={atleta.foto} alt={atleta.nome} />
-
-                        <div>
-                            <h2>{atleta.nome}</h2>
-                            <p>
-                                {atleta.esporte} • {atleta.idade} anos
-                            </p>
+                {/* ── Tab: Sessões ── */}
+                {tabAtiva === "sessões" && (
+                    <div className="atletas-table-wrap">
+                        <div className="table-toolbar">
+                            <span style={{ fontWeight: 700, color: "var(--text)" }}>
+                                Histórico de Sessões
+                            </span>
+                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>
+                                {sessoes.length} sessão(ões)
+                            </span>
                         </div>
-
-                        <span className="star">★</span>
-                    </section>
-
-                    <nav className="perfil-tabs">
-                        <button className="active-tab">RESUMO</button>
-                        <button>SESSÕES</button>
-                        <button>GRÁFICOS</button>
-                        <button>DADOS</button>
-                    </nav>
-
-                    <section className="resumo-box">
-                        <h3>RESUMO DO ATLETA</h3>
-
-                        <div className="resumo-grid">
-                            <div className="resumo-card">
-                                <p>Sessões (Mês)</p>
-                                <strong>{atleta.sessoesMes}</strong>
-                            </div>
-
-                            <div className="resumo-card">
-                                <p>Taxa de sudorese média</p>
-                                <strong>{atleta.suor}</strong>
-                            </div>
-
-                            <div className="resumo-card">
-                                <p>Perda de peso média</p>
-                                <strong>{atleta.perdaPeso}</strong>
-                            </div>
-
-                            <div className="resumo-card destaque">
-                                <p>Hidratação média</p>
-                                <strong>{atleta.hidratacao}</strong>
-                            </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Modalidade</th>
+                                    <th>Duração</th>
+                                    <th>Peso Pré</th>
+                                    <th>Peso Pós</th>
+                                    <th>Ingestão</th>
+                                    <th>Taxa Sudorese</th>
+                                    <th>Variação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sessoes.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "var(--text-3)" }}>
+                                            Nenhuma sessão encontrada
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    sessoes.map(s => (
+                                        <tr key={s.id}>
+                                            <td>{formatarData(s.criado_em)}</td>
+                                            <td>{s.modalidade || atleta.modalidade || "—"}</td>
+                                            <td>{s.duracao_minutos ? `${s.duracao_minutos?.toFixed(0)} min` : "—"}</td>
+                                            <td>{s.peso_pre ? `${s.peso_pre} kg` : "—"}</td>
+                                            <td>{s.peso_pos ? `${s.peso_pos} kg` : "—"}</td>
+                                            <td>{s.ingestao_ml ? `${s.ingestao_ml?.toFixed(0)} mL` : "—"}</td>
+                                            <td>
+                                                <strong style={{ color: "var(--red)" }}>
+                                                    {s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "—"}
+                                                </strong>
+                                            </td>
+                                            <td>
+                                                <span className={`chip ${s.variacao_peso_pct > 2 ? "chip-red" : "chip-green"}`}>
+                                                    {s.variacao_peso_pct ? `${s.variacao_peso_pct?.toFixed(1)}%` : "—"}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                        <div className="table-footer">
+                            <span>{sessoes.length} sessão(ões) encontrada(s)</span>
                         </div>
-                    </section>
+                    </div>
+                )}
 
-                    <section className="ultima-box">
-                        <h3>ÚLTIMA SESSÃO</h3>
-                        <p>{atleta.ultimaSessao}</p>
-
-                        <div className="ultima-grid">
-                            <div>
-                                <p>Perda de peso</p>
-                                <strong>{atleta.perdaPeso}</strong>
-                            </div>
-
-                            <div>
-                                <p>Ingestão</p>
-                                <strong>{atleta.ingestao}</strong>
-                            </div>
-
-                            <div>
-                                <p>Taxa de sudorese</p>
-                                <strong>{atleta.taxaSudorese}</strong>
-                            </div>
+                {/* ── Tab: Dados ── */}
+                {tabAtiva === "dados" && (
+                    <div className="atletas-table-wrap" style={{ padding: "24px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                            <DadoRow label="Nome completo" value={atleta.nome} />
+                            <DadoRow label="E-mail" value={atleta.email} />
+                            <DadoRow label="Sexo" value={atleta.sexo || "Não informado"} />
+                            <DadoRow label="Modalidade" value={atleta.modalidade || "Não informada"} />
+                            <DadoRow label="Código anônimo" value={atleta.codigo_anonimizado || "—"} mono />
+                            <DadoRow label="Total de sessões" value={sessoes.length} />
                         </div>
-
-                        <button className="detalhes-btn">
-                            VER DETALHES DA SESSÃO
-                        </button>
-                    </section>
-
-                    <section className="tendencia-box">
-                        <h3>TENDÊNCIA (30 DIAS)</h3>
-
-                        <div className="grafico-fake">
-                            <div>
-                                <p>Taxa de sudorese</p>
-                                <span className="linha verde"></span>
-                            </div>
-
-                            <div>
-                                <p>Perda de peso</p>
-                                <span className="linha vermelha"></span>
-                            </div>
-                        </div>
-                    </section>
-                </main>
-
-                <nav className="bottom-nav">
-                    <div className="nav-item active-nav">
-                        <span className="nav-icon">
-                            <AiFillHome />
-                        </span>
-                        <p>INÍCIO</p>
                     </div>
+                )}
 
-                    <div className="nav-item" onClick={() => navigate("/atletas")}>
-                        <span className="nav-icon vazio">
-                            <HiOutlineUserGroup />
-                        </span>
-                        <p>ATLETAS</p>
-                    </div>
+            </main>
+        </div>
+    );
+}
 
-                    <div className="nav-item">
-                        <span className="nav-icon vazio">
-                            <AiOutlineBell />
-                        </span>
-                        <p>ALERTAS</p>
-                    </div>
+function UltimaInfo({ label, value, alerta, verde }) {
+    return (
+        <div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 4 }}>
+                {label}
+            </div>
+            <div style={{
+                fontSize: 16, fontWeight: 700,
+                color: verde ? "var(--green)" : alerta ? "var(--red)" : "var(--text)",
+            }}>
+                {value}
+            </div>
+        </div>
+    );
+}
 
-                    <div className="nav-item">
-                        <span className="nav-icon vazio">
-                            <AiOutlineUser />
-                        </span>
-                        <p>PERFIL</p>
-                    </div>
-                </nav>
+function DadoRow({ label, value, mono }) {
+    return (
+        <div style={{
+            background: "#fafafa", borderRadius: 10,
+            padding: "14px 16px", border: "1px solid var(--border)",
+        }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 4 }}>
+                {label}
+            </div>
+            <div style={{
+                fontSize: 14, fontWeight: 600, color: "var(--text)",
+                fontFamily: mono ? "monospace" : "inherit",
+            }}>
+                {value}
             </div>
         </div>
     );
