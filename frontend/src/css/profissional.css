@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap');
-
 :root {
     --red: #9B1C2E;
     --red-dark: #7a1020;
@@ -1402,5 +1400,118 @@ tbody tr:hover td {
 @media (max-width: 900px) {
     .suporte-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ── Perfil Atleta (profissional) ── */
+.atleta-perfil-hero {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+}
+
+.atleta-perfil-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--red-dark), var(--red));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.atleta-perfil-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.atleta-perfil-info h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 2px;
+}
+
+.atleta-perfil-info p {
+    font-size: 13px;
+    color: var(--text-3);
+}
+
+.atleta-perfil-sessoes {
+    text-align: center;
+    flex-shrink: 0;
+    padding: 12px 20px;
+    background: var(--red-light);
+    border-radius: 12px;
+}
+
+/* Tabs do perfil atleta */
+.perfil-atleta-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+    width: fit-content;
+}
+
+.perfil-atleta-tab {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-3);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-transform: capitalize;
+}
+
+.perfil-atleta-tab:hover {
+    color: var(--text);
+}
+
+.perfil-atleta-tab.active {
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .atleta-perfil-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .atleta-perfil-sessoes {
+        width: 100%;
+    }
+
+    .perfil-atleta-tabs {
+        width: 100%;
+    }
+
+    .perfil-atleta-tab {
+        flex: 1;
+        text-align: center;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
     }
 }
