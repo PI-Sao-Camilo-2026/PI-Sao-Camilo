@@ -3,23 +3,41 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const IconActivity = () => (
-  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-  </svg>
-);
-
 const IconMail = () => (
-  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="2" y="4" width="20" height="16" rx="2" />
     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
   </svg>
 );
 
 const IconLock = () => (
-  <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="3" y="11" width="18" height="11" rx="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const IconActivity = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
   </svg>
 );
 
@@ -35,12 +53,19 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault();
+
     setErro("");
-    if (!email || !senha) { setErro("Preencha e-mail e senha"); return; }
+
+    if (!email || !senha) {
+      setErro("Preencha e-mail e senha");
+      return;
+    }
 
     try {
       setLoading(true);
+
       const usuario = await login(email.trim().toLowerCase(), senha);
+
       if (usuario.tipo === "profissional") {
         navigate("/homepage");
       } else {
@@ -55,86 +80,69 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <div className="login-screen">
+      <header className="login-top">
+        <div className="logo-box">
+          <img src="ChatGPT_Image_21_de_mai._de_2026__16_56_19-removebg-preview.png" alt="Logo São Camilo" />
+        </div>
+      </header>
 
-        {/* Hero */}
-        <header className="login-hero">
-          <div className="login-logo-box">
-            <IconActivity />
-          </div>
-          <h1>Nutri-Esportiva</h1>
-          <p>Hidratação inteligente para alta performance</p>
-        </header>
+      <section className="login-right">
+        <form className="login-form-area" onSubmit={handleLogin}>
+          <div className="login-welcome">
+            <div className="welcome-icon">
+              <IconActivity />
+            </div>
 
-        {/* Form */}
-        <div className="login-body">
+            <h2>Bem-vindo!</h2>
 
-          {/* Toggle */}
-          <div className="tipo-toggle">
-            <button
-              type="button"
-              className={tipo === "atleta" ? "active" : ""}
-              onClick={() => setTipo("atleta")}
-            >
-              Sou Atleta
-            </button>
-            <button
-              type="button"
-              className={tipo === "profissional" ? "active" : ""}
-              onClick={() => setTipo("profissional")}
-            >
-              Sou Profissional
-            </button>
+            <p>Acesse sua conta para continuar</p>
           </div>
 
-          {erro && <div className="erro-msg">{erro}</div>}
-
-          {/* E-mail */}
           <div className="campo-group">
             <label>E-MAIL</label>
+
             <div className="input-wrap">
               <IconMail />
+
               <input
                 type="email"
                 placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
                 disabled={loading}
               />
             </div>
           </div>
 
-          {/* Senha */}
           <div className="campo-group">
             <label>SENHA</label>
+
             <div className="input-wrap">
               <IconLock />
+
               <input
                 type="password"
                 placeholder="••••••••"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
                 disabled={loading}
               />
             </div>
+            <div className="forgot-password">
+              <span>Esqueceu sua senha?</span>
+            </div>
           </div>
 
-          <button
-            className="btn-entrar"
-            onClick={handleLogin}
-            disabled={loading}
-          >
-            {loading ? "Entrando..." : "Entrar"} {!loading && <span>›</span>}
+          <button className="btn-entrar" type="submit" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
           </button>
 
           <div className="link-cadastro">
             Ainda não tem conta?{" "}
             <strong onClick={() => navigate("/cadastro")}>Cadastre-se</strong>
           </div>
-        </div>
-      </div>
+        </form>
+      </section>
     </div>
   );
 }

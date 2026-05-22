@@ -1,8 +1,8 @@
 import "../../css/profissional.css";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { usuariosApi } from "../../services/api";
 import Sidebar from "../../components/Sidebar";
+import { usuariosApi } from "../../services/Api";
 
 const IconUser = () => (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
@@ -419,7 +419,6 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
     );
 }
 
-// ── Dropdown ações ────────────────────────────────────────────────────────────
 function ActionMenu({ atleta, onEdit, onDesvincular }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
@@ -437,9 +436,11 @@ function ActionMenu({ atleta, onEdit, onDesvincular }) {
                 <div className="action-menu">
                     <button onClick={() => { setOpen(false); onEdit(atleta); }}>
                         Editar perfil
+                        Editar perfil
                     </button>
                     <hr />
                     <button className="danger" onClick={() => { setOpen(false); onDesvincular(atleta); }}>
+                        Desvincular atleta
                         Desvincular atleta
                     </button>
                 </div>
@@ -574,7 +575,7 @@ export default function Atletas() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "var(--text-3)" }}>
-                                        Carregando atletas...
+                                        Carregando atletas
                                     </td>
                                 </tr>
                             ) : filtrados.length === 0 ? (
