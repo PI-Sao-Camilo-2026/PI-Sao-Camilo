@@ -1,9 +1,8 @@
-// src/views/medico/Atletas.jsx
 import "../../css/profissional.css";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { usuariosApi } from "../../services/api";
 import Sidebar from "../../components/Sidebar";
+import { usuariosApi } from "../../services/Api";
 
 const IconUser = () => (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
@@ -21,7 +20,158 @@ const IconInfo = () => (
     </svg>
 );
 
-// ── Modal Cadastrar/Editar Atleta (fiel ao Figma) ─────────────────────────────
+function ModalVincularAtleta({ onClose, onVinculado }) {
+    const [busca, setBusca] = useState("");
+    const [resultados, setResultados] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+    const [vinculando, setVinculando] = useState(null);
+    const [erro, setErro] = useState("");
+    const timerRef = useRef(null);
+
+    function handleBusca(e) {
+        const valor = e.target.value;
+        setBusca(valor);
+        clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => buscar(valor), 400);
+    }
+
+    async function buscar(termo) {
+        setCarregando(true);
+        setErro("");
+        try {
+            const data = await usuariosApi.buscarAtletasDisponiveis(termo);
+            setResultados(data);
+        } catch (err) {
+            setErro("Erro ao buscar atletas");
+        } finally {
+            setCarregando(false);
+        }
+    }
+
+    useEffect(() => { buscar(""); }, []);
+
+    async function vincular(atleta) {
+        setVinculando(atleta.id);
+        setErro("");
+        try {
+            await usuariosApi.vincularAtleta(atleta.id);
+            onVinculado();
+        } catch (err) {
+            setErro(err.message || "Erro ao vincular atleta");
+            setVinculando(null);
+        }
+    }
+
+    return (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="modal-box" style={{ maxWidth: 540 }} onClick={e => e.stopPropagation()}>
+
+                <div className="modal-header">
+                    <div>
+                        <h2>Vincular Atleta Existente</h2>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                            Busque um atleta cadastrado no sistema e vincule ao seu perfil
+                        </p>
+                    </div>
+                    <button className="modal-close" onClick={onClose}>×</button>
+                </div>
+
+                <div className="modal-body">
+                    {/* Campo de busca */}
+                    <div className="form-field">
+                        <label>Buscar por nome ou e-mail</label>
+                        <div className="search-field" style={{ maxWidth: "100%" }}>
+                            <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" style={{ width: 16, height: 16 }}>
+                                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Digite o nome ou e-mail do atleta..."
+                                value={busca}
+                                onChange={handleBusca}
+                                autoFocus
+                            />
+                        </div>
+                    </div>
+
+                    {erro && <div className="prof-erro">{erro}</div>}
+
+                    {/* Lista de resultados */}
+                    <div style={{
+                        border: "1px solid var(--border)", borderRadius: 10,
+                        overflow: "hidden", maxHeight: 360, overflowY: "auto",
+                    }}>
+                        {carregando ? (
+                            <div style={{ padding: "24px", textAlign: "center", color: "var(--text-3)", fontSize: 13 }}>
+                                Buscando atletas...
+                            </div>
+                        ) : resultados.length === 0 ? (
+                            <div style={{ padding: "32px", textAlign: "center", color: "var(--text-3)" }}>
+                                <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
+                                <p style={{ fontSize: 13 }}>
+                                    {busca
+                                        ? "Nenhum atleta encontrado para esta busca."
+                                        : "Nenhum atleta disponível para vínculo no momento."}
+                                </p>
+                                <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 4 }}>
+                                    Apenas atletas sem vínculo com outro profissional aparecem aqui.
+                                </p>
+                            </div>
+                        ) : (
+                            resultados.map((atleta, i) => (
+                                <div
+                                    key={atleta.id}
+                                    style={{
+                                        display: "flex", alignItems: "center", gap: 14,
+                                        padding: "14px 16px",
+                                        borderBottom: i < resultados.length - 1 ? "1px solid #f5f5f5" : "none",
+                                        background: "#fff",
+                                        transition: "background 0.15s",
+                                    }}
+                                >
+                                    {/* Avatar */}
+                                    <div className="atleta-avatar" style={{ flexShrink: 0 }}>
+                                        {atleta.nome.charAt(0).toUpperCase()}
+                                    </div>
+
+                                    {/* Info */}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
+                                            {atleta.nome}
+                                        </div>
+                                        <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 1 }}>
+                                            {atleta.email}
+                                        </div>
+                                        {atleta.modalidade && (
+                                            <span className="chip chip-green" style={{ marginTop: 4, display: "inline-block" }}>
+                                                {atleta.modalidade}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Botão vincular */}
+                                    <button
+                                        className="btn-red"
+                                        onClick={() => vincular(atleta)}
+                                        disabled={vinculando === atleta.id}
+                                        style={{ padding: "8px 16px", fontSize: 13, flexShrink: 0 }}
+                                    >
+                                        {vinculando === atleta.id ? "Vinculando..." : "Vincular"}
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                <div className="modal-footer">
+                    <button className="btn-ghost" onClick={onClose}>Fechar</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
     const isEdicao = !!atleta;
     const [form, setForm] = useState({
@@ -58,7 +208,6 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
                     sexo: form.genero || null,
                 });
             } else {
-                // ✅ Usa endpoint autenticado — vincula automaticamente ao profissional logado
                 await usuariosApi.cadastrarAtleta({
                     nome: form.nome.trim(),
                     email: form.email.trim().toLowerCase(),
@@ -270,7 +419,6 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
     );
 }
 
-// ── Dropdown ações ────────────────────────────────────────────────────────────
 function ActionMenu({ atleta, onEdit, onDesvincular }) {
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
@@ -287,11 +435,11 @@ function ActionMenu({ atleta, onEdit, onDesvincular }) {
             {open && (
                 <div className="action-menu">
                     <button onClick={() => { setOpen(false); onEdit(atleta); }}>
-                        ✏️ Editar perfil
+                        Editar perfil
                     </button>
                     <hr />
                     <button className="danger" onClick={() => { setOpen(false); onDesvincular(atleta); }}>
-                        🔗 Desvincular atleta
+                        Desvincular atleta
                     </button>
                 </div>
             )}
@@ -299,10 +447,8 @@ function ActionMenu({ atleta, onEdit, onDesvincular }) {
     );
 }
 
-// ── Componente principal ──────────────────────────────────────────────────────
 export default function Atletas() {
     const navigate = useNavigate();
-    const temNotificacao = true;
     const [atletas, setAtletas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [busca, setBusca] = useState("");
@@ -422,7 +568,7 @@ export default function Atletas() {
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} style={{ textAlign: "center", padding: "40px", color: "var(--text-3)" }}>
-                                        Carregando atletas...
+                                        Carregando atletas
                                     </td>
                                 </tr>
                             ) : filtrados.length === 0 ? (
