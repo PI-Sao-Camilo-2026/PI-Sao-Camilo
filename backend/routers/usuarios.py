@@ -1,8 +1,4 @@
-"""
-routers/usuarios.py
-Perfil do usuário + gestão de atletas pelo profissional.
-"""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
@@ -15,7 +11,6 @@ from services.auth_service import hash_senha
 router = APIRouter()
 
 
-# ── Schemas ───────────────────────────────────────────────────────────────────
 
 class UsuarioOut(BaseModel):
     id: int
@@ -25,6 +20,7 @@ class UsuarioOut(BaseModel):
     sexo: Optional[str]
     modalidade: Optional[str]
     codigo_anonimizado: Optional[str]
+    profissional_id: Optional[int]
 
     class Config:
         from_attributes = True
@@ -37,7 +33,6 @@ class UsuarioUpdate(BaseModel):
 
 
 class CadastrarAtletaInput(BaseModel):
-    """Usado pelo profissional para cadastrar um atleta já vinculado a ele."""
     nome: str
     email: EmailStr
     senha: str = Field(min_length=6)
@@ -49,7 +44,10 @@ class CadastrarAtletaInput(BaseModel):
     data_nascimento: Optional[str] = None
 
 
-# ── Perfil do usuário logado ──────────────────────────────────────────────────
+class VincularAtletaInput(BaseModel):
+    atleta_id: int
+
+
 
 @router.get("/me", response_model=UsuarioOut)
 def meu_perfil(current: Usuario = Depends(get_current_user)):
@@ -73,7 +71,6 @@ def atualizar_perfil(
     return current
 
 
-# ── Gestão de atletas (profissional) ─────────────────────────────────────────
 
 @router.get("/atletas", response_model=List[UsuarioOut])
 def listar_atletas(
@@ -93,17 +90,72 @@ def listar_atletas(
     )
 
 
+@router.get("/atletas-disponiveis", response_model=List[UsuarioOut])
+def listar_atletas_disponiveis(
+    busca: Optional[str] = Query(None),
+    prof: Usuario = Depends(require_profissional),
+    db: Session = Depends(get_db),
+):
+    """
+    Lista atletas sem vínculo com nenhum profissional.
+    Permite busca por nome ou email.
+    """
+    query = db.query(Usuario).filter(
+        Usuario.tipo == "atleta",
+        Usuario.ativo == True,
+        Usuario.profissional_id == None,
+    )
+
+    if busca and busca.strip():
+        termo = f"%{busca.strip().lower()}%"
+        query = query.filter(
+            (Usuario.nome.ilike(termo)) | (Usuario.email.ilike(termo))
+        )
+
+    return query.order_by(Usuario.nome).limit(20).all()
+
+
+@router.post("/atletas/vincular", response_model=UsuarioOut)
+def vincular_atleta_existente(
+    body: VincularAtletaInput,
+    prof: Usuario = Depends(require_profissional),
+    db: Session = Depends(get_db),
+):
+    """Vincula um atleta existente (sem profissional) ao profissional logado."""
+    atleta = db.query(Usuario).filter(
+        Usuario.id == body.atleta_id,
+        Usuario.tipo == "atleta",
+        Usuario.ativo == True,
+    ).first()
+
+    if not atleta:
+        raise HTTPException(status_code=404, detail="Atleta não encontrado")
+
+    if atleta.profissional_id is not None and atleta.profissional_id != prof.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este atleta já está vinculado a outro profissional",
+        )
+
+    if atleta.profissional_id == prof.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este atleta já está vinculado a você",
+        )
+
+    atleta.profissional_id = prof.id
+    db.commit()
+    db.refresh(atleta)
+    return atleta
+
+
 @router.post("/atletas", response_model=UsuarioOut, status_code=201)
 def cadastrar_atleta_vinculado(
     body: CadastrarAtletaInput,
     prof: Usuario = Depends(require_profissional),
     db: Session = Depends(get_db),
 ):
-    """
-    Profissional cadastra um novo atleta já vinculado a ele.
-    Usa o token do profissional para determinar o profissional_id automaticamente.
-    """
-    # Verifica se e-mail já existe
+    """Profissional cadastra um novo atleta já vinculado a ele."""
     if db.query(Usuario).filter(Usuario.email == body.email).first():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -119,7 +171,7 @@ def cadastrar_atleta_vinculado(
         tipo="atleta",
         sexo=body.sexo or None,
         modalidade=body.modalidade.strip() if body.modalidade else None,
-        profissional_id=prof.id,  # ✅ vincula automaticamente ao profissional logado
+        profissional_id=prof.id,
         codigo_anonimizado=codigo,
         ativo=True,
     )
@@ -152,7 +204,6 @@ def atualizar_atleta(
     prof: Usuario = Depends(require_profissional),
     db: Session = Depends(get_db),
 ):
-    """Profissional atualiza dados de um atleta vinculado."""
     atleta = db.query(Usuario).filter(
         Usuario.id == atleta_id,
         Usuario.profissional_id == prof.id,
@@ -179,7 +230,6 @@ def desvincular_atleta(
     prof: Usuario = Depends(require_profissional),
     db: Session = Depends(get_db),
 ):
-    """Remove o vínculo entre o profissional e o atleta (não deleta o usuário)."""
     atleta = db.query(Usuario).filter(
         Usuario.id == atleta_id,
         Usuario.profissional_id == prof.id,
