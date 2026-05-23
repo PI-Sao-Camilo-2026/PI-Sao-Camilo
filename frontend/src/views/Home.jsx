@@ -1,4 +1,3 @@
-// src/views/Home.jsx
 import "../css/HomePage.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,7 +34,7 @@ export default function Home() {
           <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginBottom: 4 }}>
             {saudacao},
           </div>
-          <h1 style={{ fontSize: 26, marginBottom: 2 }}>{primeiroNome} 👋</h1>
+          <h1 style={{ fontSize: 26, marginBottom: 2 }}>{primeiroNome}</h1>
           <p>Pronto para registrar seu treino?</p>
         </div>
 
@@ -47,7 +46,7 @@ export default function Home() {
             style={{ marginBottom: 20, fontSize: 16, padding: "18px" }}
             onClick={() => navigate("/presessao")}
           >
-            🏃 Iniciar novo treino <span style={{ fontSize: 20 }}>›</span>
+            Iniciar novo treino <span style={{ fontSize: 20 }}>›</span>
           </button>
 
           {/* Stats rápidas */}
@@ -117,7 +116,7 @@ export default function Home() {
           )}
         </div>
 
-        <BottomNav active="registro" />
+        <BottomNav active="home" />
       </div>
     </div>
   );
