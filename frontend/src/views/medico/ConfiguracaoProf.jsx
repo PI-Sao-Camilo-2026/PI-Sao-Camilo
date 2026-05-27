@@ -37,7 +37,6 @@ const TABS = [
     { id: "perfil", label: "Meu Perfil", icon: <IconUser /> },
     { id: "notificacoes", label: "Notificações", icon: <IconBell /> },
     { id: "seguranca", label: "Segurança", icon: <IconLock /> },
-    { id: "assinatura", label: "Assinatura Pro", icon: <IconStar /> },
 ];
 
 export default function ConfiguracaoProf() {
@@ -317,33 +316,6 @@ export default function ConfiguracaoProf() {
                                             </button>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ── Tab: Assinatura Pro ── */}
-                        {tabAtiva === "assinatura" && (
-                            <div className="config-panel">
-                                <div className="config-panel-header">
-                                    <h2>Assinatura Pro</h2>
-                                    <p>Gerencie seu plano e benefícios.</p>
-                                </div>
-
-                                <div className="config-card" style={{ padding: "24px" }}>
-                                    <div style={{
-                                        background: "linear-gradient(135deg, var(--red-dark), var(--red))",
-                                        borderRadius: 12, padding: "20px 24px",
-                                        color: "#fff", marginBottom: 20,
-                                    }}>
-                                        <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 4 }}>PLANO ATUAL</div>
-                                        <div style={{ fontSize: 22, fontWeight: 800 }}>Profissional Pro</div>
-                                        <div style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
-                                            Atletas ilimitados · Relatórios avançados · Suporte prioritário
-                                        </div>
-                                    </div>
-                                    <p style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.6 }}>
-                                        Para gerenciar sua assinatura, entre em contato com o suporte ou acesse o portal de pagamentos.
-                                    </p>
                                 </div>
                             </div>
                         )}

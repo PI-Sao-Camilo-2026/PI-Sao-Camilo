@@ -1,4 +1,5 @@
 // src/components/Sidebar.jsx
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "../css/profissional.css";
@@ -30,8 +31,9 @@ const IconClock = () => (
 const IconFile = () => (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
 );
 const IconSettings = () => (
@@ -50,71 +52,118 @@ const IconSupport = () => (
 const IconLogout = () => (
     <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+);
+const IconMenu = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+);
+const IconX = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
 );
 
 const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: <IconGrid />, path: "/homepage" },
-    { id: "atletas", label: "Atletas", icon: <IconUsers />, path: "/atletas" },
-    { id: "historico", label: "Histórico Avançado", icon: <IconClock />, path: "/historico-prof" },
-    { id: "relatorios", label: "Relatórios", icon: <IconFile />, path: "/relatorios-prof" },
+    { id: "dashboard", label: "Dashboard",         icon: <IconGrid />,    path: "/homepage" },
+    { id: "atletas",   label: "Atletas",            icon: <IconUsers />,   path: "/atletas" },
+    { id: "historico", label: "Histórico Avançado", icon: <IconClock />,   path: "/historico-prof" },
+    { id: "relatorios",label: "Relatórios",         icon: <IconFile />,    path: "/relatorios-prof" },
 ];
 
 export default function Sidebar({ active }) {
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const [aberto, setAberto] = useState(false);
+
+    // Fecha ao redimensionar para desktop
+    useEffect(() => {
+        function onResize() {
+            if (window.innerWidth > 768) setAberto(false);
+        }
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    function navegar(path) {
+        navigate(path);
+        setAberto(false);
+    }
 
     return (
-        <aside className="prof-sidebar">
-            <div className="sidebar-brand">
-                <div className="sidebar-brand-row">
-                    <div className="sidebar-logo">
-                        <IconActivity />
-                    </div>
-                    <div>
-                        <h2>Nutri-Esportiva</h2>
-                        <p>Portal Profissional</p>
+        <>
+            {/* ── Hamburger (mobile) ── */}
+            <button
+                className="sidebar-hamburger"
+                onClick={() => setAberto(p => !p)}
+                aria-label="Menu"
+            >
+                {aberto ? <IconX /> : <IconMenu />}
+            </button>
+
+            {/* ── Overlay (mobile) ── */}
+            <div
+                className={`sidebar-overlay ${aberto ? "open" : ""}`}
+                onClick={() => setAberto(false)}
+            />
+
+            {/* ── Sidebar ── */}
+            <aside className={`prof-sidebar ${aberto ? "open" : ""}`}>
+                <div className="sidebar-brand">
+                    <div className="sidebar-brand-row">
+                        <div className="sidebar-logo">
+                            <IconActivity />
+                        </div>
+                        <div>
+                            <h2>Nutri-Esportiva</h2>
+                            <p>Portal Profissional</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <nav className="sidebar-nav">
-                {NAV_ITEMS.map((item) => (
+                <nav className="sidebar-nav">
+                    {NAV_ITEMS.map((item) => (
+                        <button
+                            key={item.id}
+                            className={`sidebar-item ${active === item.id ? "active" : ""}`}
+                            onClick={() => navegar(item.path)}
+                        >
+                            {item.icon}
+                            {item.label}
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="sidebar-footer">
                     <button
-                        key={item.id}
-                        className={`sidebar-item ${active === item.id ? "active" : ""}`}
-                        onClick={() => navigate(item.path)}
+                        className={`sidebar-item ${active === "suporte" ? "active" : ""}`}
+                        onClick={() => navegar("/suporte")}
                     >
-                        {item.icon}
-                        {item.label}
+                        <IconSupport />
+                        Suporte
                     </button>
-                ))}
-            </nav>
-
-            <div className="sidebar-footer">
-                <button
-                    className={`sidebar-item ${active === "suporte" ? "active" : ""}`}
-                    onClick={() => navigate("/suporte")}
-                >
-                    <IconSupport />
-                    Suporte
-                </button>
-                <button
-                    className={`sidebar-item ${active === "config" ? "active" : ""}`}
-                    onClick={() => navigate("/configuracoes")}  // ✅ rota correta
-                >
-                    <IconSettings />
-                    Configurações
-                </button>
-                <button
-                    className="sidebar-item"
-                    onClick={() => logout(navigate)}
-                >
-                    <IconLogout />
-                    Sair
-                </button>
-            </div>
-        </aside>
+                    <button
+                        className={`sidebar-item ${active === "config" ? "active" : ""}`}
+                        onClick={() => navegar("/configuracoes")}
+                    >
+                        <IconSettings />
+                        Configurações
+                    </button>
+                    <button
+                        className="sidebar-item"
+                        onClick={() => logout(navigate)}
+                    >
+                        <IconLogout />
+                        Sair
+                    </button>
+                </div>
+            </aside>
+        </>
     );
 }

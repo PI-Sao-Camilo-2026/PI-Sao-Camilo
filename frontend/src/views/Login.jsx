@@ -89,9 +89,9 @@ export default function Login() {
       <section className="login-right">
         <form className="login-form-area" onSubmit={handleLogin}>
           <div className="login-welcome">
-            <div className="welcome-icon">
+            {/* <div className="welcome-icon">
               <IconActivity />
-            </div>
+            </div> */}
 
             <h2>Bem-vindo!</h2>
 

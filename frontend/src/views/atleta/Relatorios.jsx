@@ -1,5 +1,5 @@
 // src/views/atleta/Relatorios.jsx
-import "../../css/Relatorios.css";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../../components/BottomNav";
@@ -174,14 +174,14 @@ export default function Relatorios() {
               borderRadius: 12, padding: "14px 16px", marginBottom: 16,
               fontSize: 13, color: "#8a6400", lineHeight: 1.5,
             }}>
-              ⚠️ <strong>Perda de massa acima de 2%.</strong> Aumente a hidratação pré-treino e consulte seu profissional.
+              Aviso <strong>Perda de massa acima de 2%.</strong> Aumente a hidratação pré-treino e consulte seu profissional.
             </div>
           )}
 
           {/* Dicas pós-treino */}
           <div className="a-card" style={{ marginBottom: 16 }}>
             <div className="a-card-title">
-              <div className="a-card-icon">💡</div>
+              <div className="a-card-icon">Recomendação</div>
               <h3>Dicas Pós-Treino</h3>
             </div>
             <ul style={{ paddingLeft: 16, fontSize: 13, color: "#555", lineHeight: 1.8 }}>

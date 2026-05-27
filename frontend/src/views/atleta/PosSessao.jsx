@@ -1,5 +1,5 @@
 // src/views/atleta/PosSessao.jsx
-import "../../css/Pos-Sessao.css";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // import { useAuth } from "../../contexts/AuthContext";

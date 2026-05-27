@@ -1,5 +1,5 @@
 // src/views/atleta/PreSessao.jsx
-import "../../css/Pre-Sessao.css";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "../../components/BottomNav";

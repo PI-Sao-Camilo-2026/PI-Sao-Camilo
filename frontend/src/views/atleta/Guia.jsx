@@ -1,5 +1,5 @@
 // src/views/atleta/Guia.jsx
-import "../../css/Guia.css";
+
 import BottomNav from "../../components/BottomNav";
 
 

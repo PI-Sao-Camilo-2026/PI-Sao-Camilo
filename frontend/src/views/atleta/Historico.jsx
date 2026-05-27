@@ -1,5 +1,5 @@
 // src/views/atleta/Historico.jsx
-import "../../css/Historico.css";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { sessoesApi } from "../../services/api";
