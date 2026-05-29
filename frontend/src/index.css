@@ -36,12 +36,22 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    min-height: 100dvh; /* Garante altura perfeita dinâmica em celulares */
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* Otimização de clique para elementos interativos no Mobile */
+button, a, .nav-item, .urina-box, .radio-option {
+    touch-action: manipulation; /* Remove atraso de 300ms do clique no mobile */
+    -webkit-tap-highlight-color: transparent; /* Remove o flash azul ao tocar */
 }
 
 button {
     font-family: var(--font);
     cursor: pointer;
+    -webkit-user-select: none; /* Impede seleção de texto ao clicar rápido */
+    user-select: none;
 }
 
 input,
@@ -63,6 +73,7 @@ img {
 /* ── Atleta mobile shell ── */
 .atleta-page {
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--bg);
     display: flex;
     align-items: flex-start;
@@ -73,6 +84,7 @@ img {
     width: 100%;
     max-width: 430px;
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--white);
     display: flex;
     flex-direction: column;
@@ -160,7 +172,7 @@ img {
     flex: 1;
     overflow-y: auto;
     padding: 20px 16px 100px;
-    -webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch; /* Scroll suave e natural no iOS */
 }
 
 /* ── Cards ── */
@@ -354,11 +366,6 @@ img {
     color: var(--red);
 }
 
-.nav-icon {
-    font-size: 22px;
-    line-height: 1;
-}
-
 /* ── Erro ── */
 .a-erro {
     background: #fef0f0;
@@ -391,6 +398,7 @@ img {
     font-size: 11px;
     font-weight: 700;
     color: rgba(0, 0, 0, 0.4);
+    user-select: none;
 }
 
 .urina-box input[type="radio"] {
@@ -402,37 +410,14 @@ img {
     transform: scale(1.08);
 }
 
-.urina-1 {
-    background: #FFF176;
-}
-
-.urina-2 {
-    background: #FDD835;
-}
-
-.urina-3 {
-    background: #F9C02A;
-}
-
-.urina-4 {
-    background: #F6A820;
-}
-
-.urina-5 {
-    background: #E68A10;
-}
-
-.urina-6 {
-    background: #C86B08;
-}
-
-.urina-7 {
-    background: #A84D04;
-}
-
-.urina-8 {
-    background: #8B3A02;
-}
+.urina-1 { background: #FFF176; }
+.urina-2 { background: #FDD835; }
+.urina-3 { background: #F9C02A; }
+.urina-4 { background: #F6A820; }
+.urina-5 { background: #E68A10; }
+.urina-6 { background: #C86B08; }
+.urina-7 { background: #A84D04; }
+.urina-8 { background: #8B3A02; }
 
 .urina-labels {
     display: flex;
@@ -456,6 +441,7 @@ img {
     cursor: pointer;
     margin-bottom: 8px;
     transition: border-color 0.15s, background 0.15s;
+    user-select: none;
 }
 
 .radio-option.selected {
@@ -560,190 +546,6 @@ input[type="range"] {
     color: var(--text);
 }
 
-/* ── Responsive: desktop centering for mobile screens ── */
-@media (min-width: 600px) {
-    .atleta-page {
-        padding: 32px 0;
-        align-items: flex-start;
-    }
-
-    .atleta-screen {
-        border-radius: 24px;
-        min-height: auto;
-        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.14);
-    }
-
-    .bottom-nav {
-        border-radius: 0 0 24px 24px;
-        position: sticky;
-        transform: none;
-        left: unset;
-    }
-}
-
-/* ── Nav icon fix (SVG no mobile) ── */
-.nav-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-}
-
-.nav-icon svg {
-    width: 22px;
-    height: 22px;
-    stroke: currentColor;
-}
-
-.nav-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    line-height: 1;
-}
-
-/* ═══════════════════════════════════════════════════
-   ATLETA SIDEBAR — desktop only
-   ═══════════════════════════════════════════════════ */
-
-.atleta-sidebar {
-    display: none;
-}
-
-@media (min-width: 768px) {
-
-    .atleta-page {
-        padding: 0;
-        align-items: stretch;
-        justify-content: flex-start;
-        min-height: 100vh;
-    }
-
-    .atleta-screen {
-        max-width: none;
-        border-radius: 0;
-        box-shadow: none;
-        flex: 1;
-        margin-left: 220px;
-        min-height: 100vh;
-    }
-
-    .bottom-nav {
-        display: none !important;
-    }
-
-    .atleta-body {
-        padding-bottom: 40px;
-    }
-
-    /* ── Sidebar ── */
-    .atleta-sidebar {
-        display: flex;
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 220px;
-        height: 100vh;
-        background: #5a0a1a;
-        z-index: 50;
-    }
-
-    .atleta-sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 20px 16px 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .atleta-sidebar-logo {
-        width: 32px;
-        height: 32px;
-        background: var(--red);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .atleta-sidebar-logo svg {
-        width: 16px;
-        height: 16px;
-        stroke: #fff;
-    }
-
-    .atleta-sidebar-titulo {
-        font-family: var(--font-display);
-        font-size: 14px;
-        font-weight: 800;
-        color: #fff;
-        line-height: 1.1;
-    }
-
-    .atleta-sidebar-sub {
-        font-size: 10px;
-        color: rgba(255, 255, 255, 0.5);
-        font-weight: 500;
-        margin-top: 1px;
-    }
-
-    .atleta-sidebar-nav {
-        flex: 1;
-        padding: 12px 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        overflow-y: auto;
-    }
-
-    .atleta-sidebar-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        border-radius: 8px;
-        font-family: var(--font);
-        font-size: 13px;
-        font-weight: 500;
-        color: rgba(255, 255, 255, 0.65);
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        text-align: left;
-        width: 100%;
-        transition: background 0.15s, color 0.15s;
-    }
-
-    .atleta-sidebar-icon {
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .atleta-sidebar-icon svg {
-        width: 18px;
-        height: 18px;
-        stroke: currentColor;
-    }
-
-    .atleta-sidebar-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .atleta-sidebar-item.active {
-        background: var(--red);
-        color: #fff;
-        font-weight: 700;
-    }
-}
-
 /* ── Sessao: cronômetro e botões de fluido ── */
 .cronometro-valor {
     font-family: var(--font-display);
@@ -785,8 +587,29 @@ input[type="range"] {
     line-height: 1;
 }
 
+/* ── Responsive: desktop centering for mobile screens ── */
+@media (min-width: 600px) {
+    .atleta-page {
+        padding: 32px 0;
+        align-items: flex-start;
+    }
+
+    .atleta-screen {
+        border-radius: 24px;
+        min-height: auto;
+        box-shadow: 0 8px 48px rgba(0, 0, 0, 0.14);
+    }
+
+    .bottom-nav {
+        border-radius: 0 0 24px 24px;
+        position: sticky;
+        transform: none;
+        left: unset;
+    }
+}
+
 /* ═══════════════════════════════════════════════════
-   ATLETA SIDEBAR — desktop only
+    ATLETA SIDEBAR — desktop only (A partir de 768px)
    ═══════════════════════════════════════════════════ */
 .atleta-sidebar {
     display: none;
@@ -817,6 +640,7 @@ input[type="range"] {
         padding-bottom: 40px;
     }
 
+    /* ── Sidebar ── */
     .atleta-sidebar {
         display: flex;
         flex-direction: column;

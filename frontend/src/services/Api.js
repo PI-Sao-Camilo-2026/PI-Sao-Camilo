@@ -1,4 +1,8 @@
-const BASE_URL = 'http://localhost:8000';
+// Definimos a BASE_URL como vazia para usar caminhos relativos.
+// Isso faz o Vite encaminhar as chamadas dinamicamente via Proxy,
+// funcionando tanto no computador quanto no celular sem erros de CORS.
+const BASE_URL = "";
+
 export function getToken() { return localStorage.getItem("@token"); }
 export function setToken(t) { t ? localStorage.setItem("@token", t) : localStorage.removeItem("@token"); }
 export function getUsuario() { const r = localStorage.getItem("@usuario"); return r ? JSON.parse(r) : null; }
