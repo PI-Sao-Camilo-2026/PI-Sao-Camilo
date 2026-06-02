@@ -131,3 +131,20 @@ function classificarRadiacao(v) {
     if (!v) return "";
     return v < 250 ? "Baixa" : v < 600 ? "Moderada" : "Alta";
 }
+
+export const exportacaoApi = {
+    async exportarHistorico({ tipo, id = null }) {
+        const token = getToken(); 
+        const url = tipo === "equipe"
+            ? `/relatorios/equipe-pdf`
+            : `/relatorios/historico-pdf/${id}`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error("Erro na exportação");
+        return await response.blob();
+    },
+};

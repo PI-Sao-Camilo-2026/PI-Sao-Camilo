@@ -327,3 +327,244 @@ def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
 
     doc.build(story)
     return buffer.getvalue()
+
+
+def _formatar_data(data) -> str:
+    if not data:
+        return "—"
+    if hasattr(data, "strftime"):
+        return data.strftime("%d/%m/%Y")
+    return str(data)
+
+def gerar_pdf_historico_atleta(sessoes: list[dict], atleta: dict) -> bytes:
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        leftMargin=MARGIN, rightMargin=MARGIN,
+        topMargin=MARGIN, bottomMargin=MARGIN,
+        title=f"Histórico - {atleta.get('nome', 'Atleta')}"
+    )
+    estilos = _estilos()
+    story = []
+
+    story.append(Paragraph(f"<b>Histórico de Sessões</b>", estilos["titulo"]))
+    story.append(Paragraph(f"Atleta: {atleta.get('nome', '—')} ({atleta.get('codigo_anonimizado', '—')})", estilos["subtitulo"]))
+    story.append(Paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", estilos["subtitulo"]))
+    story.append(HRFlowable(width="100%", thickness=1, color=COR_PRIMARIA, spaceAfter=14))
+
+    taxas    = [s.get("taxa_sudorese_lh")   for s in sessoes if s.get("taxa_sudorese_lh")   is not None]
+    perdas   = [s.get("variacao_massa_pct") for s in sessoes if s.get("variacao_massa_pct") is not None]
+    recomend = [s.get("recomendacao_ml_h")  for s in sessoes if s.get("recomendacao_ml_h")  is not None]
+    balancos = [s.get("balanco_hidrico_ml") for s in sessoes if s.get("balanco_hidrico_ml") is not None]
+
+    taxa_media       = sum(taxas)    / len(taxas)    if taxas    else None
+    taxa_maxima      = max(taxas)                     if taxas    else None
+    perda_media      = sum(perdas)   / len(perdas)   if perdas   else None
+    perda_maxima     = max(perdas)                    if perdas   else None
+    rec_media        = sum(recomend) / len(recomend) if recomend else None
+    balanco_medio    = sum(balancos) / len(balancos) if balancos else None
+    ingestao_total   = sum(s.get("total_ingestao_ml") or 0 for s in sessoes)
+
+    def _classificar(pct):
+        if pct is None:   return "Sem dados"
+        if pct <= 1.0:    return "Bem hidratado"
+        if pct <= 2.0:    return "Desidratação leve"
+        if pct <= 3.0:    return "Desidratação moderada"
+        return "Desidratação grave (>3%)"
+
+    sessoes_graves    = sum(1 for p in perdas if p > 3.0)
+    sessoes_moderadas = sum(1 for p in perdas if 2.0 < p <= 3.0)
+    sessoes_leves     = sum(1 for p in perdas if 1.0 < p <= 2.0)
+    sessoes_ok        = sum(1 for p in perdas if p <= 1.0)
+
+    story.append(Paragraph("Resumo Estatístico", estilos["secao"]))
+    story.append(_tabela_metricas([
+        {"label": "Sessões",              "valor": len(sessoes),                                    "unidade": "",    "alerta": False},
+        {"label": "Taxa Sudorese Média",  "valor": f"{taxa_media:.2f}"  if taxa_media  else "—",   "unidade": "L/h", "alerta": False},
+        {"label": "Perda Média de Massa", "valor": f"{perda_media:.1f}" if perda_media else "—",   "unidade": "%",   "alerta": bool(perda_media and perda_media > 2)},
+        {"label": "Ingestão Total",       "valor": f"{ingestao_total:.0f}",                        "unidade": "ml",  "alerta": False},
+    ]))
+    story.append(Spacer(1, 18))
+
+    story.append(Paragraph("Hidratação e Desidratação", estilos["secao"]))
+    story.append(Spacer(1, 6))
+
+    story.append(_tabela_metricas([
+        {"label": "Taxa Sudorese Máxima", "valor": f"{taxa_maxima:.2f}" if taxa_maxima else "—",   "unidade": "L/h", "alerta": bool(taxa_maxima and taxa_maxima > 2.5)},
+        {"label": "Maior Perda de Massa", "valor": f"{perda_maxima:.1f}" if perda_maxima else "—", "unidade": "%",   "alerta": bool(perda_maxima and perda_maxima > 2)},
+        {"label": "Reposição Recomendada","valor": f"{rec_media:.0f}" if rec_media else "—",       "unidade": "ml/h","alerta": False},
+        {"label": "Balanço Hídrico Médio","valor": f"{balanco_medio:.0f}" if balanco_medio else "—","unidade": "ml", "alerta": bool(balanco_medio and balanco_medio < -500)},
+    ]))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("Distribuição por Nível de Desidratação", estilos["subtitulo"]))
+    story.append(Spacer(1, 6))
+    niveis_data = [
+        ["Classificação",              "Sessões", "% do Total"],
+        ["Bem hidratado (≤1%)",      str(sessoes_ok),        f"{sessoes_ok/len(perdas)*100:.0f}%" if perdas else "—"],
+        ["Desidratação leve (1–2%)", str(sessoes_leves),     f"{sessoes_leves/len(perdas)*100:.0f}%" if perdas else "—"],
+        ["Desidratação moderada (2–3%)", str(sessoes_moderadas), f"{sessoes_moderadas/len(perdas)*100:.0f}%" if perdas else "—"],
+        ["Desidratação grave (>3%)", str(sessoes_graves),    f"{sessoes_graves/len(perdas)*100:.0f}%" if perdas else "—"],
+    ]
+    t_niveis = Table(niveis_data, colWidths=[9*cm, 3*cm, 3*cm])
+    t_niveis.setStyle(TableStyle([
+        ("BACKGROUND",    (0, 0), (-1, 0),  COR_PRIMARIA),
+        ("TEXTCOLOR",     (0, 0), (-1, 0),  COR_WHITE),
+        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
+        ("FONTNAME",      (0, 1), (-1, -1), "Helvetica"),
+        ("FONTSIZE",      (0, 0), (-1, -1), 10),
+        ("ALIGN",         (1, 0), (-1, -1), "CENTER"),
+        ("GRID",          (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
+        ("TOPPADDING",    (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("LEFTPADDING",   (0, 0), (-1, -1), 10),
+        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
+        ("TEXTCOLOR",     (0, 1), (-1, 1),  COR_PRIMARIA),
+        ("TEXTCOLOR",     (0, 4), (-1, 4),  COR_DANGER),
+        ("FONTNAME",      (0, 4), (-1, 4),  "Helvetica-Bold"),
+    ]))
+    story.append(t_niveis)
+    story.append(Spacer(1, 10))
+
+    if sessoes_graves > 0:
+        story.append(_bloco_alerta(
+            f"{sessoes_graves} sessão(ões) com desidratação grave (>3%). "
+            "Recomenda-se revisão do protocolo de hidratação.",
+            "desidratacao",
+            estilos,
+        ))
+        story.append(Spacer(1, 10))
+
+    story.append(Paragraph(
+        "Referência: American College of Sports Medicine (ACSM) — "
+        "perda ≤1% adequada; 1–2% leve; 2–3% moderada; >3% grave com risco de desempenho.",
+        ParagraphStyle("nota", parent=estilos["body"], fontSize=8, textColor=COR_GRAY, fontName="Helvetica-Oblique"),
+    ))
+    story.append(Spacer(1, 18))
+
+    story.append(Paragraph("Listagem Detalhada de Sessões", estilos["secao"]))
+    table_data = [["Data", "Modalidade", "Duração", "Taxa (L/h)", "Variação (%)", "Ingestão (ml)", "Nível Hidratação"]]
+    for s in sessoes:
+        variacao = s.get("variacao_massa_pct")
+        nivel    = s.get("hidratacao_nivel") or _classificar(variacao)
+        table_data.append([
+            _formatar_data(s.get("criada_em")),
+            s.get("modalidade", "—"),
+            f"{s.get('duracao_real_min') or '—'} min",
+            f"{s.get('taxa_sudorese_lh') or '—'}",
+            f"{variacao:.1f}%" if variacao is not None else "—",
+            f"{s.get('total_ingestao_ml') or '—'}",
+            nivel,
+        ])
+
+    col_widths = [2.2*cm, 2.8*cm, 2*cm, 2*cm, 2.2*cm, 2.2*cm, 3.6*cm]
+    t = Table(table_data, colWidths=col_widths, repeatRows=1)
+
+    cmd_cores = [
+        ("BACKGROUND",    (0, 0), (-1, 0),  COR_PRIMARIA),
+        ("TEXTCOLOR",     (0, 0), (-1, 0),  COR_WHITE),
+        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
+        ("FONTSIZE",      (0, 0), (-1, -1), 8),
+        ("GRID",          (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
+        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
+        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
+        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
+        ("TOPPADDING",    (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]
+    for i, s in enumerate(sessoes, start=1):
+        variacao = s.get("variacao_massa_pct")
+        if variacao is not None and variacao > 3.0:
+            cmd_cores.append(("BACKGROUND", (0, i), (-1, i), COR_DANGER_LIGHT))
+            cmd_cores.append(("TEXTCOLOR",  (0, i), (-1, i), COR_DANGER))
+        elif variacao is not None and variacao > 2.0:
+            cmd_cores.append(("BACKGROUND", (0, i), (-1, i), COR_WARNING_LIGHT))
+            cmd_cores.append(("TEXTCOLOR",  (0, i), (-1, i), COR_WARNING))
+
+    t.setStyle(TableStyle(cmd_cores))
+    story.append(t)
+
+    story.append(HRFlowable(width="100%", thickness=0.5, color=COR_GRAY, spaceBefore=14, spaceAfter=8))
+    story.append(Paragraph(
+        "Nutri-Esportiva — Histórico do atleta — Dados protegidos por LGPD",
+        estilos["rodape"],
+    ))
+    doc.build(story)
+    return buffer.getvalue()
+
+
+def gerar_pdf_historico_equipe(sessoes_por_atleta: dict, profissional: dict) -> bytes:
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4,
+        leftMargin=MARGIN, rightMargin=MARGIN,
+        topMargin=MARGIN, bottomMargin=MARGIN,
+        title=f"Histórico da Equipe - {profissional.get('nome', 'Profissional')}"
+    )
+    estilos = _estilos()
+    story = []
+
+    story.append(Paragraph("<b>Relatório da Equipe</b>", estilos["titulo"]))
+    story.append(Paragraph(f"Profissional: {profissional.get('nome', '—')}", estilos["subtitulo"]))
+    story.append(Paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", estilos["subtitulo"]))
+    story.append(HRFlowable(width="100%", thickness=1, color=COR_PRIMARIA, spaceAfter=14))
+
+    total_atletas = len(sessoes_por_atleta)
+    total_sessoes = sum(len(data['sessoes']) for data in sessoes_por_atleta.values())
+    story.append(Paragraph(f"Total de atletas: {total_atletas} | Sessões registradas: {total_sessoes}", estilos["body"]))
+    story.append(Spacer(1, 12))
+
+    for idx, (atleta_id, data) in enumerate(sessoes_por_atleta.items()):
+        if idx > 0:
+            story.append(PageBreak())
+
+        story.append(Paragraph(f"Atleta: {data['nome']}", estilos["secao"]))
+        sessoes = data['sessoes']
+        if not sessoes:
+            story.append(Paragraph("Nenhuma sessão registrada.", estilos["body"]))
+            continue
+
+        taxas = [s.get("taxa_sudorese_lh") for s in sessoes if s.get("taxa_sudorese_lh")]
+        perdas = [s.get("variacao_massa_pct") for s in sessoes if s.get("variacao_massa_pct")]
+        media_taxa = sum(taxas)/len(taxas) if taxas else None
+        media_perda = sum(perdas)/len(perdas) if perdas else None
+
+        story.append(Paragraph(
+            f"Média de taxa de sudorese: {media_taxa:.2f} L/h  |  "
+            f"Média de perda de massa: {media_perda:.1f}%" if media_taxa and media_perda else "Dados insuficientes",
+            estilos["body"]
+        ))
+        story.append(Spacer(1, 6))
+
+        story.append(Paragraph("Últimas sessões", estilos["subtitulo"]))
+        table_data = [["Data", "Modalidade", "Taxa (L/h)", "Variação (%)", "Ingestão (ml)"]]
+        for s in sessoes[:10]:  
+            table_data.append([
+                _formatar_data(s.get("criada_em")),
+                s.get("modalidade", "—"),
+                f"{s.get('taxa_sudorese_lh', '—')}",
+                f"{s.get('variacao_massa_pct', '—')}",
+                f"{s.get('total_ingestao_ml', '—')}",
+            ])
+
+        col_w = [2.5*cm, 3*cm, 2.5*cm, 2.5*cm, 2.5*cm]
+        t2 = Table(table_data, colWidths=col_w, repeatRows=1)
+        t2.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), COR_PRIMARIA),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
+        ]))
+        story.append(t2)
+        story.append(Spacer(1, 8))
+
+    story.append(HRFlowable(width="100%", thickness=0.5, color=COR_GRAY, spaceBefore=14, spaceAfter=8))
+    story.append(Paragraph(
+        "Nutri-Esportiva — Relatório de equipe — Dados anonimizados conforme LGPD",
+        estilos["rodape"],
+    ))
+    doc.build(story)
+    return buffer.getvalue()

@@ -1,7 +1,7 @@
 // src/views/medico/HistoricoProf.jsx
 import "../../css/profissional.css";
 import { useEffect, useState } from "react";
-import { usuariosApi, sessoesApi } from "../../services/api";
+import { usuariosApi, sessoesApi, exportacaoApi } from "../../services/api";
 import Sidebar from "../../components/Sidebar";
 
 export default function HistoricoProf() {
@@ -10,6 +10,8 @@ export default function HistoricoProf() {
     const [sessoes, setSessoes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingAtletas, setLoadingAtletas] = useState(true);
+    const [exportando, setExportando] = useState(false);
+    const [erroExport, setErroExport] = useState("");
 
     useEffect(() => {
         usuariosApi.listarAtletas()
@@ -33,6 +35,56 @@ export default function HistoricoProf() {
     const taxaMedia = taxas.length ? (taxas.reduce((a, b) => a + b, 0) / taxas.length).toFixed(2) : null;
     const maiorPerda = perdas.length ? Math.max(...perdas).toFixed(1) : null;
 
+    // Exportação Individual
+    const exportarIndividual = async () => {
+        if (!atletaSelecionado) return;
+        setExportando(true);
+        setErroExport("");
+        try {
+            const blob = await exportacaoApi.exportarHistorico({
+                tipo: "atleta",
+                id: atletaSelecionado,
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `historico_${atleta?.nome || "atleta"}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+            setErroExport("Falha ao gerar PDF individual.");
+        } finally {
+            setExportando(false);
+        }
+    };
+
+    // Exportação por Equipe (todos os atletas do profissional)
+    const exportarEquipe = async () => {
+        setExportando(true);
+        setErroExport("");
+        try {
+            const blob = await exportacaoApi.exportarHistorico({
+                tipo: "equipe",
+            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `historico_equipe_${new Date().toISOString().slice(0,10)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+            setErroExport("Falha ao gerar PDF da equipe.");
+        } finally {
+            setExportando(false);
+        }
+    };
+
     return (
         <div className="prof-layout">
             <Sidebar active="historico" />
@@ -42,7 +94,32 @@ export default function HistoricoProf() {
                         <h1>Histórico Avançado</h1>
                         <p>Análise detalhada das sessões por atleta</p>
                     </div>
+                    {/* Botões de exportação responsivos */}
+                    {atletaSelecionado && (
+                        <div className="page-header-actions" style={{ gap: 12, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                            <button
+                                className="btn-ghost"
+                                onClick={exportarIndividual}
+                                disabled={exportando}
+                                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                            >
+                                PDF Individual
+                            </button>
+                            <button
+                                className="btn-red"
+                                onClick={exportarEquipe}
+                                disabled={exportando}
+                                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                            >
+                                PDF da Equipe
+                            </button>
+                        </div>
+                    )}
                 </div>
+
+                {erroExport && (
+                    <div className="prof-erro" style={{ marginBottom: 16 }}>{erroExport}</div>
+                )}
 
                 {/* Seletor de atleta */}
                 <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px", marginBottom: 20 }}>
@@ -53,7 +130,7 @@ export default function HistoricoProf() {
                         className="form-input"
                         value={atletaSelecionado}
                         onChange={e => setAtletaSelecionado(e.target.value)}
-                        style={{ maxWidth: 360 }}
+                        style={{ maxWidth: "100%", width: "100%", maxWidth: 360 }}
                     >
                         <option value="">-- Escolha um atleta --</option>
                         {atletas.map(a => (
@@ -62,7 +139,7 @@ export default function HistoricoProf() {
                     </select>
                 </div>
 
-                {/* Stats do atleta selecionado */}
+                {/* Restante do conteúdo igual ao original... */}
                 {atletaSelecionado && (
                     <>
                         <div className="stats-row" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 20 }}>
@@ -90,14 +167,13 @@ export default function HistoricoProf() {
                             </div>
                         </div>
 
-                        {/* Tabela de sessões */}
                         <div className="atletas-table-wrap">
                             <div className="table-toolbar">
                                 <span style={{ fontWeight: 700, color: "var(--text)" }}>
                                     Sessões de {atleta?.nome || "atleta"}
                                 </span>
                             </div>
-                            <table>
+                            <table className="responsive-table">
                                 <thead>
                                     <tr>
                                         <th>Data</th>
@@ -112,9 +188,9 @@ export default function HistoricoProf() {
                                 </thead>
                                 <tbody>
                                     {loading ? (
-                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "var(--text-3)" }}>Carregando sessões...</td></tr>
+                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px" }}>Carregando sessões...</td></tr>
                                     ) : sessoes.length === 0 ? (
-                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "var(--text-3)" }}>Nenhuma sessão encontrada</td></tr>
+                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px" }}>Nenhuma sessão encontrada</td></tr>
                                     ) : (
                                         sessoes.map(s => (
                                             <tr key={s.id}>
@@ -124,11 +200,7 @@ export default function HistoricoProf() {
                                                 <td>{s.peso_pre ? `${s.peso_pre} kg` : "—"}</td>
                                                 <td>{s.peso_pos ? `${s.peso_pos} kg` : "—"}</td>
                                                 <td>{s.ingestao_ml ? `${s.ingestao_ml.toFixed(0)} mL` : "—"}</td>
-                                                <td>
-                                                    <strong style={{ color: "var(--red)" }}>
-                                                        {s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "—"}
-                                                    </strong>
-                                                </td>
+                                                <td><strong style={{ color: "var(--red)" }}>{s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "—"}</strong></td>
                                                 <td>
                                                     <span className={`chip ${s.variacao_peso_pct > 2 ? "chip-red" : "chip-green"}`}>
                                                         {s.variacao_peso_pct ? `${s.variacao_peso_pct.toFixed(1)}%` : "—"}
