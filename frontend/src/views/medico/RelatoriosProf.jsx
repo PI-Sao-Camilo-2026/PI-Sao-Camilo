@@ -1,4 +1,3 @@
-// src/views/medico/RelatoriosProf.jsx
 import "../../css/profissional.css";
 import { useEffect, useState } from "react";
 import { usuariosApi, sessoesApi, relatoriosApi } from "../../services/api";
@@ -39,7 +38,7 @@ export default function RelatoriosProf() {
         try {
             setLoadingSessoes(true);
             const res = await sessoesApi.sessoesAtleta(atleta.id);
-            setSessoes(res);
+            setSessoes(res || []);
         } catch (e) {
             console.error("Erro sessões atleta:", e);
         } finally {
@@ -68,7 +67,7 @@ export default function RelatoriosProf() {
             <div className="prof-layout">
                 <Sidebar active="relatorios" />
                 <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ color: "var(--text-3)" }}>Carregando relatórios...</p>
+                    <p style={{ color: "var(--text-3)" }}>Carregando relatórios</p>
                 </main>
             </div>
         );
@@ -103,19 +102,19 @@ export default function RelatoriosProf() {
                 {statsGlobal && (
                     <div className="stats-row" style={{ marginBottom: 24 }}>
                         <div className="stat-card">
-                            <div className="stat-card-icon">👥</div>
+                            <div className="stat-card-icon"></div>
                             <label>Atletas</label>
                             <div className="stat-val">{statsGlobal.total_atletas ?? atletas.length}</div>
                             <div className="stat-sub">vinculados</div>
                         </div>
                         <div className="stat-card">
-                            <div className="stat-card-icon">📅</div>
+                            <div className="stat-card-icon"></div>
                             <label>Sessões totais</label>
                             <div className="stat-val">{statsGlobal.total_sessoes ?? "—"}</div>
                             <div className="stat-sub">registradas</div>
                         </div>
                         <div className="stat-card">
-                            <div className="stat-card-icon">💧</div>
+                            <div className="stat-card-icon"></div>
                             <label>Taxa média</label>
                             <div className="stat-val">
                                 {statsGlobal.taxa_media_l_h ? fmt(statsGlobal.taxa_media_l_h, " L/h") : "—"}
@@ -123,7 +122,7 @@ export default function RelatoriosProf() {
                             <div className="stat-sub">de sudorese</div>
                         </div>
                         <div className="stat-card">
-                            <div className="stat-card-icon">⚖️</div>
+                            <div className="stat-card-icon"></div>
                             <label>Maior perda</label>
                             <div className="stat-val" style={{ color: statsGlobal.perda_media_pct > 2 ? "var(--red)" : "inherit" }}>
                                 {statsGlobal.perda_media_pct ? fmt(statsGlobal.perda_media_pct, "%") : "—"}
@@ -133,10 +132,11 @@ export default function RelatoriosProf() {
                     </div>
                 )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
+                {/* Estrutura Responsiva unificada com o profissional.css */}
+                <div className="config-layout">
 
-                    {/* Lista de atletas */}
-                    <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                    {/* Coluna da Esquerda: Lista de atletas */}
+                    <div className="config-tabs">
                         <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", fontWeight: 700, fontSize: 13, color: "var(--text)" }}>
                             Atletas
                         </div>
@@ -149,8 +149,11 @@ export default function RelatoriosProf() {
                                         key={a.id}
                                         onClick={() => selecionarAtleta(a)}
                                         style={{
-                                            display: "flex", alignItems: "center", gap: 12,
-                                            padding: "14px 20px", cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 12,
+                                            padding: "14px 20px",
+                                            cursor: "pointer",
                                             borderBottom: "1px solid var(--border)",
                                             background: selecionado?.id === a.id ? "var(--red-faint, #fdeaed)" : "#fff",
                                             borderLeft: selecionado?.id === a.id ? "3px solid var(--red)" : "3px solid transparent",
@@ -166,9 +169,9 @@ export default function RelatoriosProf() {
                                         }}>
                                             {(a.nome?.[0] ?? "?").toUpperCase()}
                                         </div>
-                                        <div>
-                                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)" }}>{a.nome}</div>
-                                            <div style={{ fontSize: 11, color: "var(--text-3)" }}>{a.modalidade || "Modalidade não informada"}</div>
+                                        <div style={{ overflow: "hidden" }}>
+                                            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{a.nome}</div>
+                                            <div style={{ fontSize: 11, color: "var(--text-3)", textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{a.modalidade || "Modalidade não informada"}</div>
                                         </div>
                                     </li>
                                 ))}
@@ -176,55 +179,45 @@ export default function RelatoriosProf() {
                         )}
                     </div>
 
-                    {/* Detalhe do atleta */}
-                    <div>
+                    {/* Coluna da Direita: Detalhe do atleta selecionado */}
+                    <div className="config-panel" style={{ padding: 0, background: "transparent", border: "none", boxShadow: "none" }}>
                         {!selecionado ? (
                             <div style={{
                                 background: "#fff", border: "1px solid var(--border)",
                                 borderRadius: "var(--radius)", padding: "60px 40px",
                                 textAlign: "center", color: "var(--text-3)",
                             }}>
-                                <div style={{ fontSize: 36, marginBottom: 12 }}>👈</div>
+                                <div style={{ fontSize: 36, marginBottom: 12 }}></div>
                                 <p>Selecione um atleta para ver o relatório detalhado.</p>
                             </div>
                         ) : (
                             <>
                                 {/* Cabeçalho do atleta */}
                                 <div style={{
-                                    background: "linear-gradient(135deg, var(--sidebar-bg, #1E2A4A), var(--red, #9B1C2E))",
+                                    background: "linear-gradient(135deg, var(--sidebar-bg, #5a0a1a), var(--red, #9B1C2E))",
                                     borderRadius: "var(--radius)", padding: "20px 24px",
                                     display: "flex", alignItems: "center", gap: 16,
-                                    color: "#fff", marginBottom: 16,
+                                    color: "#fff", marginBottom: 16, flexWrap: "wrap"
                                 }}>
                                     <div style={{
                                         width: 52, height: 52, borderRadius: "50%",
                                         background: "rgba(255,255,255,0.2)",
                                         display: "flex", alignItems: "center", justifyContent: "center",
-                                        fontWeight: 800, fontSize: 22,
+                                        fontWeight: 800, fontSize: 22, flexShrink: 0
                                     }}>
                                         {(selecionado.nome?.[0] ?? "?").toUpperCase()}
                                     </div>
-                                    <div style={{ flex: 1 }}>
+                                    <div style={{ flex: "1 1 200px" }}>
                                         <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>{selecionado.nome}</h2>
                                         <p style={{ fontSize: 12, opacity: 0.75 }}>{selecionado.email}</p>
                                         <p style={{ fontSize: 12, opacity: 0.75 }}>{selecionado.modalidade || "Modalidade não informada"}</p>
                                     </div>
-                                    <a
-                                        href={relatoriosApi.pdfUrl(selecionado.id)}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        style={{
-                                            background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)",
-                                            color: "#fff", padding: "8px 16px", borderRadius: 8,
-                                            fontSize: 12, fontWeight: 600, textDecoration: "none",
-                                        }}
-                                    >
-                                        📄 Exportar PDF
-                                    </a>
                                 </div>
 
                                 {loadingSessoes ? (
-                                    <p style={{ color: "var(--text-3)", padding: 20 }}>Carregando sessões...</p>
+                                    <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center" }}>
+                                        <p style={{ color: "var(--text-3)" }}>Carregando sessões...</p>
+                                    </div>
                                 ) : sessoes.length === 0 ? (
                                     <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 40, textAlign: "center", color: "var(--text-3)" }}>
                                         Nenhuma sessão encontrada para este atleta.
@@ -234,22 +227,22 @@ export default function RelatoriosProf() {
                                         {/* Médias rápidas */}
                                         <div className="stats-row" style={{ marginBottom: 16 }}>
                                             <div className="stat-card">
-                                                <div className="stat-card-icon">📅</div>
+                                                <div className="stat-card-icon"></div>
                                                 <label>Sessões</label>
                                                 <div className="stat-val">{sessoes.length}</div>
                                             </div>
                                             <div className="stat-card">
-                                                <div className="stat-card-icon">💧</div>
+                                                <div className="stat-card-icon"></div>
                                                 <label>Taxa média</label>
                                                 <div className="stat-val">{fmt(mediaSessoes("taxa_sudorese"), " L/h")}</div>
                                             </div>
                                             <div className="stat-card">
-                                                <div className="stat-card-icon">🥤</div>
+                                                <div className="stat-card-icon"></div>
                                                 <label>Ingestão média</label>
                                                 <div className="stat-val">{fmt(mediaSessoes("ingestao_ml"), " ml")}</div>
                                             </div>
                                             <div className="stat-card">
-                                                <div className="stat-card-icon">⚖️</div>
+                                                <div className="stat-card-icon"></div>
                                                 <label>Perda média</label>
                                                 <div className="stat-val" style={{ color: mediaSessoes("variacao_peso_pct") > 2 ? "var(--red)" : "inherit" }}>
                                                     {fmt(mediaSessoes("variacao_peso_pct"), "%")}
@@ -257,12 +250,12 @@ export default function RelatoriosProf() {
                                             </div>
                                         </div>
 
-                                        {/* Tabela */}
-                                        <div className="atletas-table-wrap">
+                                        {/* Tabela de Histórico */}
+                                        <div className="atletas-table-wrap" style={{ boxShadow: "none", border: "1px solid var(--border)" }}>
                                             <div className="table-toolbar">
                                                 <span style={{ fontWeight: 700 }}>Histórico de sessões</span>
                                             </div>
-                                            <table>
+                                            <table className="responsive-table">
                                                 <thead>
                                                     <tr>
                                                         <th>Data</th>

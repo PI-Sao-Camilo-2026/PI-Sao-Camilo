@@ -31,15 +31,16 @@ export default defineConfig({
       }
     })
   ],
+  optimizeDeps: {
+    include: ["recharts", "lodash"]
+  },
   server: {
-    host: true, // <-- Torna o projeto acessível no celular automaticamente ao dar 'npm run dev'
+    host: true, 
     proxy: {
       "/auth": "http://127.0.0.1:8000",
       "/sessoes": "http://127.0.0.1:8000",
       "/usuarios": "http://127.0.0.1:8000",
       "/relatorios": "http://127.0.0.1:8000",
-      "/clima": "http://127.0.0.1:8000",
-      "/fluidos": "http://127.0.0.1:8000",
-    },
-  },
+    }
+  }
 });

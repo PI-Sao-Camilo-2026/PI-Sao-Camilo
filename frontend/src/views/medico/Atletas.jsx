@@ -325,7 +325,6 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
                                     <option value="">Selecione...</option>
                                     <option value="Masculino">Masculino</option>
                                     <option value="Feminino">Feminino</option>
-                                    <option value="Outro">Outro</option>
                                 </select>
                             </div>
                             <div className="form-field">
@@ -387,7 +386,7 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
                                     name="equipe"
                                     value={form.equipe}
                                     onChange={handle}
-                                    placeholder="Ex: Principal, Sub-20, Elite..."
+                                    placeholder="Ex: Principal, Sub-20, Elite"
                                 />
                             </div>
                         </div>
@@ -411,7 +410,7 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
                     <button className="btn-red" onClick={salvar} disabled={loading}
                         style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 22px" }}>
                         <IconUser />
-                        {loading ? "Cadastrando..." : isEdicao ? "Salvar alterações" : "Cadastrar Atleta"}
+                        {loading ? "Cadastrando" : isEdicao ? "Salvar alterações" : "Cadastrar Atleta"}
                     </button>
                 </div>
             </div>
@@ -436,15 +435,84 @@ function ActionMenu({ atleta, onEdit, onDesvincular }) {
                 <div className="action-menu">
                     <button onClick={() => { setOpen(false); onEdit(atleta); }}>
                         Editar perfil
-                        Editar perfil
                     </button>
                     <hr />
                     <button className="danger" onClick={() => { setOpen(false); onDesvincular(atleta); }}>
                         Desvincular atleta
-                        Desvincular atleta
                     </button>
                 </div>
             )}
+        </div>
+    );
+}
+
+function ModalDesvincular({ atleta, onClose, onConfirmar, loading, erro }) {
+    return (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="modal-box modal-desvincular" onClick={e => e.stopPropagation()}>
+
+                <div className="modal-header">
+                    <div>
+                        <h2>Desvincular atleta</h2>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                            Esta ação pode ser desfeita vinculando novamente
+                        </p>
+                    </div>
+                    <button className="modal-close" onClick={onClose} disabled={loading}>×</button>
+                </div>
+
+                <div className="modal-body">
+                    {/* Avatar + nome do atleta */}
+                    <div className="desvincular-atleta-info">
+                        <div className="atleta-avatar desvincular-avatar">
+                            {atleta.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>
+                                {atleta.nome}
+                            </div>
+                            <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                                {atleta.email}
+                            </div>
+                            {atleta.modalidade && (
+                                <span className="chip chip-green" style={{ marginTop: 6, display: "inline-block" }}>
+                                    {atleta.modalidade}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Aviso */}
+                    <div className="desvincular-aviso">
+                        <div className="desvincular-aviso-icon">Aviso</div>
+                        <div>
+                            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
+                                Tem certeza que deseja desvincular?
+                            </p>
+                            <p style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6 }}>
+                                O atleta continuará existindo no sistema e poderá ser vinculado novamente.
+                                Apenas o vínculo com o seu perfil será removido.
+                            </p>
+                        </div>
+                    </div>
+
+                    {erro && <div className="prof-erro" style={{ marginTop: 12 }}>{erro}</div>}
+                </div>
+
+                <div className="modal-footer">
+                    <button className="btn-ghost" onClick={onClose} disabled={loading}>
+                        Cancelar
+                    </button>
+                    <button
+                        className="btn-red"
+                        onClick={onConfirmar}
+                        disabled={loading}
+                        style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                        {loading ? "Desvinculando..." : "Confirmar desvínculo"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }
@@ -459,6 +527,7 @@ export default function Atletas() {
     const [atletaEditando, setAtletaEditando] = useState(null);
     const [atletaDesvinculando, setAtletaDesvinculando] = useState(null);
     const [desvincLoading, setDesvincLoading] = useState(false);
+    const [desvincErro, setDesvincErro] = useState("");
 
     async function carregar() {
         setLoading(true);
@@ -478,11 +547,12 @@ export default function Atletas() {
         if (!atletaDesvinculando) return;
         try {
             setDesvincLoading(true);
+            setDesvincErro("");
             await usuariosApi.desvincularAtleta(atletaDesvinculando.id);
             setAtletaDesvinculando(null);
             carregar();
         } catch (err) {
-            console.error(err);
+            setDesvincErro(err.message || "Erro ao desvincular atleta. Tente novamente.");
         } finally {
             setDesvincLoading(false);
         }
@@ -529,7 +599,7 @@ export default function Atletas() {
                             onClick={() => setModalCadastro(true)}
                             style={{ display: "flex", alignItems: "center", gap: 6 }}
                         >
-                            + Novo Atleta
+                            Novo Atleta
                         </button>
                     </div>
                 </div>
@@ -549,13 +619,13 @@ export default function Atletas() {
                         </div>
                         <div className="status-filters">
                             {completos > 0 && (
-                                <span className="status-badge badge-green">✓ Completo ({completos})</span>
+                                <span className="status-badge badge-green">Completo ({completos})</span>
                             )}
                             {pendentes > 0 && (
-                                <span className="status-badge badge-yellow">⚠ Pendente ({pendentes})</span>
+                                <span className="status-badge badge-yellow">Pendente ({pendentes})</span>
                             )}
                             {alertas > 0 && (
-                                <span className="status-badge badge-red">✕ Alerta ({alertas})</span>
+                                <span className="status-badge badge-red">Alerta ({alertas})</span>
                             )}
                         </div>
                     </div>
@@ -679,33 +749,13 @@ export default function Atletas() {
 
                 {/* Modal confirmar desvincular */}
                 {atletaDesvinculando && (
-                    <div className="modal-overlay" onClick={() => setAtletaDesvinculando(null)}>
-                        <div className="modal-box" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
-                            <div className="modal-header">
-                                <h2>Desvincular atleta</h2>
-                                <button className="modal-close" onClick={() => setAtletaDesvinculando(null)}>×</button>
-                            </div>
-                            <div className="modal-body">
-                                <p style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.7 }}>
-                                    Deseja desvincular <strong>{atletaDesvinculando.nome}</strong> da sua lista?
-                                </p>
-                                <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 8, lineHeight: 1.6 }}>
-                                    O atleta continuará existindo no sistema e poderá ser vinculado novamente.
-                                    Apenas o vínculo com o seu perfil será removido.
-                                </p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn-ghost" onClick={() => setAtletaDesvinculando(null)}>Cancelar</button>
-                                <button
-                                    className="btn-red"
-                                    onClick={confirmarDesvincular}
-                                    disabled={desvincLoading}
-                                >
-                                    {desvincLoading ? "Desvinculando..." : "Confirmar desvínculo"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <ModalDesvincular
+                        atleta={atletaDesvinculando}
+                        onClose={() => { setAtletaDesvinculando(null); setDesvincErro(""); }}
+                        onConfirmar={confirmarDesvincular}
+                        loading={desvincLoading}
+                        erro={desvincErro}
+                    />
                 )}
             </main>
         </div>

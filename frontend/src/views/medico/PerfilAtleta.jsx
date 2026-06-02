@@ -1,4 +1,3 @@
-// src/views/medico/PerfilAtleta.jsx
 import "../../css/profissional.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -38,16 +37,16 @@ function formatarData(iso) {
 }
 
 function iconeModalidade(m) {
-    if (!m) return "🏃";
+    if (!m) return "";
     const k = m.toLowerCase();
-    if (k.includes("futebol")) return "⚽";
-    if (k.includes("corrida") || k.includes("atletismo")) return "🏃";
-    if (k.includes("natação") || k.includes("natacao")) return "🏊";
-    if (k.includes("ciclismo")) return "🚴";
-    if (k.includes("musculação") || k.includes("academia")) return "🏋️";
-    if (k.includes("basquete")) return "🏀";
-    if (k.includes("vôlei") || k.includes("volei")) return "🏐";
-    return "🏃";
+    if (k.includes("futebol")) return "";
+    if (k.includes("corrida") || k.includes("atletismo")) return "";
+    if (k.includes("natação") || k.includes("natacao")) return "";
+    if (k.includes("ciclismo")) return "";
+    if (k.includes("musculação") || k.includes("academia")) return "";
+    if (k.includes("basquete")) return "";
+    if (k.includes("vôlei") || k.includes("volei")) return "";
+    return "";
 }
 
 export default function PerfilAtleta() {
@@ -58,6 +57,10 @@ export default function PerfilAtleta() {
     const [sessoes, setSessoes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tabAtiva, setTabAtiva] = useState("resumo");
+    const [modalEditar, setModalEditar] = useState(false);
+    const [modalDesvincular, setModalDesvincular] = useState(false);
+    const [desvincLoading, setDesvincLoading] = useState(false);
+    const [desvincErro, setDesvincErro] = useState("");
 
     useEffect(() => {
         async function carregar() {
@@ -76,6 +79,28 @@ export default function PerfilAtleta() {
         }
         carregar();
     }, [id]);
+
+    async function recarregarAtleta() {
+        try {
+            const dados = await usuariosApi.detalheAtleta(id);
+            setAtleta(dados);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function confirmarDesvincular() {
+        try {
+            setDesvincLoading(true);
+            setDesvincErro("");
+            await usuariosApi.desvincularAtleta(id);
+            navigate("/atletas");
+        } catch (err) {
+            setDesvincErro(err.message || "Erro ao desvincular atleta. Tente novamente.");
+        } finally {
+            setDesvincLoading(false);
+        }
+    }
 
     const taxas = sessoes.map(s => s.taxa_sudorese).filter(Boolean);
     const perdas = sessoes.map(s => s.variacao_peso_pct).filter(Boolean);
@@ -108,7 +133,7 @@ export default function PerfilAtleta() {
                 <Sidebar active="atletas" />
                 <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ textAlign: "center", color: "var(--text-3)" }}>
-                        <div style={{ fontSize: 40, marginBottom: 12 }}>😕</div>
+                        <div style={{ fontSize: 40, marginBottom: 12 }}></div>
                         <p>Atleta não encontrado.</p>
                         <button className="btn-ghost" style={{ marginTop: 16 }} onClick={() => navigate("/atletas")}>
                             Voltar para Atletas
@@ -143,6 +168,22 @@ export default function PerfilAtleta() {
                             {iconeModalidade(atleta.modalidade)} {atleta.modalidade || "Modalidade não informada"}
                             {atleta.sexo ? ` · ${atleta.sexo}` : ""}
                         </p>
+                    </div>
+                    <div className="page-header-actions">
+                        <button
+                            className="btn-ghost"
+                            onClick={() => setModalDesvincular(true)}
+                            style={{ display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                            Desvincular
+                        </button>
+                        <button
+                            className="btn-red"
+                            onClick={() => setModalEditar(true)}
+                            style={{ display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                            Editar perfil
+                        </button>
                     </div>
                 </div>
 
@@ -325,6 +366,213 @@ export default function PerfilAtleta() {
                 )}
 
             </main>
+
+            {/* Modal editar atleta */}
+            {modalEditar && (
+                <ModalEditarAtleta
+                    atleta={atleta}
+                    onClose={() => setModalEditar(false)}
+                    onSalvo={() => { setModalEditar(false); recarregarAtleta(); }}
+                />
+            )}
+
+            {/* Modal desvincular */}
+            {modalDesvincular && (
+                <ModalDesvincular
+                    atleta={atleta}
+                    onClose={() => { setModalDesvincular(false); setDesvincErro(""); }}
+                    onConfirmar={confirmarDesvincular}
+                    loading={desvincLoading}
+                    erro={desvincErro}
+                />
+            )}
+        </div>
+    );
+}
+
+function ModalEditarAtleta({ atleta, onClose, onSalvo }) {
+    const [form, setForm] = useState({
+        nome: atleta?.nome || "",
+        genero: atleta?.sexo || "",
+        modalidade: atleta?.modalidade || "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [erro, setErro] = useState("");
+
+    function handle(e) {
+        const { name, value } = e.target;
+        setForm(p => ({ ...p, [name]: value }));
+    }
+
+    async function salvar() {
+        if (!form.nome.trim()) { setErro("Nome completo é obrigatório"); return; }
+        setErro("");
+        try {
+            setLoading(true);
+            await usuariosApi.atualizarAtleta(atleta.id, {
+                nome: form.nome.trim(),
+                modalidade: form.modalidade.trim() || null,
+                sexo: form.genero || null,
+            });
+            onSalvo();
+        } catch (err) {
+            setErro(err.message || "Erro ao salvar atleta");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="modal-box" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+
+                <div className="modal-header">
+                    <div>
+                        <h2>Editar Atleta</h2>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                            Atualize as informações de {atleta.nome}
+                        </p>
+                    </div>
+                    <button className="modal-close" onClick={onClose} disabled={loading}>×</button>
+                </div>
+
+                <div className="modal-body">
+                    {/* Avatar do atleta */}
+                    <div className="desvincular-atleta-info" style={{ marginBottom: 20 }}>
+                        <div className="atleta-avatar desvincular-avatar">
+                            {atleta.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: 0.6 }}>
+                                Editando perfil
+                            </div>
+                            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)", marginTop: 2 }}>
+                                {atleta.email}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="form-field">
+                        <label>Nome Completo</label>
+                        <input
+                            className="form-input"
+                            name="nome"
+                            value={form.nome}
+                            onChange={handle}
+                            placeholder="Ex: João da Silva"
+                        />
+                    </div>
+
+                    <div className="form-row">
+                        <div className="form-field">
+                            <label>Gênero</label>
+                            <select className="form-input" name="genero" value={form.genero} onChange={handle}>
+                                <option value="">Selecione</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div className="form-field">
+                            <label>Modalidade Esportiva</label>
+                            <select className="form-input" name="modalidade" value={form.modalidade} onChange={handle}>
+                                <option value="">Selecione</option>
+                                <option value="Futebol">Futebol</option>
+                                <option value="Corrida">Corrida</option>
+                                <option value="Ciclismo">Ciclismo</option>
+                                <option value="Natação">Natação</option>
+                                <option value="Basquete">Basquete</option>
+                                <option value="Vôlei">Vôlei</option>
+                                <option value="Musculação">Musculação</option>
+                                <option value="Triathlon">Triathlon</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {erro && <div className="prof-erro">{erro}</div>}
+                </div>
+
+                <div className="modal-footer">
+                    <button className="btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
+                    <button
+                        className="btn-red"
+                        onClick={salvar}
+                        disabled={loading}
+                        style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                        {loading ? "Salvando..." : "Salvar alterações"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ModalDesvincular({ atleta, onClose, onConfirmar, loading, erro }) {
+    return (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !loading && onClose()}>
+            <div className="modal-box modal-desvincular" onClick={e => e.stopPropagation()}>
+
+                <div className="modal-header">
+                    <div>
+                        <h2>Desvincular atleta</h2>
+                        <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                            Esta ação pode ser desfeita vinculando novamente
+                        </p>
+                    </div>
+                    <button className="modal-close" onClick={onClose} disabled={loading}>×</button>
+                </div>
+
+                <div className="modal-body">
+                    <div className="desvincular-atleta-info">
+                        <div className="atleta-avatar desvincular-avatar">
+                            {atleta.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>
+                                {atleta.nome}
+                            </div>
+                            <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
+                                {atleta.email}
+                            </div>
+                            {atleta.modalidade && (
+                                <span className="chip chip-green" style={{ marginTop: 6, display: "inline-block" }}>
+                                    {atleta.modalidade}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="desvincular-aviso">
+                        <div className="desvincular-aviso-icon">Aviso</div>
+                        <div>
+                            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
+                                Tem certeza que deseja desvincular?
+                            </p>
+                            <p style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6 }}>
+                                O atleta continuará existindo no sistema e poderá ser vinculado novamente.
+                                Apenas o vínculo com o seu perfil será removido.
+                            </p>
+                        </div>
+                    </div>
+
+                    {erro && <div className="prof-erro" style={{ marginTop: 12 }}>{erro}</div>}
+                </div>
+
+                <div className="modal-footer">
+                    <button className="btn-ghost" onClick={onClose} disabled={loading}>
+                        Cancelar
+                    </button>
+                    <button
+                        className="btn-red"
+                        onClick={onConfirmar}
+                        disabled={loading}
+                        style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                        {loading ? "Desvinculando..." : "Confirmar desvínculo"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

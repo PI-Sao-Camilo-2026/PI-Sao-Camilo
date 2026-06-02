@@ -1,5 +1,3 @@
-/* Relatorios.css — tela de resultado pós-sessão */
-
 .relatorio-badge {
   text-align: center;
   margin-bottom: 4px;
@@ -25,34 +23,37 @@
 }
 
 .metricas-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 16px;
 }
 
 .metrica-card {
-  flex: 1;
   background: #fff;
   border: 1px solid #ebebeb;
   border-radius: 14px;
   padding: 16px 12px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .metrica-label {
   font-size: 10px;
   font-weight: 700;
-  color: #999;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin-bottom: 8px;
+  color: #666;
 }
 
 .metrica-valor {
-  font-size: 32px;
+  font-size: 28px; 
   font-weight: 800;
   color: #9B1C2E;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 .metrica-unit {
@@ -64,7 +65,10 @@
 .metrica-status {
   font-size: 11px;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-block;
 }
 
 .rec-ia-card {
@@ -90,51 +94,16 @@
 
 .rec-ia-texto {
   font-size: 13px;
-  color: #5a0a1a;
-  line-height: 1.65;
-  margin-bottom: 14px;
+  line-height: 1.6;
+  color: #444;
 }
 
-.rec-ia-metricas {
-  display: flex;
-  gap: 10px;
-}
-
-.rec-ia-metrica {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
-  padding: 12px 10px;
-  text-align: center;
-}
-
-.rec-ia-metrica-label {
-  font-size: 10px;
-  color: #9B1C2E;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-.rec-ia-metrica-valor {
-  font-size: 20px;
-  font-weight: 800;
-  color: #9B1C2E;
-  margin-top: 4px;
-}
-
-.rec-ia-metrica-unit {
-  font-size: 11px;
-  color: #9B1C2E;
-}
-
-.alerta-perda {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: #8a6400;
-  line-height: 1.5;
+@media (max-width: 360px) {
+  .metricas-row {
+    grid-template-columns: 1fr; 
+  }
+  
+  .metrica-valor {
+    font-size: 24px;
+  }
 }
