@@ -8,7 +8,7 @@ import BottomNav from "../../components/BottomNav";
 import { usuariosApi, sessoesApi } from "../../services/api";
 
 /* ── Garrafa animada ───────────────────────────────────────────────────────── */
-function GarrafaAgua({ totalMl, metaMl = 2000 }) {
+function GarrafaAgua({ totalMl, metaMl = 1500 }) {
   const pct = Math.min((totalMl / metaMl) * 100, 100);
 
   return (
@@ -20,16 +20,16 @@ function GarrafaAgua({ totalMl, metaMl = 2000 }) {
       <div style={{ position: "relative", width: 90, height: 160 }}>
         <svg viewBox="0 0 90 160" width="90" height="160">
           {/* Corpo da garrafa */}
-          <rect x="10" y="30" width="70" height="120" rx="12" fill="#f0f4ff" stroke="#dde3f0" strokeWidth="2"/>
+          <rect x="10" y="30" width="70" height="120" rx="12" fill="#f0f4ff" stroke="#dde3f0" strokeWidth="2" />
           {/* Gargalo */}
-          <rect x="28" y="12" width="34" height="22" rx="4" fill="#e8edf8" stroke="#dde3f0" strokeWidth="2"/>
+          <rect x="28" y="12" width="34" height="22" rx="4" fill="#e8edf8" stroke="#dde3f0" strokeWidth="2" />
           {/* Tampa */}
-          <rect x="32" y="6" width="26" height="12" rx="4" fill="#9B1C2E"/>
+          <rect x="32" y="6" width="26" height="12" rx="4" fill="#9B1C2E" />
 
           {/* Água animada — clipPath para ficar dentro da garrafa */}
           <defs>
             <clipPath id="garrafa-clip">
-              <rect x="10" y="30" width="70" height="120" rx="12"/>
+              <rect x="10" y="30" width="70" height="120" rx="12" />
             </clipPath>
           </defs>
 
@@ -111,7 +111,7 @@ export default function Sessao() {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
-    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
   function pausar() {
@@ -128,23 +128,33 @@ export default function Sessao() {
   }
 
   async function adicionarFluido(ml) {
-    if (registrando || ml === 0) return;
-    const sessaoId = localStorage.getItem("sessao_id");
-    if (!sessaoId) { alert("Sessão não encontrada"); return; }
+  if (registrando) return;
 
-    const novoTotal = Math.max(0, total + ml);
-    if (novoTotal < 0) return;
+  const sessaoId = localStorage.getItem("sessao_id");
+  if (!sessaoId) return;
 
-    try {
-      setRegistrando(true);
-      const res = await sessoesApi.registrarFluido(sessaoId, Math.abs(ml));
-      setTotal(ml > 0 ? res.ingestao_total_ml : Math.max(0, total - Math.abs(ml)));
-    } catch {
-      setTotal((prev) => Math.max(0, prev + ml));
-    } finally {
-      setRegistrando(false);
-    }
+  const tipo = ml >= 0 ? "add" : "remove";
+  const valor = Math.abs(ml);
+
+  const novoTotalLocal = Math.max(0, total + ml);
+
+  try {
+    setRegistrando(true);
+
+    const res = await sessoesApi.registrarFluido(sessaoId, {
+      tipo,
+      ml: valor,
+    });
+
+    // backend PRECISA devolver valor correto final
+    setTotal(res.ingestao_total_ml ?? novoTotalLocal);
+
+  } catch (err) {
+    setTotal(novoTotalLocal);
+  } finally {
+    setRegistrando(false);
   }
+}
 
   async function encerrar() {
     const sessaoId = localStorage.getItem("sessao_id");
@@ -245,16 +255,16 @@ export default function Sessao() {
             {/* Ajustes finos */}
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <button
-                onClick={() => setTotal((p) => Math.max(0, p - 100))}
+                onClick={() => setTotal((p) => Math.max(0, p - 50))}
                 style={{ flex: 1, padding: "8px 0", border: "1px solid #eee", borderRadius: 8, background: "#fafafa", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer" }}
               >
-                -100 mL
+                -50 mL
               </button>
               <button
-                onClick={() => adicionarFluido(100)}
+                onClick={() => adicionarFluido(50)}
                 style={{ flex: 1, padding: "8px 0", border: "1px solid #eee", borderRadius: 8, background: "#fafafa", fontSize: 12, fontWeight: 600, color: "#888", cursor: "pointer" }}
               >
-                +100 mL
+                +50 mL
               </button>
             </div>
           </div>
@@ -269,33 +279,33 @@ export default function Sessao() {
             ⚠️ Beba ~200 mL a cada 15 minutos
           </div>
 
-          {/* Volume urinário */}
-          <div className="a-card">
-            <div className="a-card-title">
-              <div className="a-card-icon">🚻</div>
-              <h3>Volume Urinário</h3>
+            {/* Volume urinário */}
+            <div className="a-card">
+              <div className="a-card-title">
+                <div className="a-card-icon">🚻</div>
+                <h3>Volume Urinário</h3>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[-50, 50, 100].map((ml) => (
+                  <button
+                    key={ml}
+                    onClick={() => setUrina((p) => Math.max(0, p + ml))}
+                    style={{
+                      flex: 1, padding: "12px 0",
+                      border: "1.5px solid #eee", borderRadius: 10,
+                      background: "#fafafa", cursor: "pointer",
+                      fontFamily: "'Barlow', sans-serif",
+                      fontSize: 12, fontWeight: 700, color: "#555",
+                    }}
+                  >
+                    {ml > 0 ? `+${ml} mL` : `${ml} mL`}
+                  </button>
+                ))}
+              </div>
+              <p style={{ textAlign: "center", marginTop: 8, fontSize: 13, color: "#666", fontWeight: 600 }}>
+                Total: {urina} mL
+              </p>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              {[100, 250, 500].map((ml) => (
-                <button
-                  key={ml}
-                  onClick={() => setUrina((p) => p + ml)}
-                  style={{
-                    flex: 1, padding: "12px 0",
-                    border: "1.5px solid #eee", borderRadius: 10,
-                    background: "#fafafa", cursor: "pointer",
-                    fontFamily: "'Barlow', sans-serif",
-                    fontSize: 12, fontWeight: 700, color: "#555",
-                  }}
-                >
-                  +{ml} mL
-                </button>
-              ))}
-            </div>
-            <p style={{ textAlign: "center", marginTop: 8, fontSize: 13, color: "#666", fontWeight: 600 }}>
-              Total: {urina} mL
-            </p>
-          </div>
 
           {/* Botões de ação */}
           <button className="btn-secondary" onClick={encerrar}>
