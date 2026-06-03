@@ -1,6 +1,3 @@
-// Definimos a BASE_URL como vazia para usar caminhos relativos.
-// Isso faz o Vite encaminhar as chamadas dinamicamente via Proxy,
-// funcionando tanto no computador quanto no celular sem erros de CORS.
 const BASE_URL = "";
 
 export function getToken() { return localStorage.getItem("@token"); }
@@ -18,7 +15,12 @@ async function request(path, method = "GET", body = null) {
         body: body ? JSON.stringify(body) : null,
     });
 
-    if (res.status === 401) { setToken(null); setUsuario(null); window.location.href = "/"; throw new Error("Sessão expirada"); }
+    if (res.status === 401) {
+        setToken(null);
+        setUsuario(null);
+        window.location.href = "/";
+        throw new Error("Sessão expirada");
+    }
 
     const text = await res.text();
     const data = text ? JSON.parse(text) : null;
@@ -45,15 +47,19 @@ export const authApi = {
         setUsuario({ id: data.usuario_id, nome: data.nome, tipo: data.tipo_usuario });
         return data;
     },
-
     async registrar(payload) { return request("/auth/registrar", "POST", payload); },
-
     logout() { setToken(null); setUsuario(null); },
 };
 
 export const sessoesApi = {
     iniciarPreTreino: (p) => request("/sessoes/pre-treino", "POST", p),
-    registrarFluido: (id, ml) => request(`/sessoes/${id}/fluido?volume_ml=${ml}`, "POST"),
+    // CORRIGIDO: aceita número ou objeto e envia como query param numérico
+    registrarFluido: (id, ml) => {
+        let volume = typeof ml === 'object' ? (ml.ml ?? ml.valor ?? ml.volume_ml ?? 0) : ml;
+        volume = Number(volume);
+        if (isNaN(volume)) volume = 0;
+        return request(`/sessoes/${id}/fluido?volume_ml=${encodeURIComponent(volume)}`, "POST");
+    },
     finalizarSessao: (id, p) => request(`/sessoes/${id}/finalizar`, "POST", p),
     finalizarPosTreino: (p) => request("/sessoes/pos-treino", "POST", p),
     historico: (limit = 20, offset = 0) => request(`/sessoes/historico?limit=${limit}&offset=${offset}`),
@@ -69,17 +75,14 @@ export const usuariosApi = {
     detalheAtleta: (id) => request(`/usuarios/atletas/${id}`),
     atualizarAtleta: (id, p) => request(`/usuarios/atletas/${id}`, "PUT", p),
     desvincularAtleta: (id) => request(`/usuarios/atletas/${id}/desvincular`, "POST"),
-
     cadastrarAtleta: (payload) => request("/usuarios/atletas", "POST", payload),
-
     buscarAtletasDisponiveis: (busca = "") =>
         request(`/usuarios/atletas-disponiveis${busca ? `?busca=${encodeURIComponent(busca)}` : ""}`),
-
     vincularAtleta: (atleta_id) => request("/usuarios/atletas/vincular", "POST", { atleta_id }),
 };
 
 export const relatoriosApi = {
-    dashboardStats: () => request("/relatorios/dashboard-stats"),
+    dashboardStats: (periodo = "30") => request(`/relatorios/dashboard-stats?periodo=${periodo}`),
     pdfUrl: (atletaId) => `${BASE_URL}/relatorios/pdf/${atletaId}`,
     excelUrl: (atletaId) => `${BASE_URL}/relatorios/excel/${atletaId}`,
 };
@@ -101,7 +104,6 @@ export const climaApi = {
             sol: classificarRadiacao(c.shortwave_radiation),
         };
     },
-
     async buscarAutomatico() {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -134,16 +136,14 @@ function classificarRadiacao(v) {
 
 export const exportacaoApi = {
     async exportarHistorico({ tipo, id = null }) {
-        const token = getToken(); 
+        const token = getToken();
         const url = tipo === "equipe"
             ? `/relatorios/equipe-pdf`
             : `/relatorios/historico-pdf/${id}`;
-
         const response = await fetch(url, {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!response.ok) throw new Error("Erro na exportação");
         return await response.blob();
     },

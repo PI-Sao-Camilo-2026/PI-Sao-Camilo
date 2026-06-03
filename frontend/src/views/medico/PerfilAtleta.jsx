@@ -1,32 +1,26 @@
 import "../../css/profissional.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { usuariosApi, sessoesApi } from "../../services/api";
+import { usuariosApi, sessoesApi } from "../../services/Api"; 
 import Sidebar from "../../components/Sidebar";
 
 const IconArrow = () => (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
         <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
     </svg>
 );
 const IconDroplet = () => (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
         <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
     </svg>
 );
 const IconScale = () => (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
         <path d="M12 3v18M3 9l9-6 9 6M3 15l9 6 9-6" />
     </svg>
 );
-const IconCalendar = () => (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-        <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-);
 const IconActivity = () => (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
 );
@@ -57,6 +51,7 @@ export default function PerfilAtleta() {
     const [sessoes, setSessoes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tabAtiva, setTabAtiva] = useState("resumo");
+
     const [modalEditar, setModalEditar] = useState(false);
     const [modalDesvincular, setModalDesvincular] = useState(false);
     const [desvincLoading, setDesvincLoading] = useState(false);
@@ -65,12 +60,13 @@ export default function PerfilAtleta() {
     useEffect(() => {
         async function carregar() {
             try {
+                setLoading(true);
                 const [dadosAtleta, dadosSessoes] = await Promise.all([
                     usuariosApi.detalheAtleta(id),
                     sessoesApi.sessoesAtleta(id, 30),
                 ]);
                 setAtleta(dadosAtleta);
-                setSessoes(dadosSessoes);
+                setSessoes(dadosSessoes || []);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -94,7 +90,7 @@ export default function PerfilAtleta() {
             setDesvincLoading(true);
             setDesvincErro("");
             await usuariosApi.desvincularAtleta(id);
-            navigate("/atletas");
+            navigate("/profissional/atletas");
         } catch (err) {
             setDesvincErro(err.message || "Erro ao desvincular atleta. Tente novamente.");
         } finally {
@@ -102,6 +98,7 @@ export default function PerfilAtleta() {
         }
     }
 
+    // Cálculos Estatísticos
     const taxas = sessoes.map(s => s.taxa_sudorese).filter(Boolean);
     const perdas = sessoes.map(s => s.variacao_peso_pct).filter(Boolean);
     const ingestoes = sessoes.map(s => s.ingestao_ml).filter(Boolean);
@@ -113,13 +110,14 @@ export default function PerfilAtleta() {
 
     const TABS = ["resumo", "sessões", "dados"];
 
+    // ── RENDERIZAÇÃO: LOADING & ERRO ──
     if (loading) {
         return (
             <div className="prof-layout">
                 <Sidebar active="atletas" />
                 <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ textAlign: "center", color: "var(--text-3)" }}>
-                        <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+                        <div className="spinner" style={{ margin: "0 auto 16px auto", width: 32, height: 32 }}></div>
                         <p>Carregando perfil do atleta...</p>
                     </div>
                 </main>
@@ -133,9 +131,9 @@ export default function PerfilAtleta() {
                 <Sidebar active="atletas" />
                 <main className="prof-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ textAlign: "center", color: "var(--text-3)" }}>
-                        <div style={{ fontSize: 40, marginBottom: 12 }}></div>
-                        <p>Atleta não encontrado.</p>
-                        <button className="btn-ghost" style={{ marginTop: 16 }} onClick={() => navigate("/atletas")}>
+                        <div style={{ fontSize: 40, marginBottom: 12 }}>Aviso</div>
+                        <p>Atleta não encontrado ou vínculo removido.</p>
+                        <button className="btn-ghost" style={{ marginTop: 16 }} onClick={() => navigate("/profissional/atletas")}>
                             Voltar para Atletas
                         </button>
                     </div>
@@ -149,225 +147,217 @@ export default function PerfilAtleta() {
             <Sidebar active="atletas" />
             <main className="prof-main">
 
-                {/* Header */}
+                {/* Cabeçalho */}
                 <div className="page-header">
                     <div className="page-header-left">
                         <button
+                            type="button"
                             onClick={() => navigate("/atletas")}
                             style={{
                                 display: "flex", alignItems: "center", gap: 6,
                                 background: "none", border: "none", cursor: "pointer",
                                 color: "var(--text-3)", fontSize: 13, fontWeight: 600,
-                                fontFamily: "var(--font)", marginBottom: 8, padding: 0,
+                                fontFamily: "var(--font)", marginBottom: 12, padding: 0,
                             }}
                         >
                             <IconArrow /> Voltar para Atletas
                         </button>
                         <h1>{atleta.nome}</h1>
-                        <p>
+                        <p style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             {iconeModalidade(atleta.modalidade)} {atleta.modalidade || "Modalidade não informada"}
                             {atleta.sexo ? ` · ${atleta.sexo}` : ""}
                         </p>
                     </div>
-                    <div className="page-header-actions">
-                        <button
-                            className="btn-ghost"
-                            onClick={() => setModalDesvincular(true)}
-                            style={{ display: "flex", alignItems: "center", gap: 6 }}
-                        >
+                    <div className="header-actions-group">
+                        <button className="btn-secondary" onClick={() => setModalDesvincular(true)}>
                             Desvincular
                         </button>
-                        <button
-                            className="btn-red"
-                            onClick={() => setModalEditar(true)}
-                            style={{ display: "flex", alignItems: "center", gap: 6 }}
-                        >
-                            Editar perfil
+                        <button className="btn-primary" onClick={() => setModalEditar(true)}>
+                            Editar Perfil
                         </button>
                     </div>
                 </div>
 
-                {/* Card do atleta */}
-                <div className="atleta-perfil-hero">
-                    <div className="atleta-perfil-avatar">
-                        {atleta.nome.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="atleta-perfil-info">
-                        <h2>{atleta.nome}</h2>
-                        <p>{atleta.email}</p>
-                        <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                            {atleta.modalidade && (
-                                <span className="chip chip-green">{atleta.modalidade}</span>
-                            )}
-                            {atleta.sexo && (
-                                <span className="chip chip-gray">{atleta.sexo}</span>
-                            )}
-                            <span className="chip chip-gray">
-                                Código: {atleta.codigo_anonimizado || "—"}
-                            </span>
+                {/* Hero Card do Atleta (Modernizado) */}
+                <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24,
+                    background: "var(--white)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "24px 32px", marginBottom: 24, boxShadow: "var(--shadow)"
+                }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                        <div style={{
+                            width: 72, height: 72, borderRadius: "50%", background: "var(--red-light)", color: "var(--red)",
+                            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 800, flexShrink: 0
+                        }}>
+                            {atleta.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text)", marginBottom: 4 }}>{atleta.nome}</h2>
+                            <p style={{ fontSize: 14, color: "var(--text-2)", marginBottom: 12 }}>{atleta.email}</p>
+                            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                {atleta.modalidade && <span className="chip chip-green">{atleta.modalidade}</span>}
+                                {atleta.sexo && <span className="chip chip-gray">{atleta.sexo}</span>}
+                                <span className="chip chip-gray">Cód: {atleta.codigo_anonimizado || "—"}</span>
+                            </div>
                         </div>
                     </div>
-                    <div className="atleta-perfil-sessoes">
-                        <div style={{ fontSize: 28, fontWeight: 800, color: "var(--red)" }}>
-                            {sessoes.length}
-                        </div>
-                        <div style={{ fontSize: 12, color: "var(--text-3)", fontWeight: 600 }}>
-                            Sessões registradas
-                        </div>
+                    <div style={{ textAlign: "right", background: "#fafafa", padding: "16px 24px", borderRadius: 16, border: "1px solid var(--border)" }}>
+                        <div style={{ fontSize: 32, fontWeight: 800, color: "var(--red)", lineHeight: 1 }}>{sessoes.length}</div>
+                        <div style={{ fontSize: 12, color: "var(--text-3)", fontWeight: 700, textTransform: "uppercase", marginTop: 6 }}>Sessões Totais</div>
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="perfil-atleta-tabs">
+                {/* Navegação por Abas (Estilo Config) */}
+                <div style={{ display: "flex", gap: 12, marginBottom: 24, borderBottom: "2px solid var(--border)", paddingBottom: 12, overflowX: "auto" }}>
                     {TABS.map(tab => (
                         <button
                             key={tab}
-                            className={`perfil-atleta-tab ${tabAtiva === tab ? "active" : ""}`}
+                            type="button"
                             onClick={() => setTabAtiva(tab)}
+                            style={{
+                                background: tabAtiva === tab ? "var(--red)" : "transparent",
+                                color: tabAtiva === tab ? "#fff" : "var(--text-2)",
+                                border: "none", borderRadius: 10, padding: "8px 16px",
+                                fontSize: 14, fontWeight: 700, cursor: "pointer", transition: "all 0.2s ease", textTransform: "capitalize"
+                            }}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab}
                         </button>
                     ))}
                 </div>
 
-                {/* ── Tab: Resumo ── */}
+                {/* ── CONTEÚDO DA ABA: RESUMO ── */}
                 {tabAtiva === "resumo" && (
                     <>
-                        {/* Stat cards */}
-                        <div className="stats-row" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 20 }}>
+                        <div className="stats-row" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", marginBottom: 24 }}>
                             <div className="stat-card">
-                                <div className="stat-card-icon"><IconDroplet /></div>
+                                <div style={{ color: "var(--green)", marginBottom: 12 }}><IconDroplet /></div>
                                 <label>Taxa Média de Sudorese</label>
                                 <div className="stat-val">{taxaMedia ? `${taxaMedia}` : "—"}</div>
-                                <div className="stat-sub">{taxaMedia ? "L/h" : "Sem dados"}</div>
+                                <div className="stat-sub">{taxaMedia ? "L/h" : "Sem dados suficientes"}</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-card-icon"><IconScale /></div>
+                                <div style={{ color: "var(--red)", marginBottom: 12 }}><IconScale /></div>
                                 <label>Perda Média de Massa</label>
                                 <div className="stat-val" style={{ color: perdaMedia > 2 ? "var(--red)" : "inherit" }}>
                                     {perdaMedia ? `${perdaMedia}%` : "—"}
                                 </div>
                                 <div className={`stat-sub ${perdaMedia > 2 ? "danger" : ""}`}>
-                                    {perdaMedia > 2 ? "Atenção" : "de massa corporal"}
+                                    {perdaMedia > 2 ? "Atenção (Acima de 2%)" : "de massa corporal"}
                                 </div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-card-icon"><IconActivity /></div>
+                                <div style={{ color: "#2979ff", marginBottom: 12 }}><IconActivity /></div>
                                 <label>Ingestão Média</label>
                                 <div className="stat-val">{ingestaoMedia ? `${ingestaoMedia}` : "—"}</div>
                                 <div className="stat-sub">{ingestaoMedia ? "ml por sessão" : "Sem dados"}</div>
                             </div>
                         </div>
 
-                        {/* Última sessão */}
                         {ultimaSessao ? (
-                            <div className="atletas-table-wrap" style={{ marginBottom: 20 }}>
+                            <div className="atletas-table-wrap">
                                 <div className="table-toolbar">
-                                    <span style={{ fontWeight: 700, color: "var(--text)" }}>Última Sessão</span>
-                                    <span style={{ fontSize: 12, color: "var(--text-3)" }}>
+                                    <span style={{ fontWeight: 700, color: "var(--text)", fontSize: 16 }}>Detalhes da Última Sessão</span>
+                                    <span style={{ fontSize: 13, color: "var(--text-3)", background: "#f0f0f0", padding: "4px 10px", borderRadius: 8 }}>
                                         {formatarData(ultimaSessao.criado_em)}
                                     </span>
                                 </div>
-                                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                                <div style={{ padding: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 20 }}>
                                     <UltimaInfo label="Taxa de Sudorese" value={ultimaSessao.taxa_sudorese ? `${ultimaSessao.taxa_sudorese} L/h` : "—"} />
                                     <UltimaInfo label="Variação de Peso" value={ultimaSessao.variacao_peso_pct ? `${ultimaSessao.variacao_peso_pct?.toFixed(1)}%` : "—"} alerta={ultimaSessao.variacao_peso_pct > 2} />
-                                    <UltimaInfo label="Ingestão" value={ultimaSessao.ingestao_ml ? `${ultimaSessao.ingestao_ml?.toFixed(0)} mL` : "—"} />
+                                    <UltimaInfo label="Ingestão Total" value={ultimaSessao.ingestao_ml ? `${ultimaSessao.ingestao_ml?.toFixed(0)} mL` : "—"} />
                                     <UltimaInfo label="Duração" value={ultimaSessao.duracao_minutos ? `${ultimaSessao.duracao_minutos?.toFixed(0)} min` : "—"} />
                                     <UltimaInfo label="Modalidade" value={ultimaSessao.modalidade || atleta.modalidade || "—"} />
                                     <UltimaInfo label="Status" value="Concluída" verde />
                                 </div>
                             </div>
                         ) : (
-                            <div style={{
-                                background: "#fff", border: "1px solid var(--border)",
-                                borderRadius: "var(--radius)", padding: "32px",
-                                textAlign: "center", color: "var(--text-3)",
-                            }}>
-                                <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
-                                <p>Nenhuma sessão registrada ainda.</p>
+                            <div className="list-empty-state" style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)" }}>
+                                <IconActivity />
+                                <h3>Nenhuma sessão registrada</h3>
+                                <p>O atleta ainda não finalizou nenhum acompanhamento de treino.</p>
                             </div>
                         )}
                     </>
                 )}
 
-                {/* ── Tab: Sessões ── */}
+                {/* ── CONTEÚDO DA ABA: SESSÕES ── */}
                 {tabAtiva === "sessões" && (
                     <div className="atletas-table-wrap">
                         <div className="table-toolbar">
-                            <span style={{ fontWeight: 700, color: "var(--text)" }}>
-                                Histórico de Sessões
-                            </span>
-                            <span style={{ fontSize: 12, color: "var(--text-3)" }}>
-                                {sessoes.length} sessão(ões)
+                            <span style={{ fontWeight: 700, color: "var(--text)", fontSize: 16 }}>
+                                Histórico Completo
                             </span>
                         </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Modalidade</th>
-                                    <th>Duração</th>
-                                    <th>Peso Pré</th>
-                                    <th>Peso Pós</th>
-                                    <th>Ingestão</th>
-                                    <th>Taxa Sudorese</th>
-                                    <th>Variação</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sessoes.length === 0 ? (
+                        <div style={{ overflowX: "auto" }}>
+                            <table style={{ minWidth: 800 }}>
+                                <thead>
                                     <tr>
-                                        <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "var(--text-3)" }}>
-                                            Nenhuma sessão encontrada
-                                        </td>
+                                        <th>Data</th>
+                                        <th>Modalidade</th>
+                                        <th>Duração</th>
+                                        <th>Peso Pré</th>
+                                        <th>Peso Pós</th>
+                                        <th>Ingestão</th>
+                                        <th>Taxa Sudorese</th>
+                                        <th>Variação</th>
                                     </tr>
-                                ) : (
-                                    sessoes.map(s => (
-                                        <tr key={s.id}>
-                                            <td>{formatarData(s.criado_em)}</td>
-                                            <td>{s.modalidade || atleta.modalidade || "—"}</td>
-                                            <td>{s.duracao_minutos ? `${s.duracao_minutos?.toFixed(0)} min` : "—"}</td>
-                                            <td>{s.peso_pre ? `${s.peso_pre} kg` : "—"}</td>
-                                            <td>{s.peso_pos ? `${s.peso_pos} kg` : "—"}</td>
-                                            <td>{s.ingestao_ml ? `${s.ingestao_ml?.toFixed(0)} mL` : "—"}</td>
-                                            <td>
-                                                <strong style={{ color: "var(--red)" }}>
-                                                    {s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "—"}
-                                                </strong>
-                                            </td>
-                                            <td>
-                                                <span className={`chip ${s.variacao_peso_pct > 2 ? "chip-red" : "chip-green"}`}>
-                                                    {s.variacao_peso_pct ? `${s.variacao_peso_pct?.toFixed(1)}%` : "—"}
-                                                </span>
+                                </thead>
+                                <tbody>
+                                    {sessoes.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "var(--text-3)" }}>
+                                                Nenhuma sessão encontrada para este atleta.
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : (
+                                        sessoes.map(s => (
+                                            <tr key={s.id}>
+                                                <td style={{ fontWeight: 600 }}>{formatarData(s.criado_em)}</td>
+                                                <td>{s.modalidade || atleta.modalidade || "—"}</td>
+                                                <td>{s.duracao_minutos ? `${s.duracao_minutos?.toFixed(0)} min` : "—"}</td>
+                                                <td>{s.peso_pre ? `${s.peso_pre} kg` : "—"}</td>
+                                                <td>{s.peso_pos ? `${s.peso_pos} kg` : "—"}</td>
+                                                <td>{s.ingestao_ml ? `${s.ingestao_ml?.toFixed(0)} mL` : "—"}</td>
+                                                <td>
+                                                    <strong style={{ color: "var(--text)" }}>
+                                                        {s.taxa_sudorese ? `${s.taxa_sudorese} L/h` : "—"}
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    <span className={`chip ${s.variacao_peso_pct > 2 ? "chip-red" : "chip-green"}`}>
+                                                        {s.variacao_peso_pct ? `${s.variacao_peso_pct?.toFixed(1)}%` : "—"}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                         <div className="table-footer">
-                            <span>{sessoes.length} sessão(ões) encontrada(s)</span>
+                            Exibindo {sessoes.length} registro(s).
                         </div>
                     </div>
                 )}
 
-                {/* ── Tab: Dados ── */}
+                {/* ── CONTEÚDO DA ABA: DADOS ── */}
                 {tabAtiva === "dados" && (
-                    <div className="atletas-table-wrap" style={{ padding: "24px" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                    <div className="atletas-table-wrap" style={{ padding: 24 }}>
+                        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Ficha Cadastral e Fisiológica</h3>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: 20 }}>
                             <DadoRow label="Nome completo" value={atleta.nome} />
                             <DadoRow label="E-mail" value={atleta.email} />
-                            <DadoRow label="Sexo" value={atleta.sexo || "Não informado"} />
-                            <DadoRow label="Modalidade" value={atleta.modalidade || "Não informada"} />
-                            <DadoRow label="Código anônimo" value={atleta.codigo_anonimizado || "—"} mono />
-                            <DadoRow label="Total de sessões" value={sessoes.length} />
+                            <DadoRow label="Gênero / Sexo" value={atleta.sexo || "Não informado"} />
+                            <DadoRow label="Modalidade Principal" value={atleta.modalidade || "Não informada"} />
+                            <DadoRow label="Código de Anonimização" value={atleta.codigo_anonimizado || "—"} mono />
+                            <DadoRow label="Total de sessões atreladas" value={sessoes.length} />
                         </div>
                     </div>
                 )}
 
             </main>
 
-            {/* Modal editar atleta */}
+            {/* MODAIS */}
             {modalEditar && (
                 <ModalEditarAtleta
                     atleta={atleta}
@@ -376,7 +366,6 @@ export default function PerfilAtleta() {
                 />
             )}
 
-            {/* Modal desvincular */}
             {modalDesvincular && (
                 <ModalDesvincular
                     atleta={atleta}
@@ -425,25 +414,23 @@ function ModalEditarAtleta({ atleta, onClose, onSalvo }) {
     return (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div className="modal-box" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
-
                 <div className="modal-header">
                     <div>
-                        <h2>Editar Atleta</h2>
+                        <h2 style={{ fontSize: 20, fontWeight: 800 }}>Editar Atleta</h2>
                         <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
-                            Atualize as informações de {atleta.nome}
+                            Atualize as informações de acompanhamento.
                         </p>
                     </div>
                     <button className="modal-close" onClick={onClose} disabled={loading}>×</button>
                 </div>
 
                 <div className="modal-body">
-                    {/* Avatar do atleta */}
                     <div className="desvincular-atleta-info" style={{ marginBottom: 20 }}>
                         <div className="atleta-avatar desvincular-avatar">
                             {atleta.nome.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <div style={{ fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700, letterSpacing: 0.6 }}>
+                            <div style={{ fontSize: 12, color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
                                 Editando perfil
                             </div>
                             <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)", marginTop: 2 }}>
@@ -454,13 +441,7 @@ function ModalEditarAtleta({ atleta, onClose, onSalvo }) {
 
                     <div className="form-field">
                         <label>Nome Completo</label>
-                        <input
-                            className="form-input"
-                            name="nome"
-                            value={form.nome}
-                            onChange={handle}
-                            placeholder="Ex: João da Silva"
-                        />
+                        <input className="form-input" name="nome" value={form.nome} onChange={handle} placeholder="Ex: João da Silva" />
                     </div>
 
                     <div className="form-row">
@@ -470,6 +451,7 @@ function ModalEditarAtleta({ atleta, onClose, onSalvo }) {
                                 <option value="">Selecione</option>
                                 <option value="Masculino">Masculino</option>
                                 <option value="Feminino">Feminino</option>
+                                <option value="Outro">Outro</option>
                             </select>
                         </div>
                         <div className="form-field">
@@ -489,17 +471,12 @@ function ModalEditarAtleta({ atleta, onClose, onSalvo }) {
                         </div>
                     </div>
 
-                    {erro && <div className="prof-erro">{erro}</div>}
+                    {erro && <div className="prof-erro" style={{ marginTop: 12 }}>{erro}</div>}
                 </div>
 
                 <div className="modal-footer">
                     <button className="btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
-                    <button
-                        className="btn-red"
-                        onClick={salvar}
-                        disabled={loading}
-                        style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
+                    <button className="btn-red" onClick={salvar} disabled={loading}>
                         {loading ? "Salvando..." : "Salvar alterações"}
                     </button>
                 </div>
@@ -512,12 +489,11 @@ function ModalDesvincular({ atleta, onClose, onConfirmar, loading, erro }) {
     return (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !loading && onClose()}>
             <div className="modal-box modal-desvincular" onClick={e => e.stopPropagation()}>
-
                 <div className="modal-header">
                     <div>
-                        <h2>Desvincular atleta</h2>
+                        <h2 style={{ fontSize: 20, fontWeight: 800 }}>Desvincular atleta</h2>
                         <p style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
-                            Esta ação pode ser desfeita vinculando novamente
+                            Esta ação pode ser desfeita vinculando novamente.
                         </p>
                     </div>
                     <button className="modal-close" onClick={onClose} disabled={loading}>×</button>
@@ -529,47 +505,30 @@ function ModalDesvincular({ atleta, onClose, onConfirmar, loading, erro }) {
                             {atleta.nome.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>
-                                {atleta.nome}
-                            </div>
-                            <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
-                                {atleta.email}
-                            </div>
-                            {atleta.modalidade && (
-                                <span className="chip chip-green" style={{ marginTop: 6, display: "inline-block" }}>
-                                    {atleta.modalidade}
-                                </span>
-                            )}
+                            <div style={{ fontWeight: 700, fontSize: 15, color: "var(--text)" }}>{atleta.nome}</div>
+                            <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>{atleta.email}</div>
                         </div>
                     </div>
 
                     <div className="desvincular-aviso">
-                        <div className="desvincular-aviso-icon">Aviso</div>
+                        <div style={{ fontSize: 24 }}>Aviso</div>
                         <div>
                             <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>
                                 Tem certeza que deseja desvincular?
                             </p>
                             <p style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.6 }}>
-                                O atleta continuará existindo no sistema e poderá ser vinculado novamente.
-                                Apenas o vínculo com o seu perfil será removido.
+                                O atleta continuará existindo no sistema com seu próprio login. Apenas o vínculo e o acesso ao histórico pelo seu perfil profissional serão removidos.
                             </p>
                         </div>
                     </div>
 
-                    {erro && <div className="prof-erro" style={{ marginTop: 12 }}>{erro}</div>}
+                    {erro && <div className="prof-erro" style={{ marginTop: 16 }}>{erro}</div>}
                 </div>
 
                 <div className="modal-footer">
-                    <button className="btn-ghost" onClick={onClose} disabled={loading}>
-                        Cancelar
-                    </button>
-                    <button
-                        className="btn-red"
-                        onClick={onConfirmar}
-                        disabled={loading}
-                        style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
-                        {loading ? "Desvinculando..." : "Confirmar desvínculo"}
+                    <button className="btn-ghost" onClick={onClose} disabled={loading}>Cancelar</button>
+                    <button className="btn-red" onClick={onConfirmar} disabled={loading}>
+                        {loading ? "Removendo" : "Confirmar desvínculo"}
                     </button>
                 </div>
             </div>
@@ -579,12 +538,12 @@ function ModalDesvincular({ atleta, onClose, onConfirmar, loading, erro }) {
 
 function UltimaInfo({ label, value, alerta, verde }) {
     return (
-        <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 4 }}>
+        <div style={{ background: "#fcfcfd", borderRadius: 12, padding: "14px 16px", border: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>
                 {label}
             </div>
             <div style={{
-                fontSize: 16, fontWeight: 700,
+                fontSize: 16, fontWeight: 800,
                 color: verde ? "var(--green)" : alerta ? "var(--red)" : "var(--text)",
             }}>
                 {value}
@@ -595,11 +554,8 @@ function UltimaInfo({ label, value, alerta, verde }) {
 
 function DadoRow({ label, value, mono }) {
     return (
-        <div style={{
-            background: "#fafafa", borderRadius: 10,
-            padding: "14px 16px", border: "1px solid var(--border)",
-        }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.7, marginBottom: 4 }}>
+        <div style={{ background: "#fafafa", borderRadius: 12, padding: "14px 16px", border: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
                 {label}
             </div>
             <div style={{

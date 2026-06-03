@@ -139,3 +139,43 @@
     gap: 10px;
   }
 }
+.chart-header-novo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.chart-title-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Container dos botões de troca */
+.toggle-visao-grafico {
+  display: inline-flex;
+  background: #f0f0f2;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.toggle-visao-grafico button {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+/* Botão Ativo */
+.toggle-visao-grafico button.active {
+  background: var(--white);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
