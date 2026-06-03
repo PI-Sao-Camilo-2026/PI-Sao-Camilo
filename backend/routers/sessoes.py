@@ -319,6 +319,7 @@ async def finalizar_pos_treino(
         umidade_pct=sessao.umidade_pct,
         modalidade=sessao.modalidade or current.modalidade,
         historico_taxas=historico_taxas,
+        duracao_segundos=sessao.tempo_total_segundos,
     )
 
     # Persiste recomendação

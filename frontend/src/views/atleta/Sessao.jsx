@@ -159,25 +159,30 @@ export default function Sessao() {
   async function encerrar() {
     const sessaoId = localStorage.getItem("sessao_id");
     if (!sessaoId) { alert("Sessão não encontrada"); return; }
+  try {
     const tempoFinal = calcularTempo();
+    const duracao_minutos = tempoFinal / 60;
+    console.log("tempoFinal:", tempoFinal);
+    console.log("duracao_minutos:", duracao_minutos);
 
-    try {
-      await sessoesApi.finalizarSessao(sessaoId, {
-        tempo_total_segundos: tempoFinal,
-        ingestao_ml: total,
-        volume_urina_ml: urina,
-      });
-      localStorage.setItem("tempoFinalSessao", String(tempoFinal));
-      localStorage.setItem("totalIngerido", String(total));
-      localStorage.setItem("volumeUrina", String(urina));
-      localStorage.removeItem("inicioSessao");
-      localStorage.removeItem("inicioPausa");
-      localStorage.removeItem("tempoPausado");
-      navigate("/possessao");
-    } catch (err) {
-      alert("Erro ao encerrar: " + err.message);
-    }
+    await sessoesApi.finalizarSessao(sessaoId, {
+      tempo_total_segundos: tempoFinal,
+      ingestao_ml: total,
+      volume_urina_ml: urina,
+    });
+
+    localStorage.setItem("tempoFinalSessao", String(tempoFinal));
+    localStorage.setItem("totalIngerido", String(total));
+    localStorage.setItem("volumeUrina", String(urina));
+    localStorage.removeItem("inicioSessao");
+    localStorage.removeItem("inicioPausa");
+    localStorage.removeItem("tempoPausado");
+
+    navigate("/possessao");
+  } catch (err) {
+    alert("Erro ao encerrar: " + err.message);
   }
+}
 
   const botoesFluido = [
     { label: "+200ml", ml: 200 },

@@ -181,7 +181,7 @@ export default function Relatorios() {
           {/* Dicas pós-treino */}
           <div className="a-card" style={{ marginBottom: 16 }}>
             <div className="a-card-title">
-              <div className="a-card-icon">Recomendação</div>
+              <div className="a-card-icon"></div>
               <h3>Dicas Pós-Treino</h3>
             </div>
             <ul style={{ paddingLeft: 16, fontSize: 13, color: "#555", lineHeight: 1.8 }}>

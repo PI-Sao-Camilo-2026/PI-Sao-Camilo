@@ -14,6 +14,7 @@ MODELO = "claude-haiku-4-5-20251001"
 async def obter_recomendacao(
     taxa_l_h: float,
     variacao_pct: float,
+    duracao_segundos: Optional[float] = None,
     temp_celsius: Optional[float] = None,
     umidade_pct: Optional[float] = None,
     modalidade: Optional[str] = None,
@@ -37,7 +38,7 @@ async def obter_recomendacao(
         dict com texto, texto_ia (se disponível), ingestao_recomendada_ml_h,
         intervalo_minutos, por_intervalo_ml, alerta
     """
-    base = gerar_recomendacao(taxa_l_h, variacao_pct)
+    base = gerar_recomendacao(taxa_l_h, variacao_pct,duracao_segundos=duracao_segundos)
 
     if not ANTHROPIC_API_KEY:
         logger.info("ANTHROPIC_API_KEY não configurada — usando recomendação base.")
