@@ -601,3 +601,49 @@ body {
     cursor: pointer;
   }
 }
+.input-wrap-password {
+  position: relative !important;
+}
+
+.input-wrap-password input {
+  padding-right: 50px !important; 
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: auto;
+  width: auto;
+  z-index: 10;
+}
+
+.btn-toggle-password svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: #9ca3af !important;
+  position: static !important; 
+}
+
+.btn-toggle-password:hover svg {
+  stroke: #991b1f !important; 
+}
+
+@media (max-width: 768px) {
+  .input-wrap-password input {
+    padding-right: 44px !important;
+  }
+  .btn-toggle-password {
+    right: 16px;
+  }
+  .btn-toggle-password svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}

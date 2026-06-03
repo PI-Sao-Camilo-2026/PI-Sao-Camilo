@@ -639,3 +639,56 @@
   margin-bottom: 24px;
   margin-top: 12px;
 }
+/* --- ESTILOS DO OLHO DA SENHA (Desktop & Mobile) --- */
+.input-wrap-password {
+  position: relative !important;
+}
+
+/* Garante o padding correto dependendo se for mobile ou desktop */
+.input-wrap-password input {
+  padding: 0 50px 0 46px !important;
+}
+
+.btn-toggle-password {
+  position: absolute !important;
+  right: 15px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+  height: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+/* Corrige o comportamento herdado do seletor global do cadastro */
+.btn-toggle-password svg {
+  position: static !important; 
+  width: 20px !important;
+  height: 20px !important;
+  stroke: #b2b2b2 !important;
+  transition: stroke 0.2s ease;
+}
+
+.btn-toggle-password:hover svg {
+  stroke: #9b1c2e !important; 
+}
+
+@media (max-width: 768px) {
+  .input-wrap-password input {
+    padding: 0 44px 0 16px !important; /* Ajuste para o mobile que não tem o ícone de cadeado esquerdo */
+  }
+  .btn-toggle-password {
+    right: 16px !important;
+  }
+  .btn-toggle-password svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+}
