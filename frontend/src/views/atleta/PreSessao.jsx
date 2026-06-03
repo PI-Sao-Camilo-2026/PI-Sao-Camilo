@@ -127,7 +127,8 @@ export default function PreSessao() {
                   type="number"
                   placeholder={climaLoading ? "..." : "25"}
                   value={temp}
-                  onChange={(e) => setTemp(e.target.value)}
+                  readOnly
+                  disabled
                 />
               </div>
               <div className="a-input-half">
@@ -137,7 +138,8 @@ export default function PreSessao() {
                   type="number"
                   placeholder={climaLoading ? "..." : "60"}
                   value={umidade}
-                  onChange={(e) => setUmidade(e.target.value)}
+                  readOnly
+                  disabled
                 />
               </div>
             </div>
