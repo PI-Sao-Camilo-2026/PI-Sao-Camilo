@@ -158,7 +158,7 @@ export default function Sessao() {
 
         <div className="atleta-body">
           <div className="a-card" style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 36, marginBottom: 4 }}>🫧</div>
+            <div style={{ fontSize: 36, marginBottom: 4 }}></div>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E2A4A", marginBottom: 4 }}>Durante o Treino</h2>
             <p style={{ fontSize: 13, color: "#999", marginBottom: 0 }}>Registre sua ingestão de líquidos</p>
             <div style={{ fontSize: 28, fontWeight: 800, color: "#9B1C2E", fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 2, margin: "12px 0 0" }}>

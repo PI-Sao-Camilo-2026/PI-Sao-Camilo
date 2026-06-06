@@ -17,7 +17,6 @@ const IconLock = () => (
   </svg>
 );
 
-// Ícones do Olho (Visível / Oculto)
 const IconEye = () => (
   <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -40,22 +39,23 @@ export default function Login() {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
-  
   const [mostrarSenha, setMostrarSenha] = useState(false);
+
+  // Estados para o Modal de Recuperação
+  const [showModal, setShowModal] = useState(false);
+  const [emailRecuperar, setEmailRecuperar] = useState("");
+  const [enviado, setEnviado] = useState(false);
 
   async function handleLogin(e) {
     e.preventDefault();
     setErro("");
-
     if (!email || !senha) {
       setErro("Preencha e-mail e senha");
       return;
     }
-
     try {
       setLoading(true);
       const usuario = await login(email.trim().toLowerCase(), senha);
-
       if (usuario.tipo === "profissional") {
         navigate("/homepage");
       } else {
@@ -66,6 +66,18 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Função simulada de recuperação
+  function handleRecoverPassword(e) {
+    e.preventDefault();
+    if (!emailRecuperar) return;
+    setLoading(true);
+    // Simula envio
+    setTimeout(() => {
+      setEnviado(true);
+      setLoading(false);
+    }, 1500);
   }
 
   return (
@@ -119,12 +131,12 @@ export default function Login() {
             </div>
             {erro && <div className="erro-login" style={{color: "red", marginTop: "5px"}}>{erro}</div>}
             <div className="forgot-password">
-              <span>Esqueceu sua senha?</span>
+              <span onClick={() => setShowModal(true)}>Esqueceu sua senha?</span>
             </div>
           </div>
 
           <button className="btn-entrar" type="submit" disabled={loading}>
-            {loading ? "Entrando" : "Entrar"}
+            {loading ? "Entrando..." : "Entrar"}
           </button>
 
           <div className="link-cadastro">
@@ -133,6 +145,71 @@ export default function Login() {
           </div>
         </form>
       </section>
+
+      {/* MODAL DE RECUPERAÇÃO DE SENHA */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            {!enviado ? (
+              <>
+                <div className="modal-header">
+                  <div className="modal-icon">
+                    <IconMail />
+                  </div>
+                  <h2>Recuperar Senha</h2>
+                  <p>Informe seu e-mail para receber as instruções de redefinição.</p>
+                </div>
+
+                <form onSubmit={handleRecoverPassword}>
+                  <div className="campo-group">
+                    <label>E-MAIL CADASTRADO</label>
+                    <div className="input-wrap">
+                      <IconMail />
+                      <input
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={emailRecuperar}
+                        onChange={(e) => setEmailRecuperar(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button className="btn-entrar" type="submit" disabled={loading}>
+                    {loading ? "Enviando..." : "Enviar Instruções"}
+                  </button>
+                  
+                  <button 
+                    type="button" 
+                    className="btn-cancelar" 
+                    onClick={() => setShowModal(false)}
+                  >
+                    Voltar para o Login
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="modal-success">
+                <div className="modal-icon success">
+                  <IconMail />
+                </div>
+                <h2>E-mail enviado!</h2>
+                <p>Se este e-mail estiver cadastrado, você receberá um link em breve.</p>
+                <button 
+                  className="btn-entrar" 
+                  onClick={() => {
+                    setShowModal(false);
+                    setEnviado(false);
+                    setEmailRecuperar("");
+                  }}
+                >
+                  Entendi
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

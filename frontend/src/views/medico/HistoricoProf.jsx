@@ -63,27 +63,29 @@ export default function HistoricoProf() {
 
     // Exportação por Equipe (todos os atletas do profissional)
     const exportarEquipe = async () => {
-        setExportando(true);
-        setErroExport("");
-        try {
-            const blob = await exportacaoApi.exportarHistorico({
-                tipo: "equipe",
-            });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `historico_equipe_${new Date().toISOString().slice(0,10)}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error(err);
-            setErroExport("Falha ao gerar PDF da equipe.");
-        } finally {
-            setExportando(false);
-        }
-    };
+    setExportando(true);
+    setErroExport("");
+    try {
+        // Passamos o atletaSelecionado como 'id' para filtrar pela modalidade dele
+        const blob = await exportacaoApi.exportarHistorico({ 
+            tipo: "equipe", 
+            id: atletaSelecionado 
+        });
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `relatorio_equipe.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    } catch (err) {
+        console.error(err);
+        setErroExport("Erro na exportação da equipe");
+    } finally {
+        setExportando(false);
+    }
+};
 
     return (
         <div className="prof-layout">

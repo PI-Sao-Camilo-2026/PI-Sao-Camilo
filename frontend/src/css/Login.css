@@ -647,3 +647,111 @@ body {
     height: 18px !important;
   }
 }
+
+/* --- ESTILOS DO MODAL DE RECUPERAÇÃO --- */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Fundo escurecido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  backdrop-filter: blur(4px); /* Efeito de desfoque no fundo */
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.modal-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #fdf2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.modal-icon svg {
+  width: 35px;
+  height: 35px;
+  stroke: #991b1f;
+}
+
+.modal-icon.success {
+  background: #f0fdf4;
+}
+
+.modal-icon.success svg {
+  stroke: #16a34a;
+}
+
+.modal-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.modal-header p {
+  font-size: 15px;
+  color: #666;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.btn-cancelar {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 20px;
+  cursor: pointer;
+  padding: 10px;
+  transition: 0.2s;
+}
+
+.btn-cancelar:hover {
+  color: #991b1f;
+}
+
+.modal-success {
+  text-align: center;
+}
+
+/* Ajustes responsivos para o modal */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 30px 20px;
+  }
+  .modal-header h2 {
+    font-size: 22px;
+  }
+}

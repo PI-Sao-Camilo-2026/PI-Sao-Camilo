@@ -108,7 +108,7 @@ export default function Perfil() {
                                 flexShrink: 0,
                             }}
                         >
-                            ✏️
+                            Editar
                         </button>
                     </div>
 
@@ -128,7 +128,7 @@ export default function Perfil() {
                     {editando ? (
                         <div className="a-card" style={{ marginBottom: 14 }}>
                             <div className="a-card-title">
-                                <div className="a-card-icon">✏️</div>
+                                <div className="a-card-icon"></div>
                                 <h3>Editar Dados</h3>
                             </div>
 
@@ -152,7 +152,7 @@ export default function Perfil() {
                                         <option value="">Selecione</option>
                                         <option value="Masculino">Masculino</option>
                                         <option value="Feminino">Feminino</option>
-                                        <option value="Outro">Outro</option>
+
                                     </select>
                                 </div>
                                 <div className="a-input-half">
@@ -182,7 +182,7 @@ export default function Perfil() {
                                     onClick={salvarPerfil}
                                     disabled={loading}
                                 >
-                                    {loading ? "Salvando..." : "Salvar"}
+                                    {loading ? "Salvando" : "Salvar"}
                                 </button>
                             </div>
                         </div>
@@ -190,7 +190,7 @@ export default function Perfil() {
                         /* Dados pessoais */
                         <div className="a-card" style={{ marginBottom: 14 }}>
                             <div className="a-card-title">
-                                <div className="a-card-icon">👤</div>
+                                <div className="a-card-icon"></div>
                                 <h3>Dados Pessoais</h3>
                             </div>
                             <InfoRow label="Nome" value={perfil?.nome || "—"} />
@@ -204,7 +204,7 @@ export default function Perfil() {
                     {/* Configurações */}
                     <div className="a-card" style={{ marginBottom: 14 }}>
                         <div className="a-card-title">
-                            <div className="a-card-icon">⚙️</div>
+                            <div className="a-card-icon"></div>
                             <h3>Preferências</h3>
                         </div>
 
@@ -235,7 +235,7 @@ export default function Perfil() {
 
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
                             <div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>📋 Termos de Uso</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>Termos de Uso</div>
                                 <div style={{ fontSize: 11, color: "#999" }}>Privacidade e consentimento</div>
                             </div>
                             <span style={{ color: "#ccc", fontSize: 18 }}>›</span>

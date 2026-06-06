@@ -9,7 +9,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    HRFlowable, KeepTogether,
+    HRFlowable, KeepTogether, PageBreak
 )
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
@@ -30,541 +30,424 @@ MARGIN = 2 * cm
 CONTENT_W = PAGE_W - 2 * MARGIN
 
 
+def _estilos_pdf() -> dict:
+    styles = getSampleStyleSheet()
+    normal = styles["Normal"]
 
-def _estilos() -> dict:
-    base = getSampleStyleSheet()
     return {
         "titulo": ParagraphStyle(
-            "titulo", parent=base["Heading1"],
-            fontSize=20, textColor=COR_PRIMARIA, spaceAfter=4,
-            fontName="Helvetica-Bold", alignment=TA_LEFT,
+            "DocTitulo", parent=normal, fontName="Helvetica-Bold", fontSize=22,
+            leading=26, textColor=COR_PRIMARIA, spaceAfter=6
         ),
         "subtitulo": ParagraphStyle(
-            "subtitulo", parent=base["Normal"],
-            fontSize=11, textColor=COR_GRAY, spaceAfter=2,
-            fontName="Helvetica",
+            "DocSubtitulo", parent=normal, fontName="Helvetica-Bold", fontSize=14,
+            leading=18, textColor=COR_SECUNDARIA, spaceBefore=12, spaceAfter=8
         ),
-        "secao": ParagraphStyle(
-            "secao", parent=base["Heading2"],
-            fontSize=12, textColor=COR_PRIMARIA,
-            spaceBefore=14, spaceAfter=6,
-            fontName="Helvetica-Bold",
+        "h3": ParagraphStyle(
+            "DocH3", parent=normal, fontName="Helvetica-Bold", fontSize=11,
+            leading=14, textColor=COR_BLACK, spaceBefore=10, spaceAfter=4
         ),
-        "body": ParagraphStyle(
-            "body", parent=base["Normal"],
-            fontSize=10, textColor=COR_BLACK, leading=14,
-            fontName="Helvetica",
+        "corpo": ParagraphStyle(
+            "DocCorpo", parent=normal, fontName="Helvetica", fontSize=10,
+            leading=14, textColor=COR_BLACK, spaceAfter=6
         ),
-        "alerta_danger": ParagraphStyle(
-            "alerta_danger", parent=base["Normal"],
-            fontSize=10, textColor=COR_DANGER, leading=14,
-            fontName="Helvetica",
+        "corpo_cinza": ParagraphStyle(
+            "DocCorpoCinza", parent=normal, fontName="Helvetica", fontSize=9,
+            leading=13, textColor=COR_GRAY, spaceAfter=4
         ),
-        "alerta_warning": ParagraphStyle(
-            "alerta_warning", parent=base["Normal"],
-            fontSize=10, textColor=COR_WARNING, leading=14,
-            fontName="Helvetica",
+        "ia_txt": ParagraphStyle(
+            "DocIaTxt", parent=normal, fontName="Helvetica-Oblique", fontSize=10,
+            leading=14, textColor=colors.HexColor("#115E42")
         ),
-        "rodape": ParagraphStyle(
-            "rodape", parent=base["Normal"],
-            fontSize=8, textColor=COR_GRAY, alignment=TA_CENTER,
-            fontName="Helvetica",
+        "card_titulo_perda": ParagraphStyle(
+            "CardTitlePerda", parent=normal, fontName="Helvetica", fontSize=9,
+            leading=11, textColor=COR_DANGER, alignment=TA_CENTER
         ),
-        "metrica_label": ParagraphStyle(
-            "ml", parent=base["Normal"],
-            fontSize=9, textColor=COR_GRAY,
-            fontName="Helvetica", alignment=TA_CENTER,
+        "card_valor_perda": ParagraphStyle(
+            "CardValPerda", parent=normal, fontName="Helvetica-Bold", fontSize=16,
+            leading=20, textColor=COR_DANGER, alignment=TA_CENTER
         ),
-        "metrica_valor": ParagraphStyle(
-            "mv", parent=base["Normal"],
-            fontSize=18, textColor=COR_PRIMARIA,
-            fontName="Helvetica-Bold", alignment=TA_CENTER,
+        "card_titulo_ingest": ParagraphStyle(
+            "CardTitleIngest", parent=normal, fontName="Helvetica", fontSize=9,
+            leading=11, textColor=COR_PRIMARIA, alignment=TA_CENTER
         ),
-        "metrica_unidade": ParagraphStyle(
-            "mu", parent=base["Normal"],
-            fontSize=9, textColor=COR_GRAY,
-            fontName="Helvetica", alignment=TA_CENTER,
+        "card_valor_ingest": ParagraphStyle(
+            "CardValIngest", parent=normal, fontName="Helvetica-Bold", fontSize=16,
+            leading=20, textColor=COR_PRIMARIA, alignment=TA_CENTER
         ),
     }
 
 
-
-def _tabela_dados(linhas: list[tuple], col_widths: list | None = None) -> Table:
-    col_widths = col_widths or [6 * cm, CONTENT_W - 6 * cm]
-    t = Table(linhas, colWidths=col_widths, hAlign="LEFT")
-    t.setStyle(TableStyle([
-        ("FONTNAME",       (0, 0), (-1, -1), "Helvetica"),
-        ("FONTSIZE",       (0, 0), (-1, -1), 10),
-        ("TEXTCOLOR",      (0, 0), (0, -1),  COR_GRAY),
-        ("TEXTCOLOR",      (1, 0), (1, -1),  COR_BLACK),
-        ("FONTNAME",       (1, 0), (1, -1),  "Helvetica-Bold"),
-        ("ROWBACKGROUNDS", (0, 0), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
-        ("TOPPADDING",     (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING",  (0, 0), (-1, -1), 6),
-        ("LEFTPADDING",    (0, 0), (-1, -1), 10),
-        ("RIGHTPADDING",   (0, 0), (-1, -1), 10),
-        ("GRID",           (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
-    ]))
-    return t
+def _formatar_data(dt_val) -> str:
+    if not dt_val:
+        return "—"
+    if isinstance(dt_val, str):
+        try:
+            dt_val = datetime.fromisoformat(dt_val.replace("Z", ""))
+        except ValueError:
+            return dt_val[:16]
+    if isinstance(dt_val, datetime):
+        return dt_val.strftime("%d/%m/%Y %H:%M")
+    return str(dt_val)
 
 
-def _tabela_metricas(metricas: list[dict]) -> Table:
-    estilos = _estilos()
-    n       = len(metricas)
-    col_w   = [CONTENT_W / n] * n
-
-    row_labels  = []
-    row_valores = []
-    row_units   = []
-
-    for m in metricas:
-        cor_valor = COR_DANGER if m.get("alerta") else COR_PRIMARIA
-        row_labels.append(Paragraph(m["label"], estilos["metrica_label"]))
-        row_valores.append(
-            Paragraph(
-                str(m["valor"]),
-                ParagraphStyle(
-                    "mv_dyn", parent=estilos["metrica_valor"],
-                    textColor=cor_valor,
-                ),
-            )
-        )
-        row_units.append(Paragraph(m["unidade"], estilos["metrica_unidade"]))
-
-    t = Table([row_labels, row_valores, row_units], colWidths=col_w)
-    t.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, -1), COR_LIGHT),
-        ("TOPPADDING",    (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 6),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 6),
-        ("LINEAFTER",     (0, 0), (-2, -1), 0.5, colors.HexColor("#9FE1CB")),
-    ]))
-    return t
-
-
-def _bloco_alerta(msg: str, tipo: str, estilos: dict) -> Table:
-
-    prefixo   = "aviso" if tipo == "desidratacao" else "cuidado  "
-    estilo    = estilos["alerta_danger"] if tipo == "desidratacao" else estilos["alerta_warning"]
-    bg_color  = COR_DANGER_LIGHT if tipo == "desidratacao" else COR_WARNING_LIGHT
-    bd_color  = COR_DANGER if tipo == "desidratacao" else COR_WARNING
-
-    paragrafo = Paragraph(f"{prefixo}{msg}", estilo)
-    t = Table([[paragrafo]], colWidths=[CONTENT_W])
-    t.setStyle(TableStyle([
-        ("BACKGROUND",   (0, 0), (-1, -1), bg_color),
-        ("TOPPADDING",   (0, 0), (-1, -1), 8),
-        ("BOTTOMPADDING",(0, 0), (-1, -1), 8),
-        ("LEFTPADDING",  (0, 0), (-1, -1), 12),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-        ("LINEABOVE",    (0, 0), (-1, 0),  1.5, bd_color),
-        ("LINEBEFORE",   (0, 0), (0, -1),  3,   bd_color),
-        ("LINEBELOW",    (0, -1),(-1, -1), 0.3, bd_color),
-    ]))
-    return t
-
-
-
-def gerar_pdf_sessao(sessao: dict, atleta: dict, alertas: list[dict]) -> bytes:
-    """
-    Gera o PDF completo de uma sessão de avaliação.
-
-    Args:
-        sessao:  dict com todos os campos calculados da sessão
-        atleta:  dict com 'codigo_anonimizado' e outros dados do atleta
-        alertas: lista de dicts {"tipo": str, "mensagem": str}
-
-    Returns:
-        bytes do PDF gerado, pronto para download ou envio
-    """
+def gerar_pdf_sessao(dados: dict) -> bytes:
     buffer = io.BytesIO()
-    doc    = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=MARGIN, rightMargin=MARGIN,
-        topMargin=MARGIN,  bottomMargin=MARGIN,
-        title="Relatório de Sessão — Nutri-Esportiva",
-        author="Nutri-Esportiva / Instituto Mauá de Tecnologia",
+    doc = SimpleDocTemplate(
+        buffer, pagesize=A4, leftMargin=MARGIN, rightMargin=MARGIN,
+        topMargin=MARGIN, bottomMargin=MARGIN
     )
 
-    estilos = _estilos()
-    story   = []
+    estilos = _estilos_pdf()
+    story = []
 
-    header_t = Table(
-        [[
-            Paragraph(
-                "<b>Nutri-Esportiva</b>",
-                ParagraphStyle("hdr", fontSize=14, textColor=COR_PRIMARIA,
-                            fontName="Helvetica-Bold"),
-            ),
-            Paragraph(
-                f"Relatório de Sessão<br/>"
-                f"<font size='9' color='#5F5E5A'>Gerado em "
-                f"{datetime.now().strftime('%d/%m/%Y às %H:%M')}</font>",
-                ParagraphStyle("hdr_r", fontSize=11, textColor=COR_BLACK,
-                            fontName="Helvetica", alignment=TA_RIGHT),
-            ),
-        ]],
-        colWidths=[CONTENT_W * 0.6, CONTENT_W * 0.4],
-    )
-    header_t.setStyle(TableStyle([
-        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING",    (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+    atleta = dados.get("atleta", {})
+    sessao = dados.get("sessao", {})
+    rec = dados.get("recomendacao", {})
+
+    nome_atleta = atleta.get("codigo_anonimizado") or atleta.get("nome", "Atleta")
+    dt_criacao = sessao.get("criado_em") or sessao.get("criada_em")
+
+    def _header_footer(canvas, document):
+        canvas.saveState()
+        canvas.setFillColor(COR_PRIMARIA)
+        canvas.rect(0, PAGE_H - 0.5*cm, PAGE_W, 0.5*cm, stroke=0, fill=1)
+
+        canvas.setFillColor(COR_BLACK)
+        canvas.setFont("Helvetica-Bold", 8)
+        canvas.drawString(MARGIN, PAGE_H - 1.2*cm, "RELATÓRIO DE AVALIAÇÃO INDIVIDUAL")
+        canvas.setFont("Helvetica", 8)
+        canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 1.2*cm, f"Atleta: {nome_atleta}")
+
+        canvas.setStrokeColor(COR_GRAY_LIGHT)
+        canvas.setLineWidth(0.5)
+        canvas.line(MARGIN, PAGE_H - 1.3*cm, PAGE_W - MARGIN, PAGE_H - 1.3*cm)
+
+        canvas.line(MARGIN, 1.5*cm, PAGE_W - MARGIN, 1.5*cm)
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(COR_GRAY)
+        canvas.drawString(MARGIN, 1.1*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        canvas.drawRightString(PAGE_W - MARGIN, 1.1*cm, f"Página {document.page}")
+        canvas.restoreState()
+
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph("AVALIAÇÃO DE HIDRATAÇÃO", estilos["titulo"]))
+    story.append(Paragraph(f"Identificação do Atleta: <b>{nome_atleta}</b>", estilos["corpo"]))
+    story.append(Paragraph(f"Data da Atividade: {_formatar_data(dt_criacao)}", estilos["corpo_cinza"]))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph("Dados da Sessão", estilos["subtitulo"]))
+
+    mod = sessao.get("modalidade", "—")
+    dur = sessao.get("duracao_minutos", "—")
+    dur_str = f"{dur} min" if dur != "—" else "—"
+    txt_clima = sessao.get("clima_texto") or "Não informado"
+
+    peso_pre = sessao.get("peso_pre")
+    peso_pos = sessao.get("peso_pos")
+    p_pre_str = f"{peso_pre:.2f} kg" if isinstance(peso_pre, (int, float)) else "—"
+    p_pos_str = f"{peso_pos:.2f} kg" if isinstance(peso_pos, (int, float)) else "—"
+
+    info_data = [
+        [Paragraph("<b>Modalidade:</b>", estilos["corpo"]), Paragraph(str(mod), estilos["corpo"]),
+         Paragraph("<b>Duração:</b>", estilos["corpo"]), Paragraph(dur_str, estilos["corpo"])],
+        [Paragraph("<b>Peso Pré:</b>", estilos["corpo"]), Paragraph(p_pre_str, estilos["corpo"]),
+         Paragraph("<b>Peso Pós:</b>", estilos["corpo"]), Paragraph(p_pos_str, estilos["corpo"])],
+        [Paragraph("<b>Ambiente:</b>", estilos["corpo"]), Paragraph(str(txt_clima), estilos["corpo"]), "", ""]
+    ]
+    t_info = Table(info_data, colWidths=[3*cm, 4.5*cm, 3*cm, 4.5*cm])
+    t_info.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("SPAN", (1, 2), (3, 2)),
     ]))
-    story.append(header_t)
-    story.append(HRFlowable(width="100%", thickness=2, color=COR_PRIMARIA, spaceAfter=14))
+    story.append(t_info)
+    story.append(Spacer(1, 15))
 
-    data_sessao = sessao.get("criada_em", "")
-    if hasattr(data_sessao, "strftime"):
-        data_sessao = data_sessao.strftime("%d/%m/%Y %H:%M")
+    story.append(Paragraph("Métricas Calculadas", estilos["subtitulo"]))
 
-    story.append(Paragraph("Identificação", estilos["secao"]))
-    story.append(_tabela_dados([
-        ("Atleta (código)", atleta.get("codigo_anonimizado", "—")),
-        ("Modalidade",      sessao.get("modalidade", "—")),
-        ("Data / Hora",     data_sessao),
-        ("Duração real",    f"{sessao.get('duracao_real_min', '—')} min"),
-        ("Intensidade",     f"{sessao.get('intensidade_percebida', '—')} / 10"),
-        ("Cidade / Clima",
-            f"{sessao.get('cidade', '—')} — "
-            f"{sessao.get('temperatura_c', '—')}°C, "
-            f"{sessao.get('umidade_pct', '—')}% umidade"),
+    taxa = sessao.get("taxa_sudorese") or sessao.get("taxa_sudorese_lh")
+    taxa_str = f"{taxa:.2f} L/h" if isinstance(taxa, (int, float)) else "—"
+
+    v_pct = sessao.get("variacao_peso_pct") or sessao.get("variacao_massa_pct")
+    v_pct_str = f"{v_pct:.1f}%" if isinstance(v_pct, (int, float)) else "—"
+
+    ing_tot = sessao.get("total_ingestao_ml") or sessao.get("ingestao_ml")
+    ing_tot_str = f"{ing_tot:.0f} ml" if isinstance(ing_tot, (int, float)) else "—"
+
+    is_danger = isinstance(v_pct, (int, float)) and v_pct > 2.0
+    cor_card_massa = COR_DANGER_LIGHT if is_danger else COR_GRAY_LIGHT
+    estilo_lbl_massa = estilos["card_titulo_perda"] if is_danger else estilos["corpo_cinza"]
+    estilo_val_massa = estilos["card_valor_perda"] if is_danger else ParagraphStyle("CVM", parent=estilos["titulo"], alignment=TA_CENTER, textColor=COR_BLACK)
+
+    card_massa_story = [
+        Spacer(1, 6),
+        Paragraph("VARIAÇÃO DE MASSA", estilo_lbl_massa),
+        Spacer(1, 4),
+        Paragraph(v_pct_str, estilo_val_massa),
+        Spacer(1, 6)
+    ]
+    card_ingest_story = [
+        Spacer(1, 6),
+        Paragraph("INGESTÃO TOTAL", estilos["card_titulo_ingest"]),
+        Spacer(1, 4),
+        Paragraph(ing_tot_str, estilos["card_valor_ingest"]),
+        Spacer(1, 6)
+    ]
+
+    t_cards = Table([[card_massa_story, card_ingest_story]], colWidths=[7.5*cm, 7.5*cm])
+    t_cards.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), cor_card_massa),
+        ("BACKGROUND", (1, 0), (1, 0), COR_LIGHT),
+        ("BOX", (0, 0), (0, 0), 0.5, COR_DANGER if is_danger else COR_GRAY_LIGHT),
+        ("BOX", (1, 0), (1, 0), 0.5, COR_SECUNDARIA),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ]))
-    story.append(Spacer(1, 14))
+    story.append(t_cards)
+    story.append(Spacer(1, 15))
 
-    variacao = float(sessao.get("variacao_massa_pct") or 0)
-    story.append(Paragraph("Resultados", estilos["secao"]))
-    story.append(_tabela_metricas([
-        {
-            "label":   "Taxa de Sudorese",
-            "valor":   f"{float(sessao.get('taxa_sudorese_lh') or 0):.2f}",
-            "unidade": "L/h",
-            "alerta":  False,
-        },
-        {
-            "label":   "Variação de Massa",
-            "valor":   f"{variacao:.1f}",
-            "unidade": "%",
-            "alerta":  variacao > 2,
-        },
-        {
-            "label":   "Recomendação Hídrica",
-            "valor":   sessao.get("recomendacao_ml_h", "—"),
-            "unidade": "ml/h",
-            "alerta":  False,
-        },
-        {
-            "label":   "Perda Ajustada",
-            "valor":   f"{float(sessao.get('perda_ajustada_l') or 0):.3f}",
-            "unidade": "L",
-            "alerta":  False,
-        },
-    ]))
-    story.append(Spacer(1, 14))
+    story.append(Paragraph(f"<b>Taxa de Sudorese Estimada:</b> {taxa_str}", estilos["h3"]))
+    story.append(Spacer(1, 10))
 
-    story.append(Paragraph("Detalhes do Balanço Hídrico", estilos["secao"]))
-    story.append(_tabela_dados([
-        ("Massa pré-sessão",          f"{sessao.get('massa_pre_kg', '—')} kg"),
-        ("Massa pós-sessão",          f"{sessao.get('massa_pos_kg', '—')} kg"),
-        ("Total ingerido",            f"{sessao.get('total_ingestao_ml', 0)} ml"),
-        ("Volume urinário",           f"{sessao.get('total_urina_ml', 0)} ml"),
-        ("Balanço hídrico",           f"{sessao.get('balanco_hidrico_ml', '—')} ml"),
-        ("Faixa-alvo (próx. sessão)",
-            f"{sessao.get('faixa_alvo_min_ml_h', '—')} – "
-            f"{sessao.get('faixa_alvo_max_ml_h', '—')} ml/h"),
-    ]))
-    story.append(Spacer(1, 14))
+    if rec and rec.get("texto"):
+        story.append(Paragraph("Diretriz de Hidratação Recomenda", estilos["subtitulo"]))
+        box_story = [
+            Spacer(1, 8),
+            Paragraph(rec["texto"], estilos["ia_txt"]),
+            Spacer(1, 8)
+        ]
+        t_box = Table([[box_story]], colWidths=[15*cm])
+        t_box.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, 0), COR_LIGHT),
+            ("BOX", (0, 0), (0, 0), 1, COR_SECUNDARIA),
+            ("LEFTPADDING", (0, 0), (0, 0), 12),
+            ("RIGHTPADDING", (0, 0), (0, 0), 12),
+        ]))
+        story.append(t_box)
 
-    story.append(Paragraph("Dados Clínicos", estilos["secao"]))
-    story.append(_tabela_dados([
-        ("Cor da urina (pré)",       f"{sessao.get('cor_urina', '—')} / 8"),
-        ("Sede (pré)",               f"{sessao.get('sede_nivel', '—')} / 5"),
-        ("Exposição solar",          sessao.get("exposicao_solar", "—")),
-        ("Vestimenta",               sessao.get("vestimenta", "—")),
-        ("Fadiga (pós)",             f"{sessao.get('fadiga_nivel', '—')} / 10"),
-        ("Tolerância hídrica (pós)", f"{sessao.get('tolerancia_hidrica', '—')} / 5"),
-        ("Sintomas GI",              sessao.get("sintomas_gi") or "Nenhum relatado"),
-    ]))
-    story.append(Spacer(1, 14))
-
-    if alertas:
-        story.append(Paragraph("Alertas e Recomendações Clínicas", estilos["secao"]))
-        for alerta in alertas:
-            tipo = alerta.get("tipo", "")
-            msg  = alerta.get("mensagem", "")
-            story.append(KeepTogether([
-                _bloco_alerta(msg, tipo, estilos),
-                Spacer(1, 6),
-            ]))
-
-    if sessao.get("predicao_taxa") or sessao.get("anomalia_detectada"):
-        story.append(Paragraph("Análise por Inteligência Artificial", estilos["secao"]))
-        ia_linhas = []
-        if sessao.get("predicao_taxa"):
-            ia_linhas.append((
-                "Predição de taxa (Random Forest)",
-                f"{float(sessao['predicao_taxa']):.3f} L/h",
-            ))
-        if sessao.get("anomalia_detectada"):
-            ia_linhas.append((
-                "Detecção de anomalia (Isolation Forest)",
-                "Resultado atípico detectado em relação ao histórico",
-            ))
-        story.append(_tabela_dados(ia_linhas))
-        story.append(Spacer(1, 14))
-
-    story.append(HRFlowable(
-        width="100%", thickness=0.5, color=COR_GRAY,
-        spaceBefore=10, spaceAfter=8,
-    ))
-    story.append(Paragraph(
-        "Nutri-Esportiva — Instituto Mauá de Tecnologia — ICD 2026 | "
-        "Dados protegidos por LGPD. Atleta identificado por código anonimizado.",
-        estilos["rodape"],
-    ))
-
-    doc.build(story)
+    doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    buffer.seek(0)
     return buffer.getvalue()
 
 
-def _formatar_data(data) -> str:
-    if not data:
-        return "—"
-    if hasattr(data, "strftime"):
-        return data.strftime("%d/%m/%Y")
-    return str(data)
-
-def gerar_pdf_historico_atleta(sessoes: list[dict], atleta: dict) -> bytes:
+def gerar_pdf_historico_atleta(atleta: dict, sessoes: list) -> bytes:
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
-        buffer, pagesize=A4,
-        leftMargin=MARGIN, rightMargin=MARGIN,
-        topMargin=MARGIN, bottomMargin=MARGIN,
-        title=f"Histórico - {atleta.get('nome', 'Atleta')}"
+        buffer, pagesize=A4, leftMargin=MARGIN, rightMargin=MARGIN,
+        topMargin=MARGIN, bottomMargin=MARGIN
     )
-    estilos = _estilos()
+
+    estilos = _estilos_pdf()
     story = []
 
-    story.append(Paragraph(f"<b>Histórico de Sessões</b>", estilos["titulo"]))
-    story.append(Paragraph(f"Atleta: {atleta.get('nome', '—')} ({atleta.get('codigo_anonimizado', '—')})", estilos["subtitulo"]))
-    story.append(Paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", estilos["subtitulo"]))
-    story.append(HRFlowable(width="100%", thickness=1, color=COR_PRIMARIA, spaceAfter=14))
+    nome_atleta = atleta.get("codigo_anonimizado") or atleta.get("nome", "Atleta")
 
-    taxas    = [s.get("taxa_sudorese_lh")   for s in sessoes if s.get("taxa_sudorese_lh")   is not None]
-    perdas   = [s.get("variacao_massa_pct") for s in sessoes if s.get("variacao_massa_pct") is not None]
-    recomend = [s.get("recomendacao_ml_h")  for s in sessoes if s.get("recomendacao_ml_h")  is not None]
-    balancos = [s.get("balanco_hidrico_ml") for s in sessoes if s.get("balanco_hidrico_ml") is not None]
+    def _header_footer(canvas, document):
+        canvas.saveState()
+        canvas.setFillColor(COR_PRIMARIA)
+        canvas.rect(0, PAGE_H - 0.5*cm, PAGE_W, 0.5*cm, stroke=0, fill=1)
 
-    taxa_media       = sum(taxas)    / len(taxas)    if taxas    else None
-    taxa_maxima      = max(taxas)                     if taxas    else None
-    perda_media      = sum(perdas)   / len(perdas)   if perdas   else None
-    perda_maxima     = max(perdas)                    if perdas   else None
-    rec_media        = sum(recomend) / len(recomend) if recomend else None
-    balanco_medio    = sum(balancos) / len(balancos) if balancos else None
-    ingestao_total   = sum(s.get("total_ingestao_ml") or 0 for s in sessoes)
+        canvas.setFillColor(COR_BLACK)
+        canvas.setFont("Helvetica-Bold", 8)
+        canvas.drawString(MARGIN, PAGE_H - 1.2*cm, "HISTÓRICO COMPLETO DO ATLETA")
+        canvas.setFont("Helvetica", 8)
+        canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 1.2*cm, f"Atleta: {nome_atleta}")
 
-    def _classificar(pct):
-        if pct is None:   return "Sem dados"
-        if pct <= 1.0:    return "Bem hidratado"
-        if pct <= 2.0:    return "Desidratação leve"
-        if pct <= 3.0:    return "Desidratação moderada"
-        return "Desidratação grave (>3%)"
+        canvas.setStrokeColor(COR_GRAY_LIGHT)
+        canvas.setLineWidth(0.5)
+        canvas.line(MARGIN, PAGE_H - 1.3*cm, PAGE_W - MARGIN, PAGE_H - 1.3*cm)
 
-    sessoes_graves    = sum(1 for p in perdas if p > 3.0)
-    sessoes_moderadas = sum(1 for p in perdas if 2.0 < p <= 3.0)
-    sessoes_leves     = sum(1 for p in perdas if 1.0 < p <= 2.0)
-    sessoes_ok        = sum(1 for p in perdas if p <= 1.0)
+        canvas.line(MARGIN, 1.5*cm, PAGE_W - MARGIN, 1.5*cm)
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(COR_GRAY)
+        canvas.drawString(MARGIN, 1.1*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+        canvas.drawRightString(PAGE_W - MARGIN, 1.1*cm, f"Pág. {document.page}")
+        canvas.restoreState()
 
-    story.append(Paragraph("Resumo Estatístico", estilos["secao"]))
-    story.append(_tabela_metricas([
-        {"label": "Sessões",              "valor": len(sessoes),                                    "unidade": "",    "alerta": False},
-        {"label": "Taxa Sudorese Média",  "valor": f"{taxa_media:.2f}"  if taxa_media  else "—",   "unidade": "L/h", "alerta": False},
-        {"label": "Perda Média de Massa", "valor": f"{perda_media:.1f}" if perda_media else "—",   "unidade": "%",   "alerta": bool(perda_media and perda_media > 2)},
-        {"label": "Ingestão Total",       "valor": f"{ingestao_total:.0f}",                        "unidade": "ml",  "alerta": False},
-    ]))
-    story.append(Spacer(1, 18))
-
-    story.append(Paragraph("Hidratação e Desidratação", estilos["secao"]))
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph("HISTÓRICO EVOLUTIVO", estilos["titulo"]))
+    story.append(Paragraph(f"Atleta: <b>{nome_atleta}</b>", estilos["subtitulo"]))
+    story.append(Paragraph(f"Relatório contendo o compilado de todas as sessões registradas cronologicamente.", estilos["corpo_cinza"]))
     story.append(Spacer(1, 6))
 
-    story.append(_tabela_metricas([
-        {"label": "Taxa Sudorese Máxima", "valor": f"{taxa_maxima:.2f}" if taxa_maxima else "—",   "unidade": "L/h", "alerta": bool(taxa_maxima and taxa_maxima > 2.5)},
-        {"label": "Maior Perda de Massa", "valor": f"{perda_maxima:.1f}" if perda_maxima else "—", "unidade": "%",   "alerta": bool(perda_maxima and perda_maxima > 2)},
-        {"label": "Reposição Recomendada","valor": f"{rec_media:.0f}" if rec_media else "—",       "unidade": "ml/h","alerta": False},
-        {"label": "Balanço Hídrico Médio","valor": f"{balanco_medio:.0f}" if balanco_medio else "—","unidade": "ml", "alerta": bool(balanco_medio and balanco_medio < -500)},
-    ]))
-    story.append(Spacer(1, 12))
+    story.append(Paragraph("Últimas sessões", estilos["subtitulo"]))
+    table_data = [["Data", "Modalidade", "Taxa (L/h)", "Variação (%)", "Ingestão (ml)"]]
+    for s in sessoes[:10]:  
+        dt = s.get("criada_em") or s.get("criado_em")
+        
+        taxa = s.get("taxa_sudorese_lh") or s.get("taxa_sudorese")
+        taxa_str = f"{taxa:.2f}" if isinstance(taxa, (int, float)) else "—"
 
-    story.append(Paragraph("Distribuição por Nível de Desidratação", estilos["subtitulo"]))
-    story.append(Spacer(1, 6))
-    niveis_data = [
-        ["Classificação",              "Sessões", "% do Total"],
-        ["Bem hidratado (≤1%)",      str(sessoes_ok),        f"{sessoes_ok/len(perdas)*100:.0f}%" if perdas else "—"],
-        ["Desidratação leve (1–2%)", str(sessoes_leves),     f"{sessoes_leves/len(perdas)*100:.0f}%" if perdas else "—"],
-        ["Desidratação moderada (2–3%)", str(sessoes_moderadas), f"{sessoes_moderadas/len(perdas)*100:.0f}%" if perdas else "—"],
-        ["Desidratação grave (>3%)", str(sessoes_graves),    f"{sessoes_graves/len(perdas)*100:.0f}%" if perdas else "—"],
-    ]
-    t_niveis = Table(niveis_data, colWidths=[9*cm, 3*cm, 3*cm])
-    t_niveis.setStyle(TableStyle([
-        ("BACKGROUND",    (0, 0), (-1, 0),  COR_PRIMARIA),
-        ("TEXTCOLOR",     (0, 0), (-1, 0),  COR_WHITE),
-        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
-        ("FONTNAME",      (0, 1), (-1, -1), "Helvetica"),
-        ("FONTSIZE",      (0, 0), (-1, -1), 10),
-        ("ALIGN",         (1, 0), (-1, -1), "CENTER"),
-        ("GRID",          (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
-        ("TOPPADDING",    (0, 0), (-1, -1), 7),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 10),
-        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
-        ("TEXTCOLOR",     (0, 1), (-1, 1),  COR_PRIMARIA),
-        ("TEXTCOLOR",     (0, 4), (-1, 4),  COR_DANGER),
-        ("FONTNAME",      (0, 4), (-1, 4),  "Helvetica-Bold"),
-    ]))
-    story.append(t_niveis)
-    story.append(Spacer(1, 10))
+        var_massa = s.get("variacao_massa_pct") or s.get("variacao_peso_pct")
+        var_massa_str = f"{var_massa:.1f}%" if isinstance(var_massa, (int, float)) else "—"
 
-    if sessoes_graves > 0:
-        story.append(_bloco_alerta(
-            f"{sessoes_graves} sessão(ões) com desidratação grave (>3%). "
-            "Recomenda-se revisão do protocolo de hidratação.",
-            "desidratacao",
-            estilos,
-        ))
-        story.append(Spacer(1, 10))
+        ingestao = s.get("total_ingestao_ml") or s.get("ingestao_ml")
+        ingestao_str = f"{ingestao:.0f} ml" if isinstance(ingestao, (int, float)) else "—"
 
-    story.append(Paragraph(
-        "Referência: American College of Sports Medicine (ACSM) — "
-        "perda ≤1% adequada; 1–2% leve; 2–3% moderada; >3% grave com risco de desempenho.",
-        ParagraphStyle("nota", parent=estilos["body"], fontSize=8, textColor=COR_GRAY, fontName="Helvetica-Oblique"),
-    ))
-    story.append(Spacer(1, 18))
-
-    story.append(Paragraph("Listagem Detalhada de Sessões", estilos["secao"]))
-    table_data = [["Data", "Modalidade", "Duração", "Taxa (L/h)", "Variação (%)", "Ingestão (ml)", "Nível Hidratação"]]
-    for s in sessoes:
-        variacao = s.get("variacao_massa_pct")
-        nivel    = s.get("hidratacao_nivel") or _classificar(variacao)
         table_data.append([
-            _formatar_data(s.get("criada_em")),
-            s.get("modalidade", "—"),
-            f"{s.get('duracao_real_min') or '—'} min",
-            f"{s.get('taxa_sudorese_lh') or '—'}",
-            f"{variacao:.1f}%" if variacao is not None else "—",
-            f"{s.get('total_ingestao_ml') or '—'}",
-            nivel,
+            _formatar_data(dt),
+            s.get("modalidade") or "—",
+            taxa_str,
+            var_massa_str,
+            ingestao_str,
         ])
 
-    col_widths = [2.2*cm, 2.8*cm, 2*cm, 2*cm, 2.2*cm, 2.2*cm, 3.6*cm]
-    t = Table(table_data, colWidths=col_widths, repeatRows=1)
-
-    cmd_cores = [
-        ("BACKGROUND",    (0, 0), (-1, 0),  COR_PRIMARIA),
-        ("TEXTCOLOR",     (0, 0), (-1, 0),  COR_WHITE),
-        ("FONTNAME",      (0, 0), (-1, 0),  "Helvetica-Bold"),
-        ("FONTSIZE",      (0, 0), (-1, -1), 8),
-        ("GRID",          (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
-        ("ALIGN",         (0, 0), (-1, -1), "CENTER"),
-        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
-        ("TOPPADDING",    (0, 0), (-1, -1), 5),
+    col_w = [4*cm, 3.5*cm, 3*cm, 3*cm, 3.5*cm]
+    t2 = Table(table_data, colWidths=col_w, repeatRows=1)
+    t2.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), COR_PRIMARIA),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
+        ("ALIGN", (2, 0), (-1, -1), "CENTER"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-    ]
-    for i, s in enumerate(sessoes, start=1):
-        variacao = s.get("variacao_massa_pct")
-        if variacao is not None and variacao > 3.0:
-            cmd_cores.append(("BACKGROUND", (0, i), (-1, i), COR_DANGER_LIGHT))
-            cmd_cores.append(("TEXTCOLOR",  (0, i), (-1, i), COR_DANGER))
-        elif variacao is not None and variacao > 2.0:
-            cmd_cores.append(("BACKGROUND", (0, i), (-1, i), COR_WARNING_LIGHT))
-            cmd_cores.append(("TEXTCOLOR",  (0, i), (-1, i), COR_WARNING))
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    for r_idx in range(1, len(table_data)):
+        bg = COR_WHITE if r_idx % 2 == 1 else COR_GRAY_LIGHT
+        t2.setStyle(TableStyle([("BACKGROUND", (0, r_idx), (-1, r_idx), bg)]))
 
-    t.setStyle(TableStyle(cmd_cores))
-    story.append(t)
-
-    story.append(HRFlowable(width="100%", thickness=0.5, color=COR_GRAY, spaceBefore=14, spaceAfter=8))
-    story.append(Paragraph(
-        "Nutri-Esportiva — Histórico do atleta — Dados protegidos por LGPD",
-        estilos["rodape"],
-    ))
-    doc.build(story)
+    story.append(t2)
+    doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    buffer.seek(0)
     return buffer.getvalue()
 
 
 def gerar_pdf_historico_equipe(sessoes_por_atleta: dict, profissional: dict) -> bytes:
+    """
+    Gera PDF consolidando o histórico de múltiplos atletas da equipe,
+    incluindo Modalidade, Nome, Ingestão de Água e Cor da Urina Final.
+    """
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
-        buffer, pagesize=A4,
-        leftMargin=MARGIN, rightMargin=MARGIN,
-        topMargin=MARGIN, bottomMargin=MARGIN,
-        title=f"Histórico da Equipe - {profissional.get('nome', 'Profissional')}"
+        buffer,
+        pagesize=A4,
+        leftMargin=MARGIN,
+        rightMargin=MARGIN,
+        topMargin=MARGIN,
+        bottomMargin=MARGIN
     )
-    estilos = _estilos()
+
+    estilos = _estilos_pdf()
     story = []
 
-    story.append(Paragraph("<b>Relatório da Equipe</b>", estilos["titulo"]))
-    story.append(Paragraph(f"Profissional: {profissional.get('nome', '—')}", estilos["subtitulo"]))
-    story.append(Paragraph(f"Gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", estilos["subtitulo"]))
-    story.append(HRFlowable(width="100%", thickness=1, color=COR_PRIMARIA, spaceAfter=14))
+    nome_prof = profissional.get("nome", "Profissional")
+    email_prof = profissional.get("email", "—")
+    modalidade_equipe = profissional.get("modalidade_equipe")
 
-    total_atletas = len(sessoes_por_atleta)
-    total_sessoes = sum(len(data['sessoes']) for data in sessoes_por_atleta.values())
-    story.append(Paragraph(f"Total de atletas: {total_atletas} | Sessões registradas: {total_sessoes}", estilos["body"]))
-    story.append(Spacer(1, 12))
+    if modalidade_equipe:
+        titulo_principal = f"HISTÓRICO DA EQUIPE - {modalidade_equipe.upper()}"
+    else:
+        titulo_principal = "HISTÓRICO DA EQUIPE"
 
-    for idx, (atleta_id, data) in enumerate(sessoes_por_atleta.items()):
-        if idx > 0:
-            story.append(PageBreak())
+    def _header_footer(canvas, document):
+        canvas.saveState()
+        canvas.setFillColor(COR_PRIMARIA)
+        canvas.rect(0, PAGE_H - 0.5*cm, PAGE_W, 0.5*cm, stroke=0, fill=1)
 
-        story.append(Paragraph(f"Atleta: {data['nome']}", estilos["secao"]))
-        sessoes = data['sessoes']
+        canvas.setFillColor(COR_BLACK)
+        canvas.setFont("Helvetica-Bold", 8)
+        canvas.drawString(MARGIN, PAGE_H - 1.2*cm, titulo_principal)
+        
+        canvas.setFont("Helvetica", 8)
+        canvas.drawRightString(PAGE_W - MARGIN, PAGE_H - 1.2*cm, f"Prof. {nome_prof} ({email_prof})")
+
+        canvas.setStrokeColor(COR_GRAY_LIGHT)
+        canvas.setLineWidth(0.5)
+        canvas.line(MARGIN, PAGE_H - 1.3*cm, PAGE_W - MARGIN, PAGE_H - 1.3*cm)
+
+        canvas.line(MARGIN, 1.5*cm, PAGE_W - MARGIN, 1.5*cm)
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(COR_GRAY)
+        data_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+        canvas.drawString(MARGIN, 1.1*cm, f"Gerado em: {data_str}")
+        canvas.drawRightString(PAGE_W - MARGIN, 1.1*cm, f"Pág. {document.page}")
+        canvas.restoreState()
+
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph(titulo_principal, estilos["titulo"]))
+    
+    texto_subtitulo = f"Relatório consolidado de monitoramento de hidratação e sudorese."
+    if modalidade_equipe:
+        texto_subtitulo += f" Filtro aplicado: atletas com atividades na modalidade <b>{modalidade_equipe}</b>."
+        
+    story.append(Paragraph(texto_subtitulo, estilos["corpo_cinza"]))
+    story.append(Spacer(1, 1.5*cm))
+
+    atleta_ids = list(sessoes_por_atleta.keys())
+    for i, atl_id in enumerate(atleta_ids):
+        dados = sessoes_por_atleta[atl_id]
+        nome_atleta = dados.get("codigo_anonimizado") or dados.get("nome", "Atleta")
+        sessoes = dados.get("sessoes", [])
+
+        atleta_story = []
+        atleta_story.append(HRFlowable(width="100%", thickness=1.5, color=COR_SECUNDARIA, spaceAfter=8))
+        atleta_story.append(Paragraph(f"Atleta: {nome_atleta}", estilos["subtitulo"]))
+        atleta_story.append(Paragraph(f"Total de sessões avaliadas: {len(sessoes)}", estilos["corpo_cinza"]))
+        atleta_story.append(Spacer(1, 6))
+
         if not sessoes:
-            story.append(Paragraph("Nenhuma sessão registrada.", estilos["body"]))
+            atleta_story.append(Paragraph("<i>Nenhuma sessão concluída registrada para este atleta nesta filtragem.</i>", estilos["corpo"]))
+            atleta_story.append(Spacer(1, 1*cm))
+            story.append(KeepTogether(atleta_story))
             continue
 
-        taxas = [s.get("taxa_sudorese_lh") for s in sessoes if s.get("taxa_sudorese_lh")]
-        perdas = [s.get("variacao_massa_pct") for s in sessoes if s.get("variacao_massa_pct")]
-        media_taxa = sum(taxas)/len(taxas) if taxas else None
-        media_perda = sum(perdas)/len(perdas) if perdas else None
+        # CABEÇALHO ATUALIZADO CONFORME PEDIDO
+        table_data = [["Data/Hora", "Atleta", "Modalidade", "Taxa", "Var. Peso", "Ingestão", "Urina Final"]]
+        
+        for s in sessoes:
+            dt = s.get("criado_em") or s.get("criada_em")
+            
+            taxa = s.get("taxa_sudorese") or s.get("taxa_sudorese_lh")
+            taxa_str = f"{taxa:.2f} L/h" if isinstance(taxa, (int, float)) else "—"
 
-        story.append(Paragraph(
-            f"Média de taxa de sudorese: {media_taxa:.2f} L/h  |  "
-            f"Média de perda de massa: {media_perda:.1f}%" if media_taxa and media_perda else "Dados insuficientes",
-            estilos["body"]
-        ))
-        story.append(Spacer(1, 6))
+            var_massa = s.get("variacao_peso_pct") or s.get("variacao_massa_pct")
+            var_massa_str = f"{var_massa:.1f}%" if isinstance(var_massa, (int, float)) else "—"
 
-        story.append(Paragraph("Últimas sessões", estilos["subtitulo"]))
-        table_data = [["Data", "Modalidade", "Taxa (L/h)", "Variação (%)", "Ingestão (ml)"]]
-        for s in sessoes[:10]:  
+            ingestao = s.get("total_ingestao_ml") or s.get("ingestao_ml")
+            ingestao_str = f"{ingestao:.0f} ml" if isinstance(ingestao, (int, float)) else "—"
+            
+            urina = s.get("cor_urina_final") or s.get("cor_urina_pos") or "—"
+
             table_data.append([
-                _formatar_data(s.get("criada_em")),
-                s.get("modalidade", "—"),
-                f"{s.get('taxa_sudorese_lh', '—')}",
-                f"{s.get('variacao_massa_pct', '—')}",
-                f"{s.get('total_ingestao_ml', '—')}",
+                _formatar_data(dt),
+                nome_atleta,
+                s.get("modalidade") or "—",
+                taxa_str,
+                var_massa_str,
+                ingestao_str,
+                str(urina)
             ])
 
-        col_w = [2.5*cm, 3*cm, 2.5*cm, 2.5*cm, 2.5*cm]
+        # Redistribuição das larguras das colunas para caber perfeitamente na folha A4 (Total 17cm de largura útil)
+        col_w = [2.8*cm, 2.7*cm, 2.5*cm, 2.0*cm, 2.0*cm, 2.5*cm, 2.5*cm]
+        
         t2 = Table(table_data, colWidths=col_w, repeatRows=1)
         t2.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), COR_PRIMARIA),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("FONTSIZE", (0, 0), (-1, -1), 8), # Fonte levemente menor para comportar o volume de colunas
             ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#D3D1C7")),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [COR_WHITE, COR_GRAY_LIGHT]),
+            ("ALIGN", (3, 0), (-1, -1), "CENTER"),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
         ]))
-        story.append(t2)
-        story.append(Spacer(1, 8))
+        
+        for row_idx in range(1, len(table_data)):
+            bg = COR_WHITE if row_idx % 2 == 1 else COR_GRAY_LIGHT
+            t2.setStyle(TableStyle([("BACKGROUND", (0, row_idx), (-1, row_idx), bg)]))
 
-    story.append(HRFlowable(width="100%", thickness=0.5, color=COR_GRAY, spaceBefore=14, spaceAfter=8))
-    story.append(Paragraph(
-        "Nutri-Esportiva — Relatório de equipe — Dados anonimizados conforme LGPD",
-        estilos["rodape"],
-    ))
-    doc.build(story)
+        atleta_story.append(t2)
+        atleta_story.append(Spacer(1, 1.5*cm))
+
+        story.append(KeepTogether(atleta_story))
+
+        if i < len(atleta_ids) - 1:
+            story.append(PageBreak())
+
+    doc.build(story, onFirstPage=_header_footer, onLaterPages=_header_footer)
+    buffer.seek(0)
     return buffer.getvalue()

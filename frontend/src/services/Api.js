@@ -53,7 +53,6 @@ export const authApi = {
 
 export const sessoesApi = {
     iniciarPreTreino: (p) => request("/sessoes/pre-treino", "POST", p),
-    // CORRIGIDO: aceita número ou objeto e envia como query param numérico
     registrarFluido: (id, ml) => {
         let volume = typeof ml === 'object' ? (ml.ml ?? ml.valor ?? ml.volume_ml ?? 0) : ml;
         volume = Number(volume);
@@ -83,7 +82,7 @@ export const usuariosApi = {
 
 export const relatoriosApi = {
     dashboardStats: (periodo = "30") => request(`/relatorios/dashboard-stats?periodo=${periodo}`),
-    pdfUrl: (atletaId) => `${BASE_URL}/relatorios/pdf/${atletaId}`,
+    pdfUrl: (atletaId) => `${BASE_URL}/relatorios/historico-pdf/${atletaId}`,
     excelUrl: (atletaId) => `${BASE_URL}/relatorios/excel/${atletaId}`,
 };
 
@@ -137,14 +136,28 @@ function classificarRadiacao(v) {
 export const exportacaoApi = {
     async exportarHistorico({ tipo, id = null }) {
         const token = getToken();
-        const url = tipo === "equipe"
-            ? `/relatorios/equipe-pdf`
-            : `/relatorios/historico-pdf/${id}`;
-        const response = await fetch(url, {
+        const headers = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        let path = "";
+        if (tipo === "atleta") {
+            path = `/relatorios/atleta-pdf/${id}`;
+        } else if (tipo === "equipe") {
+            // Se houver um atleta selecionado, anexa via query string (?atleta_id=X)
+            path = id ? `/relatorios/equipe-pdf?atleta_id=${id}` : "/relatorios/equipe-pdf";
+        } else if (tipo === "excel") {
+            path = `/relatorios/excel/${id}`;
+        }
+
+        const res = await fetch(`${BASE_URL}${path}`, {
             method: "GET",
-            headers: { Authorization: `Bearer ${token}` },
+            headers
         });
-        if (!response.ok) throw new Error("Erro na exportação");
-        return await response.blob();
-    },
+
+        if (!res.ok) {
+            throw new Error("Erro ao baixar relatório");
+        }
+
+        return await res.blob();
+    }
 };

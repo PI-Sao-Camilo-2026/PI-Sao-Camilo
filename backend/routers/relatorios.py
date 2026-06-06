@@ -9,10 +9,10 @@ from dependencies import get_current_user, require_profissional
 from exportacao.pdf   import gerar_pdf_sessao
 from exportacao.excel import gerar_excel_historico
 from exportacao.pdf import gerar_pdf_historico_atleta, gerar_pdf_historico_equipe
-# from services.calculo import gerar_recommendacao
 
 from collections import defaultdict
 from datetime import datetime, timedelta
+from typing import Optional  
 
 router = APIRouter()
 
@@ -30,26 +30,56 @@ def _classificar_hidratacao(variacao_pct: float | None) -> dict:
 
 
 def _buscar_sessoes_concluidas(atleta_id: int, db: Session):
+    # BLINDAGEM 1: Usar taxa_sudorese.isnot(None) em vez do texto de status 
     return db.query(Sessao).filter(
         Sessao.atleta_id == atleta_id,
-        Sessao.status == "concluida"
+        Sessao.taxa_sudorese.isnot(None)
     ).order_by(desc(Sessao.criado_em)).all()
 
 
 def _sessao_para_dict(s: Sessao) -> dict:
+    if not s:
+        return {}
+        
+    variacao = getattr(s, 'variacao_peso_pct', 0.0)
+    status_hidr = _classificar_hidratacao(variacao)
+    
+    total_ingestao = 0.0
+    if hasattr(s, 'fluidos') and s.fluidos:
+        try:
+            total_ingestao = sum(float(getattr(f, 'quantidade_ml', 0) or 0) for f in s.fluidos)
+        except Exception:
+            total_ingestao = 0.0
+        
+    rec_texto = ""
+    if hasattr(s, 'recomendacao') and s.recomendacao:
+        rec_texto = getattr(s.recomendacao, 'texto', "") or ""
+
+    # AJUSTE DA COR DA URINA (Verifique se no seu modelo o nome é exatamente esse)
+    cor_urina_final = getattr(s, 'cor_urina_final', None) or getattr(s, 'cor_urina_pos', None) or getattr(s, 'cor_urina_basal', "—")
+
     return {
-        "id": s.id,
-        "data": s.criado_em.strftime("%d/%m/%Y") if s.criado_em else "—",
-        "criado_em": s.criado_em.isoformat() if s.criado_em else None,
-        "modalidade": s.modalidade,
-        "duracao_minutos": s.duracao_minutos,
-        "peso_pre": s.peso_pre,
-        "peso_pos": s.peso_pos,
-        "ingestao_ml": s.ingestao_ml,
-        "taxa_sudorese": s.taxa_sudorese,
-        "variacao_peso_pct": s.variacao_peso_pct,
-        "clima_temperatura": s.clima_temperatura,
-        "clima_condicao": s.clima_condicao,
+        "id": getattr(s, 'id', None),
+        "atleta_id": getattr(s, 'atleta_id', None),
+        "modalidade": getattr(s, 'modalidade', "Não informada") or "Não informada",
+        "duracao_minutos": getattr(s, 'duracao_minutos', 0) or 0,
+        "peso_pre": getattr(s, 'peso_pre', None),
+        "peso_pos": getattr(s, 'peso_pos', None),
+        "taxa_sudorese": getattr(s, 'taxa_sudorese', 0.0) or 0.0,
+        "taxa_sudorese_lh": getattr(s, 'taxa_sudorese', 0.0) or 0.0,
+        "variacao_peso_pct": variacao or 0.0,
+        "variacao_massa_pct": variacao or 0.0,
+        "total_ingestao_ml": total_ingestao if total_ingestao > 0 else (getattr(s, 'ingestao_ml', 0.0) or 0.0),
+        "clima_temperatura": getattr(s, 'temp_celsius', None) or getattr(s, 'clima_temperatura', None),
+        "clima_umidade": getattr(s, 'umidade_pct', None) or getattr(s, 'clima_umidade', None),
+        "cor_urina_basal": getattr(s, 'cor_urina_basal', None),
+        "cor_urina_final": cor_urina_final, # Adicionado explicitamente para o PDF
+        "status_hidratacao": status_hidr["nivel"],
+        "cor_status": status_hidr["cor"],
+        "alerta_perigo": status_hidr["alerta"],
+        "texto_ia": rec_texto,
+        "criada_em": s.criado_em.isoformat() if (hasattr(s, 'criado_em') and s.criado_em) else None,
+        "criado_em": s.criado_em.isoformat() if (hasattr(s, 'criado_em') and s.criado_em) else None
     }
 
 
@@ -89,27 +119,28 @@ def dashboard_stats(
 
     sessoes = db.query(Sessao).filter(
         Sessao.atleta_id.in_(ids),
-        Sessao.status == "concluida",
+        Sessao.taxa_sudorese.isnot(None),
         Sessao.criado_em >= data_limite
     ).order_by(Sessao.criado_em.asc()).all()
 
-    taxas  = [s.taxa_sudorese    for s in sessoes if s.taxa_sudorese]
-    perdas = [s.variacao_peso_pct for s in sessoes if s.variacao_peso_pct]
+    taxas  = [s.taxa_sudorese for s in sessoes if getattr(s, 'taxa_sudorese', None)]
+    perdas = [s.variacao_peso_pct for s in sessoes if getattr(s, 'variacao_peso_pct', None)]
 
     atleta_map = {a.id: a for a in atletas}
     
     alertas_list = []
     for s in sessoes:
-        if s.variacao_peso_pct and s.variacao_peso_pct > 2.0:
+        v_peso = getattr(s, 'variacao_peso_pct', 0.0)
+        if v_peso and v_peso > 2.0:
             atl = atleta_map.get(s.atleta_id)
             nome_atl = atl.nome if atl else "Atleta"
-            tipo_alerta = "incompleto" if s.variacao_peso_pct <= 3.0 else "perigo"
-            titulo_alerta = "Desidratação Leve/Mod." if s.variacao_peso_pct <= 3.0 else "Desidratação Crítica!"
+            tipo_alerta = "incompleto" if v_peso <= 3.0 else "perigo"
+            titulo_alerta = "Desidratação Leve/Mod." if v_peso <= 3.0 else "Desidratação Crítica!"
             
             alertas_list.append({
                 "titulo": f"{titulo_alerta} - {nome_atl}",
                 "tempo": s.criado_em.strftime("%d/%m %H:%M") if s.criado_em else "Agora",
-                "descricao": f"O atleta apresentou perda de massa corporal de <strong>{s.variacao_peso_pct:.1f}%</strong> na sessão de {s.modalidade or 'Treino'}.",
+                "descricao": f"O atleta apresentou perda de massa corporal de <strong>{v_peso:.1f}%</strong> na sessão de {s.modalidade or 'Treino'}.",
                 "tipo": tipo_alerta,
                 "data": s.criado_em.isoformat() if s.criado_em else ""
             })
@@ -132,11 +163,12 @@ def dashboard_stats(
 
     agrupamento_diario = defaultdict(lambda: defaultdict(list))
     for s in sessoes:
-        if s.variacao_peso_pct is None or not s.criado_em:
+        v_peso = getattr(s, 'variacao_peso_pct', None)
+        if v_peso is None or not s.criado_em:
             continue
         data_str = s.criado_em.strftime("%d/%m")
         mod = s.modalidade or "Geral"
-        agrupamento_diario[data_str][mod].append(s.variacao_peso_pct)
+        agrupamento_diario[data_str][mod].append(v_peso)
 
     evolucao_sudorese = []
     for data_str, mods_dict in agrupamento_diario.items():
@@ -161,7 +193,7 @@ def dashboard_stats(
     }
 
 
-@router.get("/pdf/{atleta_id}")
+@router.get("/historico-pdf/{atleta_id}")
 def exportar_atleta_pdf(
     atleta_id: int,
     prof: Usuario = Depends(require_profissional),
@@ -180,7 +212,7 @@ def exportar_atleta_pdf(
         "nome": atleta.nome,
         "codigo_anonimizado": atleta.codigo_anonimizado or atleta.nome,
     }
-    pdf_bytes = gerar_pdf_historico_atleta(sessoes_dict, atleta_dict)
+    pdf_bytes = gerar_pdf_historico_atleta(atleta_dict, sessoes_dict) # Corrigida a ordem dos parametros
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
@@ -190,29 +222,90 @@ def exportar_atleta_pdf(
 
 @router.get("/equipe-pdf")
 def exportar_equipe_pdf(
+    atleta_id: Optional[int] = None,
     prof: Usuario = Depends(require_profissional),
     db: Session = Depends(get_db),
 ):
-    atletas = db.query(Usuario).filter(
+    atletas_todos = db.query(Usuario).filter(
         Usuario.profissional_id == prof.id,
-        Usuario.ativo == True,
+        Usuario.tipo == "atleta",
+        Usuario.ativo == True
     ).all()
-    if not atletas:
-        raise HTTPException(status_code=404, detail="Nenhum atleta vinculado à sua equipe")
+
+    modalidade_filtro = None
+
+    if atleta_id:
+        atleta_sel = db.query(Usuario).filter(Usuario.id == atleta_id).first()
+        if atleta_sel:
+            modalidade_filtro = getattr(atleta_sel, "modalidade", None)
+            if not modalidade_filtro:
+                ult_s = db.query(Sessao).filter(
+                    Sessao.atleta_id == atleta_id,
+                    Sessao.taxa_sudorese.isnot(None)
+                ).order_by(desc(Sessao.criado_em)).first()
+                if ult_s:
+                    modalidade_filtro = getattr(ult_s, "modalidade", None)
+
+    atletas_filtrados = []
+    if modalidade_filtro:
+        # Usando strip() e lower() para evitar que Vôlei e vôlei sejam tratados como diferentes
+        mod_filtro_limpo = str(modalidade_filtro).strip().lower()
+        for a in atletas_todos:
+            mod_a = getattr(a, "modalidade", None)
+            if mod_a and str(mod_a).strip().lower() == mod_filtro_limpo:
+                atletas_filtrados.append(a)
+                continue
+            
+            tem_sessao = db.query(Sessao).filter(
+                Sessao.atleta_id == a.id,
+                func.lower(Sessao.modalidade) == mod_filtro_limpo
+            ).first()
+            
+            if tem_sessao or a.id == atleta_id:
+                atletas_filtrados.append(a)
+    else:
+        atletas_filtrados = atletas_todos
+
+    # Remove duplicados que possam ter entrado
+    atletas_filtrados = list({a.id: a for a in atletas_filtrados}.values())
+
     sessoes_por_atleta = {}
-    for atl in atletas:
-        sessoes = _buscar_sessoes_concluidas(atl.id, db)
+    for atl in atletas_filtrados:
+        # BLINDAGEM 2: Foco total na taxa_sudorese em vez do status
+        query_sessoes = db.query(Sessao).filter(
+            Sessao.atleta_id == atl.id, 
+            Sessao.taxa_sudorese.isnot(None)
+        )
+        if modalidade_filtro:
+            query_sessoes = query_sessoes.filter(
+                func.lower(Sessao.modalidade) == str(modalidade_filtro).strip().lower()
+            )
+        
+        sessoes = query_sessoes.order_by(desc(Sessao.criado_em)).all()
         sessoes_dict = [_sessao_para_dict(s) for s in sessoes]
-        sessoes_por_atleta[atl.id] = {
-            "nome": atl.nome,
-            "codigo_anonimizado": atl.codigo_anonimizado or atl.nome,
-            "sessoes": sessoes_dict
-        }
-    pdf_bytes = gerar_pdf_historico_equipe(sessoes_por_atleta)
+        
+        if sessoes_dict or atl.id == atleta_id:
+            sessoes_por_atleta[atl.id] = {
+                "nome": atl.nome,
+                "codigo_anonimizado": atl.codigo_anonimizado or atl.nome,
+                "sessoes": sessoes_dict
+            }
+
+    profissional_dict = {
+        "nome": prof.nome,
+        "email": prof.email,
+        "modalidade_equipe": modalidade_filtro
+    }
+
+    pdf_bytes = gerar_pdf_historico_equipe(sessoes_por_atleta, profissional_dict)
+    
+    slug_modalidade = f"_{str(modalidade_filtro).replace(' ', '_')}" if modalidade_filtro else ""
+    filename = f"relatorio_equipe{slug_modalidade}.pdf"
+
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=relatorio_equipe.pdf"}
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
 

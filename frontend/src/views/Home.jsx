@@ -53,14 +53,14 @@ export default function Home() {
           {!loading && stats && stats.total_sessoes > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
               <StatCard
-                icon="📅"
+                icon=""
                 label="Sessões"
                 value={stats.total_sessoes}
                 sub="Total registradas"
                 onClick={() => navigate("/historico")}
               />
               <StatCard
-                icon="💧"
+                icon=""
                 label="Taxa Média"
                 value={stats.taxa_media ? `${stats.taxa_media} L/h` : "—"}
                 sub="de sudorese"
@@ -72,25 +72,25 @@ export default function Home() {
           {/* Ações rápidas */}
           <div className="a-card" style={{ marginBottom: 14 }}>
             <div className="a-card-title">
-              <div className="a-card-icon">⚡</div>
+              <div className="a-card-icon"></div>
               <h3>Acesso Rápido</h3>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <AcaoRow
-                icon="📋"
+                icon=""
                 titulo="Histórico de Sessões"
                 desc="Veja todas as suas sessões registradas"
                 onClick={() => navigate("/historico")}
               />
               <AcaoRow
-                icon="💡"
+                icon=""
                 titulo="Guia de Hidratação"
                 desc="Aprenda a registrar corretamente"
                 onClick={() => navigate("/guia")}
               />
               <AcaoRow
-                icon="👤"
+                icon=""
                 titulo="Meu Perfil"
                 desc="Gerencie seus dados pessoais"
                 onClick={() => navigate("/perfil")}
@@ -105,7 +105,7 @@ export default function Home() {
               background: "#fafafa", borderRadius: 14,
               border: "1px dashed #ddd",
             }}>
-              <div style={{ fontSize: 36, marginBottom: 10 }}>🏋️</div>
+              <div style={{ fontSize: 36, marginBottom: 10 }}></div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#333", marginBottom: 6 }}>
                 Nenhuma sessão ainda
               </div>

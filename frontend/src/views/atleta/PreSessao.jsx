@@ -46,7 +46,7 @@ export default function PreSessao() {
 
   const nivelUrina = Number(urina);
   const msgUrina =
-    nivelUrina >= 1 && nivelUrina <= 3 ? { texto: "Hidratado ✓", cor: "#0A7C59" } :
+    nivelUrina >= 1 && nivelUrina <= 3 ? { texto: "Hidratado ", cor: "#0A7C59" } :
       nivelUrina >= 4 && nivelUrina <= 5 ? { texto: "Atenção — beba água", cor: "#E68A10" } :
         nivelUrina >= 6 ? { texto: "Desidratado — beba água agora!", cor: "#9B1C2E" } : null;
 
@@ -103,7 +103,7 @@ export default function PreSessao() {
           {/* Card Pré-Treino */}
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon">⚖️</div>
+              <div className="a-card-icon"></div>
               <h3>Pré-Treino</h3>
             </div>
 
