@@ -1,7 +1,3 @@
-"""
-routers/sessoes.py
-Fluxo completo: pré-treino → fluidos → pós-treino → histórico.
-"""
 from __future__ import annotations
 
 import logging
@@ -196,6 +192,8 @@ def iniciar_pre_treino(
         status="durante",
     )
     db.add(sessao)
+    print("MODALIDADE USUARIO:", current.modalidade)
+    print("MODALIDADE SESSAO:", sessao.modalidade)
     db.commit()
     db.refresh(sessao)
     logger.info("Sessão %s iniciada para atleta %s", sessao.id, current.id)

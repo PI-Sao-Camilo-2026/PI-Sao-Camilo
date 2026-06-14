@@ -44,47 +44,49 @@ export default function Homepage() {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("30");
   async function carregarDashboard() {
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const data = await relatoriosApi.dashboardStats(periodo);
-    setStats(data);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setLoading(false);
+    try {
+      const data = await relatoriosApi.dashboardStats(periodo);
+      console.log("DASHBOARD:", data);
+      console.log("POR MODALIDADE:", data?.por_modalidade);
+      setStats(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
-useEffect(() => {
-  carregarDashboard();
-}, [periodo]);
-
-useEffect(() => {
-  const atualizarDashboard = () => {
+  useEffect(() => {
     carregarDashboard();
-  };
+  }, [periodo]);
 
-  window.addEventListener("dashboard-refresh", atualizarDashboard);
+  useEffect(() => {
+    const atualizarDashboard = () => {
+      carregarDashboard();
+    };
 
-  return () => {
-    window.removeEventListener(
-      "dashboard-refresh",
-      atualizarDashboard
-    );
-  };
-}, []);
+    window.addEventListener("dashboard-refresh", atualizarDashboard);
+
+    return () => {
+      window.removeEventListener(
+        "dashboard-refresh",
+        atualizarDashboard
+      );
+    };
+  }, []);
 
 
   const totalAtletas = stats?.total_atletas ?? 0;
   const totalAtletasSub = stats?.total_atletas_sub ?? "—";
-  
+
   const taxaMedia = stats?.taxa_media_l_h ?? null;
   const taxaMediaSub = stats?.taxa_media_sub ?? "—";
-  
+
   const perdaMedia = stats?.perda_media_pct ?? null;
   const perdaMediaSub = stats?.perda_media_sub ?? "—";
-  
+
   const totalSessoes = stats?.total_sessoes ?? 0;
   const totalSessoesSub = stats?.total_sessoes_sub ?? "—";
 
@@ -118,8 +120,8 @@ useEffect(() => {
             <p>Acompanhamento de hidratação e performance da equipe</p>
           </div>
           <div className="page-header-right">
-            <select 
-              value={periodo} 
+            <select
+              value={periodo}
               onChange={(e) => setPeriodo(e.target.value)}
               className="periodo-select"
             >
@@ -141,7 +143,7 @@ useEffect(() => {
             label="TOTAL DE ATLETAS"
             value={loading ? "..." : totalAtletas}
             sub={totalAtletasSub}
-            subClass="trend-danger" 
+            subClass="trend-danger"
           />
           <StatCard
             icon={<IconSudorese />}
@@ -171,7 +173,7 @@ useEffect(() => {
 
         {/* Seção Central: Gráficos lado a lado */}
         <div className="dashboard-charts-grid">
-          
+
           {/* Gráfico de Evolução por Data (Esquerda) */}
           <div className="chart-container main-chart">
             <div className="chart-header-row">
@@ -195,8 +197,8 @@ useEffect(() => {
                     <defs>
                       {modalidadesChaves.map((mod, i) => (
                         <linearGradient key={mod} id={`colorGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={paletaCores[i % paletaCores.length]} stopOpacity={0.15}/>
-                          <stop offset="95%" stopColor={paletaCores[i % paletaCores.length]} stopOpacity={0.0}/>
+                          <stop offset="5%" stopColor={paletaCores[i % paletaCores.length]} stopOpacity={0.15} />
+                          <stop offset="95%" stopColor={paletaCores[i % paletaCores.length]} stopOpacity={0.0} />
                         </linearGradient>
                       ))}
                     </defs>
@@ -205,17 +207,17 @@ useEffect(() => {
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9ca3af", fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
                     <Tooltip formatter={(value) => [`${value}%`, "Perda de Massa"]} />
                     <Legend iconSize={8} wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-                    
+
                     {modalidadesChaves.map((mod, i) => (
-                      <Area 
+                      <Area
                         key={mod}
-                        type="monotone" 
-                        dataKey={mod} 
-                        stroke={paletaCores[i % paletaCores.length]} 
-                        strokeWidth={2.5} 
-                        fillOpacity={1} 
-                        fill={`url(#colorGrad-${i})`} 
-                        name={mod} 
+                        type="monotone"
+                        dataKey={mod}
+                        stroke={paletaCores[i % paletaCores.length]}
+                        strokeWidth={2.5}
+                        fillOpacity={1}
+                        fill={`url(#colorGrad-${i})`}
+                        name={mod}
                       />
                     ))}
                   </AreaChart>
@@ -228,7 +230,7 @@ useEffect(() => {
           <div className="chart-container side-chart">
             <h3>Distribuição por Modalidade</h3>
             <p className="chart-sub" style={{ marginBottom: 24 }}>Proporção do total de avaliações feitas</p>
-            
+
             <div className="modalidades-list">
               {loading ? (
                 <div className="chart-loading">Carregando dados...</div>
@@ -247,15 +249,15 @@ useEffect(() => {
                         </span>
                       </div>
                       <div className="mod-bar-bg" style={{ height: 6, background: "#f0f0f2", borderRadius: 4 }}>
-                        <div 
-                          className="mod-bar-fill" 
-                          style={{ 
-                            width: `${m.percentual}%`, 
+                        <div
+                          className="mod-bar-fill"
+                          style={{
+                            width: `${m.percentual}%`,
                             background: "var(--red)",
                             height: "100%",
                             borderRadius: 4,
                             transition: "width 0.3s ease"
-                          }} 
+                          }}
                         />
                       </div>
                     </div>
@@ -288,8 +290,8 @@ useEffect(() => {
                   </svg>
                 );
 
-                if (alerta.tipo === "incompleto") { 
-                  badgeClass = "badge-yellow"; 
+                if (alerta.tipo === "incompleto") {
+                  badgeClass = "badge-yellow";
                   badgeIcon = (
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="12" height="12">
                       <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />

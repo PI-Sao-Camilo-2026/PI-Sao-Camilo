@@ -7,16 +7,15 @@ from sqlalchemy import desc, func
 from routers import sessoes
 from database import get_db, Usuario, Sessao
 from dependencies import get_current_user, require_profissional
-from exportacao.pdf   import gerar_pdf_sessao
+from exportacao.pdf import gerar_pdf_sessao
 from exportacao.excel import gerar_excel_historico
 from exportacao.pdf import gerar_pdf_historico_atleta, gerar_pdf_historico_equipe
 
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Optional  
+from typing import Optional
 
 router = APIRouter()
-
 
 def _classificar_hidratacao(variacao_pct: float | None) -> dict:
     if variacao_pct is None:
@@ -29,22 +28,20 @@ def _classificar_hidratacao(variacao_pct: float | None) -> dict:
         return {"nivel": "Desidratação moderada", "cor": "laranja", "alerta": True}
     return {"nivel": "Desidratação grave", "cor": "vermelho", "alerta": True}
 
-
 def _buscar_sessoes_concluidas(atleta_id: int, db: Session):
-    # BLINDAGEM 1: Usar taxa_sudorese.isnot(None) em vez do texto de status 
+    # BLINDAGEM 1: Usar taxa_sudorese.isnot(None) em vez do texto de status
     return db.query(Sessao).filter(
         Sessao.atleta_id == atleta_id,
         Sessao.taxa_sudorese.isnot(None)
     ).order_by(desc(Sessao.criado_em)).all()
 
-
 def _sessao_para_dict(s: Sessao) -> dict:
     if not s:
         return {}
-        
+
     variacao = getattr(s, 'variacao_peso_pct', 0.0)
     status_hidr = _classificar_hidratacao(variacao)
-    
+
     total_ingestao = 0.0
     if hasattr(s, 'fluidos') and s.fluidos:
         try:
@@ -56,7 +53,7 @@ def _sessao_para_dict(s: Sessao) -> dict:
     if hasattr(s, 'recomendacao') and s.recomendacao:
         rec_texto = getattr(s.recomendacao, 'texto', "") or ""
 
-    # AJUSTE DA COR DA URINA (Verifique se no seu modelo o nome é exatamente esse)
+    # AJUSTE DA COR DA URINA
     cor_urina_final = getattr(s, 'cor_urina_final', None) or getattr(s, 'cor_urina_pos', None) or getattr(s, 'cor_urina_basal', "—")
 
     return {
@@ -74,7 +71,7 @@ def _sessao_para_dict(s: Sessao) -> dict:
         "clima_temperatura": getattr(s, 'temp_celsius', None) or getattr(s, 'clima_temperatura', None),
         "clima_umidade": getattr(s, 'umidade_pct', None) or getattr(s, 'clima_umidade', None),
         "cor_urina_basal": getattr(s, 'cor_urina_basal', None),
-        "cor_urina_final": cor_urina_final, # Adicionado explicitamente para o PDF
+        "cor_urina_final": cor_urina_final, 
         "status_hidratacao": status_hidr["nivel"],
         "cor_status": status_hidr["cor"],
         "alerta_perigo": status_hidr["alerta"],
@@ -83,10 +80,8 @@ def _sessao_para_dict(s: Sessao) -> dict:
         "criado_em": s.criado_em.isoformat() if (hasattr(s, 'criado_em') and s.criado_em) else None
     }
 
-
 def _nome_arquivo(nome: str) -> str:
     return nome.lower().replace(" ", "_")
-
 
 @router.get("/dashboard-stats")
 def dashboard_stats(
@@ -128,147 +123,54 @@ def dashboard_stats(
     perdas = [s.variacao_peso_pct for s in sessoes if getattr(s, 'variacao_peso_pct', None)]
 
     atleta_map = {a.id: a for a in atletas}
-    
     alertas_list = []
 
     for s in sessoes:
-
-    # ALERTA DE DESIDRATAÇÃO
+        # ALERTA DE DESIDRATAÇÃO
         v_peso = getattr(s, "variacao_peso_pct", 0.0)
-
         if v_peso and v_peso > 2.0:
-
             atl = atleta_map.get(s.atleta_id)
             nome_atl = atl.nome if atl else "Atleta"
 
-            tipo_alerta = (
-                "incompleto"
-                if v_peso <= 3.0
-                else "perigo"
-        )
-
-            titulo_alerta = (
-                "Desidratação Leve/Mod."
-                if v_peso <= 3.0
-                else "Desidratação Crítica"
-        )
+            tipo_alerta = "incompleto" if v_peso <= 3.0 else "perigo"
+            titulo_alerta = "Desidratação Leve/Mod." if v_peso <= 3.0 else "Desidratação Crítica"
 
             alertas_list.append({
                 "titulo": f"{titulo_alerta} - {nome_atl}",
-                "tempo": (
-                    s.criado_em.strftime("%d/%m %H:%M")
-                    if s.criado_em else "Agora"
-            ),
-                "descricao": (
-                    f"O atleta apresentou perda de massa corporal "
-                    f"de <strong>{v_peso:.1f}%</strong> "
-                    f"na sessão de {s.modalidade or 'Treino'}."
-            ),
+                "tempo": s.criado_em.strftime("%d/%m %H:%M") if s.criado_em else "Agora",
+                "descricao": f"O atleta apresentou perda de massa corporal de <strong>{v_peso:.1f}%</strong> na sessão de {s.modalidade or 'Treino'}.",
                 "tipo": tipo_alerta,
-                "data": (
-                    s.criado_em.isoformat()
-                    if s.criado_em else ""
-            )
-        })
-
-    # ALERTA GASTROINTESTINAL
-    sintomas = getattr(s, "sintomas", None)
-
-    if sintomas:
-
-        sintomas_lower = sintomas.lower()
-
-        palavras_gi = [
-            "náusea",
-            "enjoo",
-            "vômito",
-            "vomito",
-            "azia",
-            "refluxo",
-            "dor abdominal",
-            "distensão",
-            "distensao",
-            "diarreia",
-            "desconforto gastrointestinal"
-        ]
-
-        if any(
-            palavra in sintomas_lower
-            for palavra in palavras_gi
-        ):
-
-            atl = atleta_map.get(s.atleta_id)
-            nome_atl = atl.nome if atl else "Atleta"
-
-            alertas_list.append({
-                "titulo": f"Sintomas Gastrointestinais - {nome_atl}",
-                "tempo": (
-                    s.criado_em.strftime("%d/%m %H:%M")
-                    if s.criado_em else "Agora"
-                ),
-                "descricao": (
-                    f"O atleta relatou sintomas "
-                    f"gastrointestinais: "
-                    f"<strong>{sintomas}</strong>"
-                ),
-                "tipo": "perigo",
-                "data": (
-                    s.criado_em.isoformat()
-                    if s.criado_em else ""
-                )
+                "data": s.criado_em.isoformat() if s.criado_em else ""
             })
 
-    # ALERTA GASTROINTESTINAL
-    sintomas = getattr(s, "sintomas", None)
+        # ALERTA GASTROINTESTINAL
+        sintomas = getattr(s, "sintomas", None)
+        if sintomas:
+            sintomas_lower = sintomas.lower()
+            palavras_gi = [
+                "náusea", "enjoo", "vômito", "vomito", "azia", "refluxo",
+                "dor abdominal", "distensão", "distensao", "diarreia",
+                "desconforto gastrointestinal"
+            ]
 
-    if sintomas:
+            if any(palavra in sintomas_lower for palavra in palavras_gi):
+                atl = atleta_map.get(s.atleta_id)
+                nome_atl = atl.nome if atl else "Atleta"
 
-        sintomas_lower = sintomas.lower()
-
-        palavras_gi = [
-            "náusea",
-            "enjoo",
-            "vômito",
-            "vomito",
-            "azia",
-            "refluxo",
-            "dor abdominal",
-            "distensão",
-            "distensao",
-            "diarreia",
-            "desconforto gastrointestinal"
-        ]
-
-        if any(
-            palavra in sintomas_lower
-            for palavra in palavras_gi
-        ):
-
-            atl = atleta_map.get(s.atleta_id)
-            nome_atl = atl.nome if atl else "Atleta"
-
-            alertas_list.append({
-                "titulo": (
-                    f"Sintomas Gastrointestinais - "
-                    f"{nome_atl}"
-                ),
-                "tempo": (
-                    s.criado_em.strftime("%d/%m %H:%M")
-                    if s.criado_em else "Agora"
-                ),
-                "descricao": (
-                    f"O atleta relatou sintomas "
-                    f"gastrointestinais: "
-                    f"<strong>{sintomas}</strong>"
-                ),
-                "tipo": "perigo",
-                "data": (
-                    s.criado_em.isoformat()
-                    if s.criado_em else ""
-                )
-            })
+                alertas_list.append({
+                    "titulo": f"Sintomas Gastrointestinais - {nome_atl}",
+                    "tempo": s.criado_em.strftime("%d/%m %H:%M") if s.criado_em else "Agora",
+                    "descricao": f"O atleta relatou sintomas gastrointestinais: <strong>{sintomas}</strong>",
+                    "tipo": "perigo",
+                    "data": s.criado_em.isoformat() if s.criado_em else ""
+                })
 
     total_sessoes_periodo = len(sessoes)
+    
+    print("\n=== MODALIDADES DAS SESSÕES ===")
+    for s in sessoes:
+        print("ID:", s.id, "Modalidade:", repr(getattr(s, "modalidade", None)))
+
     contagem_modalidades = defaultdict(int)
     for s in sessoes:
         mod = s.modalidade or "Geral"
@@ -315,7 +217,6 @@ def dashboard_stats(
         "evolucao_sudorese": evolucao_sudorese
     }
 
-
 @router.get("/historico-pdf/{atleta_id}")
 def exportar_atleta_pdf(
     atleta_id: int,
@@ -329,19 +230,19 @@ def exportar_atleta_pdf(
     ).first()
     if not atleta:
         raise HTTPException(status_code=404, detail="Atleta não encontrado ou não pertence à sua equipe")
+    
     sessoes = _buscar_sessoes_concluidas(atleta_id, db)
     sessoes_dict = [_sessao_para_dict(s) for s in sessoes]
     atleta_dict = {
         "nome": atleta.nome,
         "codigo_anonimizado": atleta.codigo_anonimizado or atleta.nome,
     }
-    pdf_bytes = gerar_pdf_historico_atleta(atleta_dict, sessoes_dict) # Corrigida a ordem dos parametros
+    pdf_bytes = gerar_pdf_historico_atleta(atleta_dict, sessoes_dict)
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=historico_{_nome_arquivo(atleta.nome)}.pdf"}
     )
-
 
 @router.get("/equipe-pdf")
 def exportar_equipe_pdf(
@@ -371,7 +272,6 @@ def exportar_equipe_pdf(
 
     atletas_filtrados = []
     if modalidade_filtro:
-        # Usando strip() e lower() para evitar que Vôlei e vôlei sejam tratados como diferentes
         mod_filtro_limpo = str(modalidade_filtro).strip().lower()
         for a in atletas_todos:
             mod_a = getattr(a, "modalidade", None)
@@ -389,12 +289,10 @@ def exportar_equipe_pdf(
     else:
         atletas_filtrados = atletas_todos
 
-    # Remove duplicados que possam ter entrado
     atletas_filtrados = list({a.id: a for a in atletas_filtrados}.values())
 
     sessoes_por_atleta = {}
     for atl in atletas_filtrados:
-        # BLINDAGEM 2: Foco total na taxa_sudorese em vez do status
         query_sessoes = db.query(Sessao).filter(
             Sessao.atleta_id == atl.id, 
             Sessao.taxa_sudorese.isnot(None)
@@ -420,8 +318,9 @@ def exportar_equipe_pdf(
         "modalidade_equipe": modalidade_filtro
     }
 
+    # Correção do erro de digitação aqui: profissional_dict
     pdf_bytes = gerar_pdf_historico_equipe(sessoes_por_atleta, profissional_dict)
-    
+
     slug_modalidade = f"_{str(modalidade_filtro).replace(' ', '_')}" if modalidade_filtro else ""
     filename = f"relatorio_equipe{slug_modalidade}.pdf"
 
@@ -430,7 +329,6 @@ def exportar_equipe_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
-
 
 @router.get("/excel/{atleta_id}")
 def exportar_atleta_excel(
