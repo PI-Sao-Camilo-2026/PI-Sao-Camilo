@@ -161,6 +161,25 @@ export default function Perfil() {
         }
     }
 
+    async function handleApagarConta() {
+        const confirmar = window.confirm(
+            "Tem certeza que deseja apagar sua conta? Essa ação é irreversível e todo o seu histórico de hidratação e treinos será permanentemente removido."
+        );
+        
+        if (confirmar) {
+            try {
+                setLoading(true);
+                // Quando sua API de exclusão estiver pronta, você pode descomentar a linha abaixo:
+                // await usuariosApi.deletarConta();
+                
+                logout(navigate);
+            } catch (err) {
+                setErro(err.message || "Erro ao apagar conta");
+                setLoading(false);
+            }
+        }
+    }
+
     return (
         <div className="atleta-page">
             <div className="atleta-screen">
@@ -233,7 +252,7 @@ export default function Perfil() {
                             fontSize: 13, color: "#0A7C59", fontWeight: 600,
                             marginBottom: 14,
                         }}>
-                            ✓ Perfil atualizado com sucesso!
+                            ✓ Perfil updated com sucesso!
                         </div>
                     )}
 
@@ -355,6 +374,36 @@ export default function Perfil() {
                                 <div style={{ fontSize: 11, color: "#999" }}>Privacidade e consentimento</div>
                             </div>
                             <span style={{ color: "#ccc", fontSize: 18 }}>›</span>
+                        </div>
+                    </div>
+
+                    {/* Zona de Perigo / Excluir Conta */}
+                    <div className="a-card" style={{ marginBottom: 14, border: "1px solid #f5c0c0" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <div>
+                                <div style={{ fontSize: 13, fontWeight: 700, color: "#9B1C2E" }}>Zona de Perigo</div>
+                                <div style={{ fontSize: 11, color: "#999", marginTop: 2, maxWidth: "90%" }}>
+                                    Apagar a conta permanentemente e apagar todo o histórico.
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleApagarConta}
+                                disabled={loading}
+                                style={{
+                                    padding: "8px 14px",
+                                    background: "#9B1C2E",
+                                    border: "none",
+                                    borderRadius: 10,
+                                    color: "#fff",
+                                    fontWeight: 700,
+                                    fontSize: 12,
+                                    cursor: "pointer",
+                                    fontFamily: "'Barlow', sans-serif",
+                                    whiteSpace: "nowrap"
+                                }}
+                            >
+                                {loading ? "Apagando..." : "Excluir Conta"}
+                            </button>
                         </div>
                     </div>
 

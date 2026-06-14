@@ -7,6 +7,7 @@ import Sidebar from "../../components/Sidebar";
 export default function HistoricoProf() {
     const [atletas, setAtletas] = useState([]);
     const [atletaSelecionado, setAtletaSelecionado] = useState("");
+    const [modalidadeFiltro, setModalidadeFiltro] = useState("");
     const [sessoes, setSessoes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingAtletas, setLoadingAtletas] = useState(true);
@@ -30,8 +31,34 @@ export default function HistoricoProf() {
     }, [atletaSelecionado]);
 
     const atleta = atletas.find(a => String(a.id) === String(atletaSelecionado));
-    const taxas = sessoes.map(s => s.taxa_sudorese).filter(Boolean);
-    const perdas = sessoes.map(s => s.variacao_peso_pct).filter(Boolean);
+
+    // Modalidades únicas extraídas da lista de atletas
+    const modalidades = [...new Set(atletas.map(a => a.modalidade).filter(Boolean))].sort();
+
+    // Atletas filtrados pela modalidade selecionada
+    const atletasFiltrados = modalidadeFiltro
+        ? atletas.filter(a => a.modalidade === modalidadeFiltro)
+        : atletas;
+
+    // Ao trocar modalidade, limpa o atleta se ele não pertencer à nova modalidade
+    const handleModalidadeChange = (e) => {
+        const nova = e.target.value;
+        setModalidadeFiltro(nova);
+        if (nova && atletaSelecionado) {
+            const atletaAtual = atletas.find(a => String(a.id) === String(atletaSelecionado));
+            if (atletaAtual?.modalidade !== nova) {
+                setAtletaSelecionado("");
+            }
+        }
+    };
+
+    // Sessões filtradas pela modalidade (caso o atleta tenha sessões de modalidades diferentes)
+    const sessoesFiltradas = modalidadeFiltro
+        ? sessoes.filter(s => !s.modalidade || s.modalidade === modalidadeFiltro)
+        : sessoes;
+
+    const taxas = sessoesFiltradas.map(s => s.taxa_sudorese).filter(Boolean);
+    const perdas = sessoesFiltradas.map(s => s.variacao_peso_pct).filter(Boolean);
     const taxaMedia = taxas.length ? (taxas.reduce((a, b) => a + b, 0) / taxas.length).toFixed(2) : null;
     const maiorPerda = perdas.length ? Math.max(...perdas).toFixed(1) : null;
 
@@ -123,22 +150,63 @@ export default function HistoricoProf() {
                     <div className="prof-erro" style={{ marginBottom: 16 }}>{erroExport}</div>
                 )}
 
-                {/* Seletor de atleta */}
+                {/* Filtros: Modalidade + Atleta */}
                 <div style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: "20px", marginBottom: 20 }}>
-                    <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
-                        Selecionar Atleta
-                    </label>
-                    <select
-                        className="form-input"
-                        value={atletaSelecionado}
-                        onChange={e => setAtletaSelecionado(e.target.value)}
-                        style={{ maxWidth: "100%", width: "100%", maxWidth: 360 }}
-                    >
-                        <option value="">-- Escolha um atleta --</option>
-                        {atletas.map(a => (
-                            <option key={a.id} value={a.id}>{a.nome} {a.modalidade ? `(${a.modalidade})` : ""}</option>
-                        ))}
-                    </select>
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-end" }}>
+                        {/* Filtro de Modalidade */}
+                        <div style={{ flex: "0 0 auto", minWidth: 200 }}>
+                            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
+                                Modalidade
+                            </label>
+                            <select
+                                className="form-input"
+                                value={modalidadeFiltro}
+                                onChange={handleModalidadeChange}
+                                style={{ width: "100%", maxWidth: 220 }}
+                            >
+                                <option value="">Todas as modalidades</option>
+                                {modalidades.map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Divisor vertical */}
+                        <div style={{ width: 1, background: "var(--border)", alignSelf: "stretch", margin: "0 4px" }} />
+
+                        {/* Seletor de Atleta */}
+                        <div style={{ flex: "1 1 200px", minWidth: 200 }}>
+                            <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
+                                Atleta {modalidadeFiltro && atletasFiltrados.length > 0 && (
+                                    <span style={{ fontWeight: 400, color: "var(--red)", marginLeft: 6 }}>
+                                        {atletasFiltrados.length} encontrado{atletasFiltrados.length !== 1 ? "s" : ""}
+                                    </span>
+                                )}
+                            </label>
+                            <select
+                                className="form-input"
+                                value={atletaSelecionado}
+                                onChange={e => setAtletaSelecionado(e.target.value)}
+                                style={{ width: "100%", maxWidth: 360 }}
+                            >
+                                <option value="">-- Escolha um atleta --</option>
+                                {atletasFiltrados.map(a => (
+                                    <option key={a.id} value={a.id}>{a.nome} {a.modalidade ? `(${a.modalidade})` : ""}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Botão de limpar filtros */}
+                        {(modalidadeFiltro || atletaSelecionado) && (
+                            <button
+                                className="btn-ghost"
+                                onClick={() => { setModalidadeFiltro(""); setAtletaSelecionado(""); }}
+                                style={{ whiteSpace: "nowrap", alignSelf: "flex-end" }}
+                            >
+                                Limpar filtros
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Restante do conteúdo igual ao original... */}
@@ -148,7 +216,7 @@ export default function HistoricoProf() {
                             <div className="stat-card">
                                 <div className="stat-card-icon">📅</div>
                                 <label>Sessões</label>
-                                <div className="stat-val">{loading ? "..." : sessoes.length}</div>
+                                <div className="stat-val">{loading ? "..." : sessoesFiltradas.length}</div>
                                 <div className="stat-sub">Total registradas</div>
                             </div>
                             <div className="stat-card">
@@ -191,10 +259,14 @@ export default function HistoricoProf() {
                                 <tbody>
                                     {loading ? (
                                         <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px" }}>Carregando sessões...</td></tr>
-                                    ) : sessoes.length === 0 ? (
-                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px" }}>Nenhuma sessão encontrada</td></tr>
+                                    ) : sessoesFiltradas.length === 0 ? (
+                                        <tr><td colSpan={8} style={{ textAlign: "center", padding: "32px" }}>
+                                            {modalidadeFiltro && sessoes.length > 0
+                                                ? `Nenhuma sessão de "${modalidadeFiltro}" encontrada para este atleta`
+                                                : "Nenhuma sessão encontrada"}
+                                        </td></tr>
                                     ) : (
-                                        sessoes.map(s => (
+                                        sessoesFiltradas.map(s => (
                                             <tr key={s.id}>
                                                 <td>{s.criado_em ? new Date(s.criado_em).toLocaleDateString("pt-BR") : "—"}</td>
                                                 <td>{s.modalidade || "—"}</td>
@@ -214,7 +286,14 @@ export default function HistoricoProf() {
                                 </tbody>
                             </table>
                             <div className="table-footer">
-                                <span>{sessoes.length} sessão(ões) encontrada(s)</span>
+                                <span>
+                                    {sessoesFiltradas.length} sessão(ões) encontrada(s)
+                                    {modalidadeFiltro && sessoes.length !== sessoesFiltradas.length && (
+                                        <span style={{ color: "var(--text-3)", marginLeft: 8 }}>
+                                            ({sessoes.length} no total)
+                                        </span>
+                                    )}
+                                </span>
                             </div>
                         </div>
                     </>

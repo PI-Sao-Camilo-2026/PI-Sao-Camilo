@@ -56,8 +56,8 @@ const TABS = [
 export default function ConfiguracaoProf() {
     const { logout } = useAuth();
     const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
-const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
-const [mostrarConfirmacaoSenha, setMostrarConfirmacaoSenha] = useState(false);
+    const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
+    const [mostrarConfirmacaoSenha, setMostrarConfirmacaoSenha] = useState(false);
     const [tabAtiva, setTabAtiva] = useState("perfil");
     const [perfil, setPerfil] = useState(null);
     const [form, setForm] = useState({
@@ -114,6 +114,26 @@ const [mostrarConfirmacaoSenha, setMostrarConfirmacaoSenha] = useState(false);
             setErro(err.message || "Erro ao salvar");
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function handleApagarConta() {
+        const confirmar = window.confirm(
+            "Tem certeza que deseja apagar sua conta? Essa ação é irreversível e todos os seus dados serão perdidos."
+        );
+        
+        if (confirmar) {
+            try {
+                setLoading(true);
+                // Exemplo de como você chamaria sua API para deletar a conta:
+                // await usuariosApi.deletarConta(); 
+                
+                // Após deletar no banco, desloga o usuário e limpa a sessão:
+                logout(); 
+            } catch (err) {
+                setErro(err.message || "Erro ao apagar conta");
+                setLoading(false);
+            }
         }
     }
 
@@ -291,95 +311,106 @@ const [mostrarConfirmacaoSenha, setMostrarConfirmacaoSenha] = useState(false);
                                 </div>
 
                                 <div className="config-card" style={{ padding: "20px" }}>
-    <div className="form-field">
-        <label>Senha atual</label>
+                                    <div className="form-field">
+                                        <label>Senha atual</label>
 
-        <div className="input-wrap input-wrap-password">
-            <input
-                className="form-input"
-                type={mostrarSenhaAtual ? "text" : "password"}
-                placeholder="••••••••"
-            />
+                                        <div className="input-wrap input-wrap-password">
+                                            <input
+                                                className="form-input"
+                                                type={mostrarSenhaAtual ? "text" : "password"}
+                                                placeholder="••••••••"
+                                            />
 
-            <button
-                type="button"
-                className="btn-toggle-password"
-                onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-            >
-                {mostrarSenhaAtual ? <IconEyeOff /> : <IconEye />}
-            </button>
-        </div>
-    </div>
+                                            <button
+                                                type="button"
+                                                className="btn-toggle-password"
+                                                onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
+                                            >
+                                                {mostrarSenhaAtual ? <IconEyeOff /> : <IconEye />}
+                                            </button>
+                                        </div>
+                                    </div>
 
-    <div className="form-row">
-        <div className="form-field">
-            <label>Nova senha</label>
+                                    <div className="form-row">
+                                        <div className="form-field">
+                                            <label>Nova senha</label>
 
-            <div className="input-wrap input-wrap-password">
-                <input
-                    className="form-input"
-                    type={mostrarNovaSenha ? "text" : "password"}
-                    placeholder="••••••••"
-                />
+                                            <div className="input-wrap input-wrap-password">
+                                                <input
+                                                    className="form-input"
+                                                    type={mostrarNovaSenha ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                />
 
-                <button
-                    type="button"
-                    className="btn-toggle-password"
-                    onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                >
-                    {mostrarNovaSenha ? <IconEyeOff /> : <IconEye />}
-                </button>
-            </div>
-        </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn-toggle-password"
+                                                    onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
+                                                >
+                                                    {mostrarNovaSenha ? <IconEyeOff /> : <IconEye />}
+                                                </button>
+                                            </div>
+                                        </div>
 
-        <div className="form-field">
-            <label>Confirmar nova senha</label>
+                                        <div className="form-field">
+                                            <label>Confirmar nova senha</label>
 
-            <div className="input-wrap input-wrap-password">
-                <input
-                    className="form-input"
-                    type={mostrarConfirmacaoSenha ? "text" : "password"}
-                    placeholder="••••••••"
-                />
+                                            <div className="input-wrap input-wrap-password">
+                                                <input
+                                                    className="form-input"
+                                                    type={mostrarConfirmacaoSenha ? "text" : "password"}
+                                                    placeholder="••••••••"
+                                                />
 
-                <button
-                    type="button"
-                    className="btn-toggle-password"
-                    onClick={() =>
-                        setMostrarConfirmacaoSenha(!mostrarConfirmacaoSenha)
-                    }
-                >
-                    {mostrarConfirmacaoSenha ? <IconEyeOff /> : <IconEye />}
-                </button>
-            </div>
-        </div>
-    </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn-toggle-password"
+                                                    onClick={() =>
+                                                        setMostrarConfirmacaoSenha(!mostrarConfirmacaoSenha)
+                                                    }
+                                                >
+                                                    {mostrarConfirmacaoSenha ? <IconEyeOff /> : <IconEye />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
 
-    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button className="btn-red" style={{ padding: "11px 22px" }}>
-            Atualizar Senha
-        </button>
-    </div>
-</div>
+                                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                        <button className="btn-red" style={{ padding: "11px 22px" }}>
+                                            Atualizar Senha
+                                        </button>
+                                    </div>
+                                </div>
 
                                 <div style={{ marginTop: 20 }}>
                                     <div className="config-section-title">Zona de Perigo</div>
-                                    <div className="config-card" style={{ padding: "16px 20px" }}>
+                                    <div className="config-card" style={{ padding: "16px 20px", border: "1px solid #f5c0c0" }}>
                                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                             <div>
-                                                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text)" }}>Sair da conta</div>
-                                                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>Encerrar sessão em todos os dispositivos</div>
+                                                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--red, #e74c3c)" }}>
+                                                    Apagar a conta
+                                                </div>
+                                                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2, maxWidth: "80%" }}>
+                                                    Atenção: Esta ação é irreversível. Todos os seus dados, histórico e vínculos com atletas serão apagados permanentemente.
+                                                </div>
                                             </div>
                                             <button
-                                                onClick={() => logout()}
+                                                onClick={handleApagarConta}
+                                                disabled={loading}
                                                 style={{
-                                                    padding: "9px 18px", background: "transparent",
-                                                    border: "1.5px solid #f5c0c0", borderRadius: 8,
-                                                    color: "var(--red)", fontWeight: 700, fontSize: 13,
-                                                    cursor: "pointer", fontFamily: "var(--font)",
+                                                    padding: "9px 18px", 
+                                                    background: "var(--red, #e74c3c)",
+                                                    border: "none", 
+                                                    borderRadius: 8,
+                                                    color: "#fff", 
+                                                    fontWeight: 700, 
+                                                    fontSize: 13,
+                                                    cursor: "pointer", 
+                                                    fontFamily: "var(--font)",
+                                                    whiteSpace: "nowrap"
                                                 }}
                                             >
-                                                ↪ Sair
+                                                {loading ? "Apagando..." : "🗑 Excluir Conta"}
                                             </button>
                                         </div>
                                     </div>
