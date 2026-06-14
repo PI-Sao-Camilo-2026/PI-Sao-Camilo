@@ -43,14 +43,38 @@ export default function Homepage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState("30");
+  async function carregarDashboard() {
+  setLoading(true);
 
-  useEffect(() => {
-    setLoading(true);
-    relatoriosApi.dashboardStats(periodo)
-      .then(setStats)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [periodo]);
+  try {
+    const data = await relatoriosApi.dashboardStats(periodo);
+    setStats(data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+}
+
+useEffect(() => {
+  carregarDashboard();
+}, [periodo]);
+
+useEffect(() => {
+  const atualizarDashboard = () => {
+    carregarDashboard();
+  };
+
+  window.addEventListener("dashboard-refresh", atualizarDashboard);
+
+  return () => {
+    window.removeEventListener(
+      "dashboard-refresh",
+      atualizarDashboard
+    );
+  };
+}, []);
+
 
   const totalAtletas = stats?.total_atletas ?? 0;
   const totalAtletasSub = stats?.total_atletas_sub ?? "—";

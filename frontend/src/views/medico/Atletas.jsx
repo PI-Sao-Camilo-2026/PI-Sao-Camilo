@@ -80,18 +80,23 @@ function ModalVincularAtleta({ onClose, onVinculado }) {
     }
 
     useEffect(() => { buscar(""); }, []);
+async function vincular(atleta) {
+    setVinculando(atleta.id);
+    setErro("");
 
-    async function vincular(atleta) {
-        setVinculando(atleta.id);
-        setErro("");
-        try {
-            await usuariosApi.vincularAtleta(atleta.id);
-            onVinculado();
-        } catch (err) {
-            setErro(err.message || "Erro ao vincular atleta.");
-            setVinculando(null);
-        }
+    try {
+        await usuariosApi.vincularAtleta(atleta.id);
+
+        window.dispatchEvent(
+            new Event("dashboard-refresh")
+        );
+
+        onVinculado();
+    } catch (err) {
+        setErro(err.message || "Erro ao vincular atleta.");
+        setVinculando(null);
     }
+}
 
     return (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
