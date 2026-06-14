@@ -96,7 +96,14 @@ export default function Suporte() {
                                 Canais de Atendimento
                             </div>
 
-                            <div className="canal-item">
+                            {/* WhatsApp integrado com wa.me */}
+                            <a 
+                                href="https://wa.me/5511999999999" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="canal-item"
+                                style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+                            >
                                 <div className="canal-icon canal-verde">
                                     <IconPhone />
                                 </div>
@@ -104,9 +111,14 @@ export default function Suporte() {
                                     <div className="canal-nome">WhatsApp</div>
                                     <div className="canal-desc">Resposta em até 2h</div>
                                 </div>
-                            </div>
+                            </a>
 
-                            <div className="canal-item">
+                            {/* E-mail integrado com mailto */}
+                            <a 
+                                href="mailto:suporte@nutriesportiva.com"
+                                className="canal-item"
+                                style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}
+                            >
                                 <div className="canal-icon canal-azul">
                                     <IconMail />
                                 </div>
@@ -114,7 +126,7 @@ export default function Suporte() {
                                     <div className="canal-nome">E-mail</div>
                                     <div className="canal-desc">suporte@nutriesportiva.com</div>
                                 </div>
-                            </div>
+                            </a>
 
                             <div className="canal-item">
                                 <div className="canal-icon canal-cinza">
