@@ -33,6 +33,20 @@ const IconSave = () => (
     </svg>
 );
 
+const IconEye = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+    </svg>
+);
+
+const IconEyeOff = () => (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+        <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+);
+
 const TABS = [
     { id: "perfil", label: "Meu Perfil", icon: <IconUser /> },
     { id: "notificacoes", label: "Notificações", icon: <IconBell /> },
@@ -41,6 +55,9 @@ const TABS = [
 
 export default function ConfiguracaoProf() {
     const { logout } = useAuth();
+    const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
+const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
+const [mostrarConfirmacaoSenha, setMostrarConfirmacaoSenha] = useState(false);
     const [tabAtiva, setTabAtiva] = useState("perfil");
     const [perfil, setPerfil] = useState(null);
     const [form, setForm] = useState({
@@ -274,26 +291,76 @@ export default function ConfiguracaoProf() {
                                 </div>
 
                                 <div className="config-card" style={{ padding: "20px" }}>
-                                    <div className="form-field">
-                                        <label>Senha atual</label>
-                                        <input className="form-input" type="password" placeholder="••••••••" />
-                                    </div>
-                                    <div className="form-row">
-                                        <div className="form-field">
-                                            <label>Nova senha</label>
-                                            <input className="form-input" type="password" placeholder="••••••••" />
-                                        </div>
-                                        <div className="form-field">
-                                            <label>Confirmar nova senha</label>
-                                            <input className="form-input" type="password" placeholder="••••••••" />
-                                        </div>
-                                    </div>
-                                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                                        <button className="btn-red" style={{ padding: "11px 22px" }}>
-                                            Atualizar Senha
-                                        </button>
-                                    </div>
-                                </div>
+    <div className="form-field">
+        <label>Senha atual</label>
+
+        <div className="input-wrap input-wrap-password">
+            <input
+                className="form-input"
+                type={mostrarSenhaAtual ? "text" : "password"}
+                placeholder="••••••••"
+            />
+
+            <button
+                type="button"
+                className="btn-toggle-password"
+                onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
+            >
+                {mostrarSenhaAtual ? <IconEyeOff /> : <IconEye />}
+            </button>
+        </div>
+    </div>
+
+    <div className="form-row">
+        <div className="form-field">
+            <label>Nova senha</label>
+
+            <div className="input-wrap input-wrap-password">
+                <input
+                    className="form-input"
+                    type={mostrarNovaSenha ? "text" : "password"}
+                    placeholder="••••••••"
+                />
+
+                <button
+                    type="button"
+                    className="btn-toggle-password"
+                    onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
+                >
+                    {mostrarNovaSenha ? <IconEyeOff /> : <IconEye />}
+                </button>
+            </div>
+        </div>
+
+        <div className="form-field">
+            <label>Confirmar nova senha</label>
+
+            <div className="input-wrap input-wrap-password">
+                <input
+                    className="form-input"
+                    type={mostrarConfirmacaoSenha ? "text" : "password"}
+                    placeholder="••••••••"
+                />
+
+                <button
+                    type="button"
+                    className="btn-toggle-password"
+                    onClick={() =>
+                        setMostrarConfirmacaoSenha(!mostrarConfirmacaoSenha)
+                    }
+                >
+                    {mostrarConfirmacaoSenha ? <IconEyeOff /> : <IconEye />}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button className="btn-red" style={{ padding: "11px 22px" }}>
+            Atualizar Senha
+        </button>
+    </div>
+</div>
 
                                 <div style={{ marginTop: 20 }}>
                                     <div className="config-section-title">Zona de Perigo</div>
