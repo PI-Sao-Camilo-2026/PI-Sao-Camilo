@@ -76,12 +76,12 @@ export default function Historico() {
 
           {loading ? (
             <div style={{ textAlign: "center", padding: "40px 0", color: "#999" }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+              <div style={{ fontSize: 32, marginBottom: 12 }}></div>
               <p style={{ fontSize: 13 }}>Carregando histórico...</p>
             </div>
           ) : sessoes.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+              <div style={{ fontSize: 48, marginBottom: 16 }}></div>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: "#333", marginBottom: 8 }}>
                 Nenhuma sessão concluída
               </h3>
@@ -99,16 +99,16 @@ export default function Historico() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
                   <StatCard
                     label="Média Mensal"
-                    value={stats.taxa_media ? `${stats.taxa_media}` : "—"}
+                    value={stats.taxa_media ? `${stats.taxa_media}` : ""}
                     unit="L/h"
-                    icon="💧"
+                    icon=""
                     destaque
                   />
                   <StatCard
                     label="Maior Perda"
-                    value={stats.maior_perda_pct ? `-${stats.maior_perda_pct}%` : "—"}
+                    value={stats.maior_perda_pct ? `${stats.maior_perda_pct}%` : ""}
                     unit="de massa"
-                    icon="⚖️"
+                    icon=""
                     alerta={stats.maior_perda_pct > 2}
                   />
                 </div>
@@ -202,7 +202,7 @@ export default function Historico() {
                       {/* Taxa */}
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 14, fontWeight: 800, color: "#9B1C2E" }}>
-                          {s.taxa_sudorese ? s.taxa_sudorese.toFixed(1) : "—"}
+                          {s.taxa_sudorese ? s.taxa_sudorese.toFixed(1) : ""}
                         </div>
                         <div style={{ fontSize: 10, color: "#bbb", fontWeight: 600 }}>L/h</div>
                         <div style={{

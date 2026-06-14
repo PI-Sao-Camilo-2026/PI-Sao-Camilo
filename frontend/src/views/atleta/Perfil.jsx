@@ -7,6 +7,118 @@ import { useAuth } from "../../contexts/AuthContext";
 import { usuariosApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
 
+function ModalTermos({ onClose }) {
+    return (
+        <div
+            onClick={onClose}
+            style={{
+                position: "fixed", inset: 0, zIndex: 1000,
+                background: "rgba(0,0,0,0.55)",
+                display: "flex", alignItems: "flex-end", justifyContent: "center",
+            }}
+        >
+            <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                    background: "#fff",
+                    borderRadius: "20px 20px 0 0",
+                    width: "100%", maxWidth: 480,
+                    maxHeight: "80vh",
+                    display: "flex", flexDirection: "column",
+                    boxShadow: "0 -4px 30px rgba(0,0,0,0.15)",
+                }}
+            >
+                {/* Header */}
+                <div style={{
+                    padding: "18px 20px 14px",
+                    borderBottom: "1px solid #f0f0f0",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    flexShrink: 0,
+                }}>
+                    <div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a1a" }}>Termos de Uso</div>
+                        <div style={{ fontSize: 11, color: "#999", marginTop: 2 }}>Privacidade e consentimento</div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            background: "#f5f5f5", border: "none",
+                            borderRadius: "50%", width: 32, height: 32,
+                            cursor: "pointer", fontSize: 16, color: "#666",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
+
+                {/* Conteúdo */}
+                <div style={{
+                    overflowY: "auto", padding: "18px 20px",
+                    flex: 1, fontSize: 13, color: "#444", lineHeight: 1.65,
+                }}>
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>1. Aceitação dos Termos</p>
+                    <p style={{ marginBottom: 14 }}>
+                        Ao utilizar este aplicativo, você concorda com os presentes Termos de Uso e com nossa
+                        Política de Privacidade. Caso não concorde, não utilize os serviços disponibilizados.
+                    </p>
+
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>2. Coleta e Uso de Dados</p>
+                    <p style={{ marginBottom: 14 }}>
+                        Coletamos dados relacionados à sua hidratação, medidas corporais e informações de perfil
+                        (nome, e-mail, sexo e modalidade esportiva) com a finalidade exclusiva de fornecer
+                        avaliações e acompanhamento personalizado de saúde e desempenho atlético.
+                    </p>
+
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>3. Privacidade e Anonimização</p>
+                    <p style={{ marginBottom: 14 }}>
+                        Seus dados são tratados com sigilo e podem ser anonimizados para fins de pesquisa
+                        científica, não sendo compartilhados de forma identificável com terceiros sem seu
+                        consentimento explícito.
+                    </p>
+
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>4. Responsabilidade do Usuário</p>
+                    <p style={{ marginBottom: 14 }}>
+                        Você é responsável pela veracidade das informações fornecidas. O uso das informações
+                        geradas pelo aplicativo não substitui a orientação de profissionais de saúde habilitados.
+                    </p>
+
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>5. Segurança</p>
+                    <p style={{ marginBottom: 14 }}>
+                        Adotamos medidas técnicas e organizacionais adequadas para proteger seus dados contra
+                        acesso não autorizado, perda ou divulgação indevida, em conformidade com a LGPD
+                        (Lei nº 13.709/2018).
+                    </p>
+
+                    <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>6. Alterações nos Termos</p>
+                    <p style={{ marginBottom: 4 }}>
+                        Reservamo-nos o direito de atualizar estes Termos a qualquer momento. Notificaremos
+                        os usuários sobre mudanças relevantes por meio do próprio aplicativo.
+                    </p>
+                </div>
+
+                {/* Botão */}
+                <div style={{ padding: "14px 20px 24px", flexShrink: 0, borderTop: "1px solid #f0f0f0" }}>
+                    <button
+                        onClick={onClose}
+                        style={{
+                            width: "100%", padding: "14px",
+                            background: "linear-gradient(135deg, #7a1020 0%, #9B1C2E 100%)",
+                            border: "none", borderRadius: 14,
+                            fontFamily: "'Barlow', sans-serif",
+                            fontSize: 14, fontWeight: 700,
+                            color: "#fff", cursor: "pointer",
+                            letterSpacing: 0.3,
+                        }}
+                    >
+                        Entendi
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Perfil() {
     const navigate = useNavigate();
     const { usuario, logout } = useAuth();
@@ -17,6 +129,7 @@ export default function Perfil() {
     const [salvo, setSalvo] = useState(false);
     const [erro, setErro] = useState("");
     const [notif, setNotif] = useState(true);
+    const [modalTermos, setModalTermos] = useState(false);
 
     useEffect(() => {
         usuariosApi.me()
@@ -91,7 +204,7 @@ export default function Perfil() {
                                     color: "#fff", padding: "3px 10px",
                                     borderRadius: 20, letterSpacing: 0.5,
                                 }}>
-                                    ✓ CONTA VERIFICADA
+                                    CONTA VERIFICADA
                                 </span>
                             </div>
                         </div>
@@ -115,7 +228,7 @@ export default function Perfil() {
                     {/* Sucesso */}
                     {salvo && (
                         <div style={{
-                            background: "#e6f5f1", border: "1px solid #a7d7c5",
+                            background: "transparent",
                             borderRadius: 8, padding: "10px 14px",
                             fontSize: 13, color: "#0A7C59", fontWeight: 600,
                             marginBottom: 14,
@@ -190,7 +303,7 @@ export default function Perfil() {
                         /* Dados pessoais */
                         <div className="a-card" style={{ marginBottom: 14 }}>
                             <div className="a-card-title">
-                                <div className="a-card-icon"></div>
+                                {/* <div className="a-card-icon"></div> */}
                                 <h3>Dados Pessoais</h3>
                             </div>
                             <InfoRow label="Nome" value={perfil?.nome || "—"} />
@@ -204,7 +317,7 @@ export default function Perfil() {
                     {/* Configurações */}
                     <div className="a-card" style={{ marginBottom: 14 }}>
                         <div className="a-card-title">
-                            <div className="a-card-icon"></div>
+                            {/* <div className="a-card-icon"></div> */}
                             <h3>Preferências</h3>
                         </div>
 
@@ -214,12 +327,12 @@ export default function Perfil() {
                             onClick={() => setNotif(p => !p)}
                         >
                             <div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>🔔 Notificações</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>Notificações</div>
                                 <div style={{ fontSize: 11, color: "#999" }}>Lembretes de hidratação</div>
                             </div>
                             <div style={{
                                 width: 42, height: 24, borderRadius: 12,
-                                background: notif ? "#9B1C2E" : "#e0e0e0",
+                                background: "transparent",
                                 position: "relative", transition: "background 0.2s",
                                 cursor: "pointer",
                             }}>
@@ -233,7 +346,10 @@ export default function Perfil() {
                             </div>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+                        <div
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
+                            onClick={() => setModalTermos(true)}
+                        >
                             <div>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: "#1a1a1a" }}>Termos de Uso</div>
                                 <div style={{ fontSize: 11, color: "#999" }}>Privacidade e consentimento</div>
@@ -247,7 +363,7 @@ export default function Perfil() {
                         onClick={() => logout(navigate)}
                         style={{
                             width: "100%", padding: "14px",
-                            background: "#fff",
+                            background: "transparent",
                             border: "1.5px solid #f5c0c0",
                             borderRadius: 14,
                             fontFamily: "'Barlow', sans-serif",
@@ -263,6 +379,10 @@ export default function Perfil() {
 
                 <BottomNav active="perfil" />
             </div>
+
+            {modalTermos && (
+                <ModalTermos onClose={() => setModalTermos(false)} />
+            )}
         </div>
     );
 }
@@ -278,7 +398,7 @@ function InfoRow({ label, value, mono }) {
             <span style={{
                 fontSize: 13, fontWeight: 600, color: "#1a1a1a",
                 fontFamily: mono ? "monospace" : "inherit",
-                background: mono ? "#f5f5f5" : "transparent",
+                background: "transparent",
                 padding: mono ? "2px 6px" : 0,
                 borderRadius: mono ? 4 : 0,
             }}>

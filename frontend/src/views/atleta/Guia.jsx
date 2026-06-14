@@ -7,7 +7,6 @@ const SECOES = [
     {
         id: "pesar",
         titulo: "Como se Pesar",
-        icon: "⚖️",
         cor: "#9B1C2E",
         itens: [
             {
@@ -30,18 +29,15 @@ const SECOES = [
     {
         id: "durante",
         titulo: "Durante o Treino",
-        icon: "💧",
         cor: "#1E2A4A",
         itens: [
             {
                 tipo: "alerta",
-                icon: "ℹ️",
                 titulo: "Apenas água e isotônicos",
                 desc: "Registre todos os líquidos ingeridos. Evite cuspir a água se a tiver registrado, pois isso afetará o cálculo da sudorese.",
             },
             {
                 tipo: "aviso",
-                icon: "⚠️",
                 titulo: "Cuidado com a garrafa",
                 desc: "Não jogue água na cabeça ou no corpo usando a mesma garrafa que você usa para beber, pois isso superestimará a ingestão.",
             },
@@ -50,7 +46,6 @@ const SECOES = [
     {
         id: "porque",
         titulo: "Por que Medir?",
-        icon: "✅",
         cor: "#0A7C59",
         destaque: true,
         texto: "A avaliação da taxa de sudorese ajuda a entender quanto líquido seu corpo perde em diferentes condições. Com isso, podemos criar estratégias personalizadas de hidratação, prevenindo a desidratação (que afeta a performance e saúde) e a superingestão de líquidos (hiponatremia).",
@@ -141,7 +136,6 @@ export default function Guia() {
                     <div className="a-card" style={{ marginBottom: 14 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #f0f0f0" }}>
                             <div style={{ width: 34, height: 34, borderRadius: 8, background: "#FFF176", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
-                                🟡
                             </div>
                             <h3 style={{ fontSize: 14, fontWeight: 800, color: "#B45309", textTransform: "uppercase", letterSpacing: 0.5 }}>
                                 Cor da Urina

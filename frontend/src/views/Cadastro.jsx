@@ -39,6 +39,118 @@ const IconEyeOff = () => (
   </svg>
 );
 
+function ModalTermos({ onClose, onAceitar }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 1000,
+        background: "rgba(0,0,0,0.55)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          borderRadius: "20px 20px 0 0",
+          width: "100%", maxWidth: 480,
+          maxHeight: "80vh",
+          display: "flex", flexDirection: "column",
+          boxShadow: "0 -4px 30px rgba(0,0,0,0.15)",
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          padding: "18px 20px 14px",
+          borderBottom: "1px solid #f0f0f0",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#1a1a1a" }}>Termos de Uso</div>
+            <div style={{ fontSize: 11, color: "#999", marginTop: 2 }}>Privacidade e consentimento</div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "#f5f5f5", border: "none",
+              borderRadius: "50%", width: 32, height: 32,
+              cursor: "pointer", fontSize: 16, color: "#666",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Conteúdo */}
+        <div style={{
+          overflowY: "auto", padding: "18px 20px",
+          flex: 1, fontSize: 13, color: "#444", lineHeight: 1.65,
+        }}>
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>1. Aceitação dos Termos</p>
+          <p style={{ marginBottom: 14 }}>
+            Ao utilizar este aplicativo, você concorda com os presentes Termos de Uso e com nossa
+            Política de Privacidade. Caso não concorde, não utilize os serviços disponibilizados.
+          </p>
+
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>2. Coleta e Uso de Dados</p>
+          <p style={{ marginBottom: 14 }}>
+            Coletamos dados relacionados à sua hidratação, medidas corporais e informações de perfil
+            (nome, e-mail, sexo e modalidade esportiva) com a finalidade exclusiva de fornecer
+            avaliações e acompanhamento personalizado de saúde e desempenho atlético.
+          </p>
+
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>3. Privacidade e Anonimização</p>
+          <p style={{ marginBottom: 14 }}>
+            Seus dados são tratados com sigilo e podem ser anonimizados para fins de pesquisa
+            científica, não sendo compartilhados de forma identificável com terceiros sem seu
+            consentimento explícito.
+          </p>
+
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>4. Responsabilidade do Usuário</p>
+          <p style={{ marginBottom: 14 }}>
+            Você é responsável pela veracidade das informações fornecidas. O uso das informações
+            geradas pelo aplicativo não substitui a orientação de profissionais de saúde habilitados.
+          </p>
+
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>5. Segurança</p>
+          <p style={{ marginBottom: 14 }}>
+            Adotamos medidas técnicas e organizacionais adequadas para proteger seus dados contra
+            acesso não autorizado, perda ou divulgação indevida, em conformidade com a LGPD
+            (Lei nº 13.709/2018).
+          </p>
+
+          <p style={{ fontWeight: 700, color: "#9B1C2E", marginBottom: 8 }}>6. Alterações nos Termos</p>
+          <p style={{ marginBottom: 4 }}>
+            Reservamo-nos o direito de atualizar estes Termos a qualquer momento. Notificaremos
+            os usuários sobre mudanças relevantes por meio do próprio aplicativo.
+          </p>
+        </div>
+
+        {/* Botão */}
+        <div style={{ padding: "14px 20px 24px", flexShrink: 0, borderTop: "1px solid #f0f0f0" }}>
+          <button
+            onClick={onAceitar}
+            style={{
+              width: "100%", padding: "14px",
+              background: "linear-gradient(135deg, #7a1020 0%, #9B1C2E 100%)",
+              border: "none", borderRadius: 14,
+              fontFamily: "'Barlow', sans-serif",
+              fontSize: 14, fontWeight: 700,
+              color: "#fff", cursor: "pointer",
+              letterSpacing: 0.3,
+            }}
+          >
+            Entendi e Aceito
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Cadastro() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -54,8 +166,8 @@ export default function Cadastro() {
   });
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
-  
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [modalTermos, setModalTermos] = useState(false);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
@@ -254,7 +366,10 @@ export default function Cadastro() {
             />
             <p>
               Li e aceito os{" "}
-              <a href="#" onClick={(e) => e.preventDefault()}>
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setModalTermos(true); }}
+              >
                 Termos de Uso
               </a>{" "}
               e concordo com o processamento dos meus dados de hidratação e
@@ -276,6 +391,16 @@ export default function Cadastro() {
           </div>
         </form>
       </div>
+
+      {modalTermos && (
+        <ModalTermos
+          onClose={() => setModalTermos(false)}
+          onAceitar={() => {
+            setForm(prev => ({ ...prev, termos: true }));
+            setModalTermos(false);
+          }}
+        />
+      )}
     </div>
   );
 }

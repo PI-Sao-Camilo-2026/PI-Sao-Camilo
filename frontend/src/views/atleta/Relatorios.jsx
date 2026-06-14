@@ -124,7 +124,7 @@ export default function Relatorios() {
               }}>
                 <span style={{ fontSize: 16 }}>〜</span>
                 <span style={{ fontSize: 14, fontWeight: 800, color: "#9B1C2E" }}>
-                  Recomendação da IA
+                  Recomendação
                 </span>
               </div>
               <p style={{ fontSize: 13, color: "#5a0a1a", lineHeight: 1.65, marginBottom: 14 }}>
@@ -181,7 +181,7 @@ export default function Relatorios() {
           {/* Dicas pós-treino */}
           <div className="a-card" style={{ marginBottom: 16 }}>
             <div className="a-card-title">
-              <div className="a-card-icon"></div>
+              {/* <div className="a-card-icon"></div> */}
               <h3>Dicas Pós-Treino</h3>
             </div>
             <ul style={{ paddingLeft: 16, fontSize: 13, color: "#555", lineHeight: 1.8 }}>

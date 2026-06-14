@@ -12,11 +12,18 @@ const InfoIcon = () => (
   </svg>
 );
 
+const vestimentaOpts = [
+  { value: "leve",    label: "Leve (short, camiseta)" },
+  { value: "medio",   label: "Médio (calça, manga longa)" },
+  { value: "pesado",  label: "Pesado (agasalho, impermeável)" },
+];
+
 export default function PreSessao() {
   const navigate = useNavigate();
 
   const [peso, setPeso] = useState("");
   const [urina, setUrina] = useState("");
+  const [vestimenta, setVestimenta] = useState("");
   const [temp, setTemp] = useState("");
   const [umidade, setUmidade] = useState("");
   const [clima, setClima] = useState(null);
@@ -24,7 +31,6 @@ export default function PreSessao() {
   const [climaLoading, setClimaLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  // Busca clima automático ao carregar
   useEffect(() => {
     let ativo = true;
 
@@ -54,6 +60,7 @@ export default function PreSessao() {
     const pesoNum = Number(peso.replace(",", "."));
     if (!peso || isNaN(pesoNum) || pesoNum <= 0) { setErro("Informe sua massa corporal"); return; }
     if (!urina) { setErro("Selecione a cor da urina"); return; }
+    if (!vestimenta) { setErro("Selecione a condição da vestimenta"); return; }
     setErro("");
 
     try {
@@ -68,12 +75,14 @@ export default function PreSessao() {
         condicao: clima?.condicao || null,
         sol: clima?.sol || null,
         bexiga_esvaziada: true,
+        vestimenta_pre: vestimenta,
       });
 
       localStorage.setItem("sessao_id", String(data.id));
       localStorage.setItem("peso_pre", String(pesoNum));
       localStorage.setItem("inicioSessao", String(Date.now()));
       localStorage.setItem("climaSessao", JSON.stringify(clima || {}));
+      localStorage.setItem("vestimenta_pre", vestimenta);
       localStorage.removeItem("tempoPausado");
 
       navigate("/sessao");
@@ -103,7 +112,7 @@ export default function PreSessao() {
           {/* Card Pré-Treino */}
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon"></div>
+              {/* <div className="a-card-icon"></div> */}
               <h3>Pré-Treino</h3>
             </div>
 
@@ -193,6 +202,24 @@ export default function PreSessao() {
                 {msgUrina.texto}
               </div>
             )}
+          </div>
+
+          {/* Card Vestimenta */}
+          <div className="a-card">
+            <div className="a-card-title">
+              <h3>Vestimenta</h3>
+            </div>
+            <div className="a-label" style={{ marginBottom: 10 }}>Tipo de roupa utilizada</div>
+            {vestimentaOpts.map((opt) => (
+              <div
+                key={opt.value}
+                className={`radio-option ${vestimenta === opt.value ? "selected" : ""}`}
+                onClick={() => setVestimenta(opt.value)}
+              >
+                <div className="radio-circle" />
+                <span>{opt.icon} {opt.label}</span>
+              </div>
+            ))}
           </div>
 
           {erro && <div className="a-erro">{erro}</div>}

@@ -67,6 +67,7 @@ class PosTreinoInput(BaseModel):
     fruta_g: Optional[float] = 0
     gasto_energetico_kcal: Optional[float] = None
     ingestao_energetica_kcal: Optional[float] = None
+    sintomas: Optional[str] = None
 
 
 class SessaoResponse(BaseModel):
@@ -294,7 +295,11 @@ async def finalizar_pos_treino(
     sessao.volume_urina_ml     = body.volume_urina_ml or 0
     sessao.taxa_sudorese       = resultado["taxa_sudorese"]
     sessao.variacao_peso_pct   = resultado["variacao_peso_pct"]
+
+    if body.sintomas:
+        sessao.sintomas = body.sintomas
     sessao.status              = "concluida"
+    
 
     # Histórico para contexto da IA (últimas 10 sessões)
     historico_taxas = [

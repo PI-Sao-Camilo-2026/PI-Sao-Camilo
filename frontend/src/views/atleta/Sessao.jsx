@@ -202,7 +202,7 @@ export default function Sessao() {
             <p style={{ textAlign: "center", marginTop: 8, fontSize: 13, color: "#666", fontWeight: 600 }}>Total: {urina} mL</p>
           </div>
 
-          <button className="btn-secondary" onClick={encerrar}>Finalizar Treino <span>✓</span></button>
+          <button className="btn-secondary" onClick={encerrar}>Finalizar Treino <span></span></button>
           <button onClick={pausar} style={{ width: "100%", padding: "12px", marginTop: 8, background: "transparent", border: "1.5px solid #eee", borderRadius: 14, fontFamily: "'Barlow', sans-serif", fontSize: 14, fontWeight: 600, color: "#888", cursor: "pointer" }}>
             {pausado ? "▶ Retomar" : "⏸ Pausar sessão"}
           </button>

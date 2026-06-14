@@ -8,9 +8,21 @@ import BottomNav from "../../components/BottomNav";
 import { usuariosApi, sessoesApi } from "../../services/api";
 
 const vestimentaOpts = [
-  { value: "seco",       label: "Sem alteração (seco)" },
-  { value: "umido",      label: "Pouca alteração (úmido)" },
+  { value: "seco", label: "Sem alteração (seco)" },
+  { value: "umido", label: "Pouca alteração (úmido)" },
   { value: "encharcado", label: "Muita alteração (encharcado)" },
+];
+
+const sintomasGIOpts = [
+  "Náusea",
+  "Enjoo",
+  "Vômito",
+  "Azia",
+  "Refluxo",
+  "Dor abdominal",
+  "Distensão abdominal",
+  "Diarreia",
+  "Desconforto gastrointestinal",
 ];
 
 export default function PosSessao() {
@@ -18,9 +30,11 @@ export default function PosSessao() {
 
   const [pesoPos, setPesoPos] = useState("");
   const [vestimenta, setVestimenta] = useState("");
+  const [vestimentaPre, setVestimentaPre] = useState("");
   const [fadiga, setFadiga] = useState(5);
   const [sede, setSede] = useState(3);
-  const [sintomas, setSintomas] = useState("");
+  const [sintomasGI, setSintomasGI] = useState([]);
+  const [observacaoGI, setObservacaoGI] = useState("");
   const [duracao, setDuracao] = useState("");
   const [pesoPre, setPesoPre] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -30,11 +44,26 @@ export default function PosSessao() {
     setPesoPre(Number(localStorage.getItem("peso_pre") || 0));
     const tempoSeg = Number(localStorage.getItem("tempoFinalSessao") || 0);
     setDuracao(String(Math.max(1, Math.round(tempoSeg / 60))));
+    setVestimentaPre(localStorage.getItem("vestimenta_pre") || "");
   }, []);
 
   const perdaPct = pesoPre && pesoPos
     ? (((pesoPre - Number(pesoPos)) / pesoPre) * 100).toFixed(1)
     : null;
+
+  const vestimentaPreLabel = {
+    leve: "Leve (short, camiseta)",
+    medio: "Médio (calça, manga longa)",
+    pesado: "Pesado (agasalho, impermeável)",
+  }[vestimentaPre];
+
+  function toggleSintoma(sintoma) {
+  setSintomasGI((prev) =>
+    prev.includes(sintoma)
+      ? prev.filter((s) => s !== sintoma)
+      : [...prev, sintoma]
+  );
+}
 
   async function handleFinalizar() {
     if (!pesoPos || isNaN(Number(pesoPos))) { setErro("Informe a massa corporal final"); return; }
@@ -54,11 +83,18 @@ export default function PosSessao() {
         duracao_minutos: duracaoMin,
         total_ingerido_ml: Number(localStorage.getItem("totalIngerido") || 0),
         volume_urina_ml: Number(localStorage.getItem("volumeUrina") || 0),
+        sintomas:
+          sintomasGI.length > 0
+            ? `${sintomasGI.join(", ")}${observacaoGI
+              ? ` | Observação: ${observacaoGI}`
+              : ""
+            }`
+            : observacaoGI,
       });
 
       localStorage.setItem("resultado_sessao", JSON.stringify(res));
       // Limpa dados de sessão
-      ["sessao_id","peso_pre","tempoFinalSessao","totalIngerido","volumeUrina","climaSessao","inicioSessao"]
+      ["sessao_id", "peso_pre", "tempoFinalSessao", "totalIngerido", "volumeUrina", "climaSessao", "inicioSessao", "vestimenta_pre"]
         .forEach(k => localStorage.removeItem(k));
 
       navigate("/relatorios");
@@ -91,7 +127,6 @@ export default function PosSessao() {
           {/* Peso pós */}
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon">✅</div>
               <h3>Pós-Treino</h3>
             </div>
 
@@ -114,12 +149,29 @@ export default function PosSessao() {
                 marginTop: -6, marginBottom: 14,
               }}>
                 {Number(perdaPct) > 0 ? `Perda de ${perdaPct}%` : `Ganho de ${Math.abs(Number(perdaPct))}%`}
-                {Number(perdaPct) > 2 && " ⚠️"}
+                {Number(perdaPct) > 2 && "Aviso: "}
+              </div>
+            )}
+          </div>
+
+          {/* Vestimenta */}
+          <div className="a-card">
+            <div className="a-card-title">
+              <h3>Condição da Vestimenta</h3>
+            </div>
+
+            {vestimentaPreLabel && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: "#f7f7f7", borderRadius: 8,
+                padding: "8px 12px", marginBottom: 12,
+                fontSize: 12, color: "#666",
+              }}>
+                <span>Você iniciou com: <strong style={{ color: "#1a1a1a" }}>{vestimentaPreLabel}</strong></span>
               </div>
             )}
 
-            {/* Vestimenta */}
-            <div className="a-label" style={{ marginBottom: 10 }}>Condição da Vestimenta</div>
+            <div className="a-label" style={{ marginBottom: 10 }}>Como está a roupa agora?</div>
             {vestimentaOpts.map((opt) => (
               <div
                 key={opt.value}
@@ -127,7 +179,7 @@ export default function PosSessao() {
                 onClick={() => setVestimenta(opt.value)}
               >
                 <div className="radio-circle" />
-                <span>{opt.label}</span>
+                <span>{opt.icon} {opt.label}</span>
               </div>
             ))}
           </div>
@@ -135,7 +187,6 @@ export default function PosSessao() {
           {/* Fadiga */}
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon">💪</div>
               <h3>Percepção de Esforço</h3>
             </div>
 
@@ -170,19 +221,58 @@ export default function PosSessao() {
           {/* Sintomas */}
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon">📝</div>
-              <h3>Sintomas (opcional)</h3>
+              <h3>Sintomas Gastrointestinais</h3>
             </div>
+
+            <div
+              style={{
+                fontSize: 12,
+                color: "#666",
+                marginBottom: 12,
+              }}
+            >
+              Marque qualquer desconforto ocorrido durante ou após o treino.
+            </div>
+
+            {sintomasGIOpts.map((sintoma) => (
+              <div
+                key={sintoma}
+                className={`radio-option ${sintomasGI.includes(sintoma) ? "selected" : ""
+                  }`}
+                onClick={() => toggleSintoma(sintoma)}
+                
+              >
+                <div className="radio-circle" />
+                <span>{sintoma}</span>
+              </div>
+            ))}
+
+            <div
+              style={{
+                marginTop: 16,
+                marginBottom: 8,
+                fontWeight: 600,
+                fontSize: 13,
+              }}
+            >
+              Observações adicionais
+            </div>
+
             <textarea
-              value={sintomas}
-              onChange={(e) => setSintomas(e.target.value)}
-              placeholder="Ex: leve tontura, câimbra, enjoo..."
+              value={observacaoGI}
+              onChange={(e) => setObservacaoGI(e.target.value)}
+              placeholder="Descreva detalhes do desconforto, se desejar..."
               rows={3}
               style={{
-                width: "100%", padding: "12px 14px",
-                border: "1.5px solid #ebebeb", borderRadius: 10,
-                fontFamily: "'Barlow', sans-serif", fontSize: 14,
-                color: "#333", resize: "none", outline: "none",
+                width: "100%",
+                padding: "12px 14px",
+                border: "1.5px solid #ebebeb",
+                borderRadius: 10,
+                fontFamily: "'Barlow', sans-serif",
+                fontSize: 14,
+                color: "#333",
+                resize: "none",
+                outline: "none",
                 background: "#fafafa",
               }}
             />

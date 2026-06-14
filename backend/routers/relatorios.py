@@ -4,6 +4,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 
+from routers import sessoes
 from database import get_db, Usuario, Sessao
 from dependencies import get_current_user, require_profissional
 from exportacao.pdf   import gerar_pdf_sessao
@@ -129,20 +130,142 @@ def dashboard_stats(
     atleta_map = {a.id: a for a in atletas}
     
     alertas_list = []
+
     for s in sessoes:
-        v_peso = getattr(s, 'variacao_peso_pct', 0.0)
+
+    # ALERTA DE DESIDRATAÇÃO
+        v_peso = getattr(s, "variacao_peso_pct", 0.0)
+
         if v_peso and v_peso > 2.0:
+
             atl = atleta_map.get(s.atleta_id)
             nome_atl = atl.nome if atl else "Atleta"
-            tipo_alerta = "incompleto" if v_peso <= 3.0 else "perigo"
-            titulo_alerta = "Desidratação Leve/Mod." if v_peso <= 3.0 else "Desidratação Crítica!"
-            
+
+            tipo_alerta = (
+                "incompleto"
+                if v_peso <= 3.0
+                else "perigo"
+        )
+
+            titulo_alerta = (
+                "Desidratação Leve/Mod."
+                if v_peso <= 3.0
+                else "Desidratação Crítica"
+        )
+
             alertas_list.append({
                 "titulo": f"{titulo_alerta} - {nome_atl}",
-                "tempo": s.criado_em.strftime("%d/%m %H:%M") if s.criado_em else "Agora",
-                "descricao": f"O atleta apresentou perda de massa corporal de <strong>{v_peso:.1f}%</strong> na sessão de {s.modalidade or 'Treino'}.",
+                "tempo": (
+                    s.criado_em.strftime("%d/%m %H:%M")
+                    if s.criado_em else "Agora"
+            ),
+                "descricao": (
+                    f"O atleta apresentou perda de massa corporal "
+                    f"de <strong>{v_peso:.1f}%</strong> "
+                    f"na sessão de {s.modalidade or 'Treino'}."
+            ),
                 "tipo": tipo_alerta,
-                "data": s.criado_em.isoformat() if s.criado_em else ""
+                "data": (
+                    s.criado_em.isoformat()
+                    if s.criado_em else ""
+            )
+        })
+
+    # ALERTA GASTROINTESTINAL
+    sintomas = getattr(s, "sintomas", None)
+
+    if sintomas:
+
+        sintomas_lower = sintomas.lower()
+
+        palavras_gi = [
+            "náusea",
+            "enjoo",
+            "vômito",
+            "vomito",
+            "azia",
+            "refluxo",
+            "dor abdominal",
+            "distensão",
+            "distensao",
+            "diarreia",
+            "desconforto gastrointestinal"
+        ]
+
+        if any(
+            palavra in sintomas_lower
+            for palavra in palavras_gi
+        ):
+
+            atl = atleta_map.get(s.atleta_id)
+            nome_atl = atl.nome if atl else "Atleta"
+
+            alertas_list.append({
+                "titulo": f"Sintomas Gastrointestinais - {nome_atl}",
+                "tempo": (
+                    s.criado_em.strftime("%d/%m %H:%M")
+                    if s.criado_em else "Agora"
+                ),
+                "descricao": (
+                    f"O atleta relatou sintomas "
+                    f"gastrointestinais: "
+                    f"<strong>{sintomas}</strong>"
+                ),
+                "tipo": "perigo",
+                "data": (
+                    s.criado_em.isoformat()
+                    if s.criado_em else ""
+                )
+            })
+
+    # ALERTA GASTROINTESTINAL
+    sintomas = getattr(s, "sintomas", None)
+
+    if sintomas:
+
+        sintomas_lower = sintomas.lower()
+
+        palavras_gi = [
+            "náusea",
+            "enjoo",
+            "vômito",
+            "vomito",
+            "azia",
+            "refluxo",
+            "dor abdominal",
+            "distensão",
+            "distensao",
+            "diarreia",
+            "desconforto gastrointestinal"
+        ]
+
+        if any(
+            palavra in sintomas_lower
+            for palavra in palavras_gi
+        ):
+
+            atl = atleta_map.get(s.atleta_id)
+            nome_atl = atl.nome if atl else "Atleta"
+
+            alertas_list.append({
+                "titulo": (
+                    f"Sintomas Gastrointestinais - "
+                    f"{nome_atl}"
+                ),
+                "tempo": (
+                    s.criado_em.strftime("%d/%m %H:%M")
+                    if s.criado_em else "Agora"
+                ),
+                "descricao": (
+                    f"O atleta relatou sintomas "
+                    f"gastrointestinais: "
+                    f"<strong>{sintomas}</strong>"
+                ),
+                "tipo": "perigo",
+                "data": (
+                    s.criado_em.isoformat()
+                    if s.criado_em else ""
+                )
             })
 
     total_sessoes_periodo = len(sessoes)

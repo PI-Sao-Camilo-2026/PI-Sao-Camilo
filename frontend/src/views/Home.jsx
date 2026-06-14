@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/AuthContext";
 import { sessoesApi } from "../services/api";
-import BottomNav from "../components/BottomNav";
+import BottomNav, { IconClock, IconBook, IconUser } from "../components/BottomNav";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -72,25 +72,26 @@ export default function Home() {
           {/* Ações rápidas */}
           <div className="a-card" style={{ marginBottom: 14 }}>
             <div className="a-card-title">
-              <div className="a-card-icon"></div>
+              {/* <div className="a-card-icon"></div> */}
               <h3>Acesso Rápido</h3>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {/* 2. Colocando as tags dos ícones em vez de aspas vazias */}
               <AcaoRow
-                icon=""
+                icon={<IconClock />}
                 titulo="Histórico de Sessões"
                 desc="Veja todas as suas sessões registradas"
                 onClick={() => navigate("/historico")}
               />
               <AcaoRow
-                icon=""
+                icon={<IconBook />}
                 titulo="Guia de Hidratação"
                 desc="Aprenda a registrar corretamente"
                 onClick={() => navigate("/guia")}
               />
               <AcaoRow
-                icon=""
+                icon={<IconUser />}
                 titulo="Meu Perfil"
                 desc="Gerencie seus dados pessoais"
                 onClick={() => navigate("/perfil")}
@@ -155,10 +156,11 @@ function AcaoRow({ icon, titulo, desc, onClick }) {
       }}
     >
       <div style={{
-        width: 38, height: 38, borderRadius: 10,
-        background: "#fdeaed",
+        width: 32, height: 32,
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 18, flexShrink: 0,
+        background: "transparent",
+        color: "#9B1C2E", 
+        flexShrink: 0,
       }}>
         {icon}
       </div>
