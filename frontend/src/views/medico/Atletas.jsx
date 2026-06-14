@@ -199,7 +199,7 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
     async function salvar() {
         if (!form.nome.trim()) { setErro("O nome completo é obrigatório."); return; }
         if (!isEdicao && !form.email.trim()) { setErro("O e-mail é obrigatório."); return; }
-        if (!isEdicao && form.senha.length < 6) { setErro("A senha deve ter no mínimo 6 caracteres."); return; }
+        if (!isEdicao && form.senha.length < 8) { setErro("A senha deve ter no mínimo 8 caracteres."); return; }
         setErro("");
 
         try {
@@ -274,7 +274,7 @@ function ModalCadastrarAtleta({ atleta = null, onClose, onSalvo }) {
                         {!isEdicao && (
                             <div className="form-field">
                                 <label>Senha de Acesso Temporária</label>
-                                <input className="form-input" name="senha" type="password" value={form.senha} onChange={handle} placeholder="Mínimo 6 caracteres" />
+                                <input className="form-input" name="senha" type="password" value={form.senha} onChange={handle} placeholder="Mínimo 8 caracteres" />
                             </div>
                         )}
 
