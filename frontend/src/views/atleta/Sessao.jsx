@@ -57,6 +57,8 @@ export default function Sessao() {
   const [pausado, setPausado] = useState(false);
   const [registrando, setRegistrando] = useState(false);
   const intervalRef = useRef(null);
+  const [modoSessao, setModoSessao] = useState("tempo_real");
+  const [duracaoManual, setDuracaoManual] = useState("");
 
   const calcularTempo = () => {
     const inicio = Number(localStorage.getItem("inicioSessao") || 0);
@@ -65,11 +67,16 @@ export default function Sessao() {
   };
 
   useEffect(() => {
+    if (modoSessao === "assincrono") return;
+
     intervalRef.current = setInterval(() => {
-      if (!pausado) setTempo(calcularTempo());
+      if (!pausado) {
+        setTempo(calcularTempo());
+      }
     }, 1000);
+
     return () => clearInterval(intervalRef.current);
-  }, [pausado]);
+  }, [pausado, modoSessao]);
 
   const fmt = (s) => {
     const h = Math.floor(s / 3600);
@@ -99,7 +106,6 @@ export default function Sessao() {
     const novoTotalLocal = Math.max(0, total + ml);
     try {
       setRegistrando(true);
-      // Chamada corrigida: passa apenas o número, não um objeto
       const res = await sessoesApi.registrarFluido(sessaoId, ml);
       setTotal(res.ingestao_total_ml ?? novoTotalLocal);
     } catch (err) {
@@ -117,13 +123,27 @@ export default function Sessao() {
       return;
     }
     try {
-      const tempoFinal = calcularTempo();
-      const duracao_minutos = tempoFinal / 60;
+      let tempoFinal;
+
+      if (modoSessao === "assincrono") {
+        const minutos = Number(duracaoManual);
+
+        if (!minutos || minutos <= 0) {
+          alert("Informe a duração do treino em minutos");
+          return;
+        }
+
+        tempoFinal = minutos * 60;
+      } else {
+        tempoFinal = calcularTempo();
+      }
+
       await sessoesApi.finalizarSessao(sessaoId, {
         tempo_total_segundos: tempoFinal,
         ingestao_ml: total,
         volume_urina_ml: urina,
       });
+
       localStorage.setItem("tempoFinalSessao", String(tempoFinal));
       localStorage.setItem("totalIngerido", String(total));
       localStorage.setItem("volumeUrina", String(urina));
@@ -161,12 +181,94 @@ export default function Sessao() {
             <div style={{ fontSize: 36, marginBottom: 4 }}></div>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: "#1E2A4A", marginBottom: 4 }}>Durante o Treino</h2>
             <p style={{ fontSize: 13, color: "#999", marginBottom: 0 }}>Registre sua ingestão de líquidos</p>
-            <div style={{ fontSize: 28, fontWeight: 800, color: "#9B1C2E", fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 2, margin: "12px 0 0" }}>
-              {fmt(tempo)}
+            
+            {/* 4. Correção: Inclusão do Seletor de Modo de Sessão */}
+            <div style={{ display: "flex", gap: 8, marginTop: 16, background: "#f5f5f5", borderRadius: 10, padding: 4 }}>
+              <button
+                onClick={() => setModoSessao("tempo_real")}
+                style={{
+                  flex: 1, padding: "8px 0", border: "none", borderRadius: 8,
+                  background: modoSessao === "tempo_real" ? "#fff" : "transparent",
+                  color: modoSessao === "tempo_real" ? "#9B1C2E" : "#666",
+                  fontWeight: 700, fontSize: 12, cursor: "pointer",
+                  fontFamily: "'Barlow', sans-serif"
+                }}
+              >
+                ⏱ Tempo Real
+              </button>
+              <button
+                onClick={() => setModoSessao("assincrono")}
+                style={{
+                  flex: 1, padding: "8px 0", border: "none", borderRadius: 8,
+                  background: modoSessao === "assincrono" ? "#fff" : "transparent",
+                  color: modoSessao === "assincrono" ? "#9B1C2E" : "#666",
+                  fontWeight: 700, fontSize: 12, cursor: "pointer",
+                  fontFamily: "'Barlow', sans-serif"
+                }}
+              >
+                Treino já realizado
+              </button>
             </div>
-            <div style={{ fontSize: 10, color: "#bbb", fontWeight: 600, letterSpacing: 1 }}>
-              {pausado ? "PAUSADO" : "EM ANDAMENTO"}
-            </div>
+
+            {modoSessao === "tempo_real" ? (
+              <>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 800,
+                    color: "#9B1C2E",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    letterSpacing: 2,
+                    margin: "12px 0 0",
+                  }}
+                >
+                  {fmt(tempo)}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: "#bbb",
+                    fontWeight: 600,
+                    letterSpacing: 1,
+                  }}
+                >
+                  {pausado ? "PAUSADO" : "EM ANDAMENTO"}
+                </div>
+              </>
+            ) : (
+              <div
+                style={{
+                  marginTop: 16,
+                  marginBottom: 16,
+                }}
+              >
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: 8,
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  Duração do treino (minutos)
+                </label>
+
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Ex: 90"
+                  value={duracaoManual}
+                  onChange={(e) => setDuracaoManual(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    border: "1px solid #ddd",
+                  }}
+                />
+              </div>
+            )}
             <GarrafaAgua totalMl={total} />
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
               {botoesFluido.map(({ label, ml }) => (
@@ -187,11 +289,10 @@ export default function Sessao() {
             </div>
           </div>
 
-          <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "#8a6400", fontWeight: 600, marginBottom: 14 }}>⚠️ Beba ~200 mL a cada 15 minutos</div>
+          {/* <div style={{ background: "#fff8e1", border: "1px solid #ffe082", borderRadius: 10, padding: "10px 14px", fontSize: 12, color: "#8a6400", fontWeight: 600, marginBottom: 14 }}>⚠️ Beba ~200 mL a cada 15 minutos</div> */}
 
           <div className="a-card">
             <div className="a-card-title">
-              <div className="a-card-icon"></div>
               <h3>Volume Urinário</h3>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -203,9 +304,28 @@ export default function Sessao() {
           </div>
 
           <button className="btn-secondary" onClick={encerrar}>Finalizar Treino <span></span></button>
-          <button onClick={pausar} style={{ width: "100%", padding: "12px", marginTop: 8, background: "transparent", border: "1.5px solid #eee", borderRadius: 14, fontFamily: "'Barlow', sans-serif", fontSize: 14, fontWeight: 600, color: "#888", cursor: "pointer" }}>
-            {pausado ? "▶ Retomar" : "⏸ Pausar sessão"}
-          </button>
+          
+          {/* 2 e 3. Correção: Sintaxe das propriedades corrigida e bloco condicional fechado devidamente */}
+          {modoSessao === "tempo_real" && (
+            <button 
+              onClick={pausar} 
+              style={{ 
+                width: "100%", 
+                padding: "12px", 
+                marginTop: 8, 
+                background: "transparent", 
+                border: "1.5px solid #eee", 
+                borderRadius: 14, 
+                fontFamily: "'Barlow', sans-serif", 
+                fontSize: 14, 
+                fontWeight: 600, 
+                color: "#888", 
+                cursor: "pointer" 
+              }}
+            >
+              {pausado ? "▶ Retomar" : "⏸ Pausar sessão"}
+            </button>
+          )}
         </div>
         <BottomNav active="registro" />
       </div>
