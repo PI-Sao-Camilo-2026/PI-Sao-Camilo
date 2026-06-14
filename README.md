@@ -1,4 +1,4 @@
-<img width="1911" height="818" alt="tela durante sessao - atleta" src="https://github.com/user-attachments/assets/321741c4-9e2f-4512-99d2-e88dad8b5723" /># Nutri-Esportiva
+# Nutri-Esportiva
 
 ## Sistema Inteligente para Avaliação da Taxa de Sudorese e Gestão da Hidratação de Atletas
 
@@ -242,14 +242,11 @@ nutri-esportiva/
 
 ## Fluxo do Atleta
 
-* Pré-Sessão ![imagem pre sessao](<img width="1912" height="797" alt="tela pre sessao - atleta" src="https://github.com/user-attachments/assets/05981514-37c2-42b0-9528-bf2cabee9987" />
-)
-* Durante o Treino ![imagem durante o treino](<img width="1911" height="818" alt="tela durante sessao - atleta" src="https://github.com/user-attachments/assets/2ced990a-8e04-49bc-8a96-8ae7e284affa" />
-)
-* Pós-Sessão ![imagem pos sessao](<img width="1888" height="867" alt="tela pos sessao - atleta" src="https://github.com/user-attachments/assets/6469d909-32b2-4aa1-bc3a-9ec133835756" />
-)
-* Recomendação ![imagem ao finalizar treino com recomendacao](<img width="1887" height="850" alt="analise de recomendacao - atleta" src="https://github.com/user-attachments/assets/5d8988eb-5547-48f5-aff9-209e4a617b5d" />
-)
+* Pré-Sessão <img width="1912" height="797" alt="tela pre sessao - atleta" src="https://github.com/user-attachments/assets/5d55e1c2-a90d-45d7-8aea-e4591cdbe99f" />
+* Durante o Treino <img width="1911" height="818" alt="tela durante sessao - atleta" src="https://github.com/user-attachments/assets/321741c4-9e2f-4512-99d2-e88dad8b5723" />
+* Pós-Sessão <img width="1888" height="867" alt="tela pos sessao - atleta" src="https://github.com/user-attachments/assets/234ece6f-95c2-4ee8-ae98-644b1bf7646f" />
+* Recomendação <img width="1887" height="850" alt="analise de recomendacao - atleta" src="https://github.com/user-attachments/assets/2fba86fc-7690-4fbb-bc8b-a4916ed13e16" />
+
 
 ## Fluxo Profissional
 
