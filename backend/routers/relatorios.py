@@ -10,6 +10,7 @@ from dependencies import get_current_user, require_profissional
 from exportacao.pdf   import gerar_pdf_sessao
 from exportacao.excel import gerar_excel_historico
 from exportacao.pdf import gerar_pdf_historico_atleta, gerar_pdf_historico_equipe
+from services.ml_predicao import treinar_modelo, prever_taxa_sudorese, modelo_disponivel, MIN_SESSOES
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -335,6 +336,26 @@ def exportar_atleta_pdf(
         "nome": atleta.nome,
         "codigo_anonimizado": atleta.codigo_anonimizado or atleta.nome,
     }
+
+    # Injeta predição ML no dict do atleta (aparece no PDF se modelo disponível)
+    if len(sessoes_dict) >= MIN_SESSOES:
+        treinar_modelo(atleta_id, sessoes_dict)
+
+    if modelo_disponivel(atleta_id) and sessoes_dict:
+        ultima = sessoes_dict[0]
+        pred = prever_taxa_sudorese(
+            atleta_id=atleta_id,
+            peso_pre=ultima.get("peso_pre") or 70,
+            temp_celsius=ultima.get("temp_celsius"),
+            umidade_pct=ultima.get("umidade_pct"),
+            duracao=ultima.get("duracao") or ultima.get("duracao_minutos"),
+            intensidade=ultima.get("intensidade"),
+            modalidade=ultima.get("modalidade") or atleta.modalidade,
+            cor_urina_basal=ultima.get("cor_urina_basal"),
+        )
+        if pred:
+            atleta_dict["predicao"] = pred
+
     profissional_dict = {"nome": prof.nome, "email": getattr(prof, "email", "")}
     pdf_bytes = gerar_pdf_historico_atleta(atleta_dict, sessoes_dict, profissional_dict)
     return StreamingResponse(

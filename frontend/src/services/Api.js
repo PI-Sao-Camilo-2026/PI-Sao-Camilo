@@ -133,6 +133,11 @@ function classificarRadiacao(v) {
     return v < 250 ? "Baixa" : v < 600 ? "Moderada" : "Alta";
 }
 
+export const predicaoApi = {
+    status: () => request("/predicao/status"),
+    prever: (payload) => request("/predicao/prever", "POST", payload),
+};
+
 export const exportacaoApi = {
     async exportarHistorico({ tipo, id = null, modalidade = null } = {}) {
         const token = getToken();

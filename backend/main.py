@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routers import auth, usuarios, sessoes, fluidos, clima, relatorios
+from routers import predicao   # ← novo
 
 
 @asynccontextmanager
@@ -26,7 +27,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "http://localhost:5174",      
+        "http://localhost:5174",
         "http://127.0.0.1:5174",
         "http://192.168.0.119:5173",
     ],
@@ -39,8 +40,9 @@ app.include_router(auth.router,       prefix="/auth",       tags=["Autenticaçã
 app.include_router(usuarios.router,   prefix="/usuarios",   tags=["Usuários"])
 app.include_router(sessoes.router,    prefix="/sessoes",    tags=["Sessões"])
 app.include_router(fluidos.router,    prefix="/fluidos",    tags=["Fluidos"])
-app.include_router(clima.router)                            
+app.include_router(clima.router)
 app.include_router(relatorios.router, prefix="/relatorios", tags=["Relatórios"])
+app.include_router(predicao.router,   prefix="/predicao",   tags=["Machine Learning"])  
 
 
 @app.get("/", tags=["Status"])

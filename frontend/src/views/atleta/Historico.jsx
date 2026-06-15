@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { sessoesApi } from "../../services/api";
+import { sessoesApi, predicaoApi } from "../../services/api";
 import BottomNav from "../../components/BottomNav";
 
 // Ícone de modalidade
@@ -33,6 +33,8 @@ export default function Historico() {
   const [sessoes, setSessoes] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [predicao, setPredicao] = useState(null);
+  const [statusML, setStatusML] = useState(null);
 
   useEffect(() => {
     async function carregar() {
@@ -43,6 +45,15 @@ export default function Historico() {
         ]);
         setSessoes(hist);
         setStats(st);
+
+        // ML: uma única chamada ao /status já treina e retorna predição
+        try {
+          const ml = await predicaoApi.status();
+          setStatusML(ml);
+          if (ml.predicao) setPredicao(ml.predicao);
+        } catch (mlErr) {
+          console.warn("Predição ML indisponível:", mlErr);
+        }
       } catch (err) {
         console.error("Erro ao carregar histórico:", err);
       } finally {
@@ -111,6 +122,95 @@ export default function Historico() {
                     icon=""
                     alerta={stats.maior_perda_pct > 2}
                   />
+                </div>
+              )}
+
+              {/* Card de Predição ML */}
+              {statusML && !statusML.modelo_disponivel && (
+                <div style={{
+                  background: "#fff", border: "1px solid #ebebeb",
+                  borderRadius: 14, padding: "16px 14px", marginBottom: 16,
+                  display: "flex", alignItems: "center", gap: 12,
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 10, background: "#fdeaed",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 20, flexShrink: 0,
+                  }}>🤖</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", marginBottom: 2 }}>
+                      Predição de Sudorese
+                    </div>
+                    <div style={{ fontSize: 11, color: "#999" }}>
+                      Faltam <strong style={{ color: "#9B1C2E" }}>{statusML.faltam}</strong> sessão(ões) para ativar a predição inteligente
+                    </div>
+                    {/* Barra de progresso */}
+                    <div style={{ marginTop: 8, height: 4, background: "#f0f0f0", borderRadius: 4 }}>
+                      <div style={{
+                        height: "100%", borderRadius: 4, background: "#9B1C2E",
+                        width: `${Math.min(100, (statusML.sessoes_registradas / statusML.sessoes_necessarias) * 100)}%`,
+                        transition: "width 0.4s ease",
+                      }} />
+                    </div>
+                    <div style={{ fontSize: 10, color: "#bbb", marginTop: 4 }}>
+                      {statusML.sessoes_registradas}/{statusML.sessoes_necessarias} sessões
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {predicao?.disponivel && (
+                <div style={{
+                  background: "linear-gradient(135deg, #9B1C2E 0%, #c0392b 100%)",
+                  borderRadius: 14, padding: "18px 16px", marginBottom: 16, color: "#fff",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <span style={{ fontSize: 18 }}>🤖</span>
+                    <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 0.3 }}>
+                      Predição para Próximo Treino
+                    </span>
+                    <span style={{
+                      marginLeft: "auto", fontSize: 9, fontWeight: 700,
+                      background: "rgba(255,255,255,0.2)", padding: "2px 8px",
+                      borderRadius: 20, textTransform: "uppercase", letterSpacing: 0.8,
+                    }}>
+                      {predicao.confianca === "alta" ? "✓ Alta" : predicao.confianca === "media" ? "~ Média" : "↓ Baixa"} confiança
+                    </span>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
+                    <span style={{ fontSize: 42, fontWeight: 800, lineHeight: 1 }}>
+                      {predicao.taxa_prevista?.toFixed(2)}
+                    </span>
+                    <span style={{ fontSize: 16, opacity: 0.8 }}>L/h</span>
+                  </div>
+
+                  <div style={{ fontSize: 11, opacity: 0.75, marginBottom: 14 }}>
+                    Taxa de sudorese estimada com base em {predicao.sessoes_usadas} sessões anteriores
+                  </div>
+
+                  {/* Ingestão recomendada derivada */}
+                  {predicao.taxa_prevista && (
+                    <div style={{
+                      background: "rgba(255,255,255,0.15)", borderRadius: 10,
+                      padding: "10px 14px", display: "flex", gap: 20,
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 9, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                          Ingestão sugerida
+                        </div>
+                        <div style={{ fontSize: 18, fontWeight: 800 }}>
+                          {Math.round(predicao.taxa_prevista * 1000 * 0.8)} ml/h
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 9, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                          Intervalo
+                        </div>
+                        <div style={{ fontSize: 18, fontWeight: 800 }}>15 min</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

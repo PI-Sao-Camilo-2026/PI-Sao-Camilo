@@ -249,6 +249,42 @@ def gerar_pdf_historico_atleta(atleta: dict, sessoes: list, profissional: dict =
         ]))
         story.append(t_medios)
 
+    # ── Seção Predição ML (opcional) ────────────────────────────────────────
+    predicao = atleta.get("predicao")
+    if predicao and predicao.get("disponivel"):
+        story.append(Spacer(1, 0.3*cm))
+        story.append(Paragraph("Predição de Desempenho", estilos["subtitulo"]))
+
+        confianca_txt = {
+            "alta":  "Alta — estimativa confiável com base no histórico",
+            "media": "Média — estimativa razoável com alguma variação esperada",
+            "baixa": "Baixa — histórico ainda reduzido",
+        }.get(predicao.get("confianca", ""), "")
+
+        taxa_prev = predicao.get("taxa_prevista", 0)
+        ingestao_sug = round(taxa_prev * 1000 * 0.8) if taxa_prev else None
+
+        pred_rows = [
+            [Paragraph("<b>Taxa de Sudorese Estimada:</b>", estilos["label"]),
+             Paragraph(f"{taxa_prev:.2f} L/h", estilos["valor"])],
+            [Paragraph("<b>Ingestão Sugerida:</b>", estilos["label"]),
+             Paragraph(f"{ingestao_sug} ml/h" if ingestao_sug else "—", estilos["valor"])],
+            [Paragraph("<b>Confiança do Modelo:</b>", estilos["label"]),
+             Paragraph(confianca_txt, estilos["corpo_cinza"])],
+            [Paragraph("<b>Sessões Usadas no Treino:</b>", estilos["label"]),
+             Paragraph(str(predicao.get("sessoes_usadas", "—")), estilos["valor"])],
+        ]
+        t_pred = Table(pred_rows, colWidths=[5*cm, CONTENT_W - 5*cm])
+        t_pred.setStyle(TableStyle([
+            ("VALIGN",        (0, 0), (-1, -1), "TOP"),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING",    (0, 0), (-1, -1), 3),
+            ("BACKGROUND",    (0, 0), (-1, -1), COR_LINHA_PAR),
+            ("ROWBACKGROUNDS",(0, 0), (-1, -1), [COR_WHITE, COR_LINHA_PAR]),
+            ("GRID",          (0, 0), (-1, -1), 0.3, COR_BORDA),
+        ]))
+        story.append(t_pred)
+
     # ── Seção Registro de Sessões ────────────────────────────────────────────
     story.append(HRFlowable(width="100%", thickness=0.5, color=COR_BORDA, spaceBefore=10, spaceAfter=0))
     story.append(Spacer(1, 0.3*cm))
