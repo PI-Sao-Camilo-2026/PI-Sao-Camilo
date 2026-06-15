@@ -52,7 +52,7 @@ export default function HistoricoProf() {
         }
     };
 
-    // Sessões filtradas pela modalidade (caso o atleta tenha sessões de modalidades diferentes)
+    // Sessões filtradas pela modalidade
     const sessoesFiltradas = modalidadeFiltro
         ? sessoes.filter(s => !s.modalidade || s.modalidade === modalidadeFiltro)
         : sessoes;
@@ -62,7 +62,7 @@ export default function HistoricoProf() {
     const taxaMedia = taxas.length ? (taxas.reduce((a, b) => a + b, 0) / taxas.length).toFixed(2) : null;
     const maiorPerda = perdas.length ? Math.max(...perdas).toFixed(1) : null;
 
-    // Exportação Individual
+    // Exportação Individual — só quando um atleta está selecionado
     const exportarIndividual = async () => {
         if (!atletaSelecionado) return;
         setExportando(true);
@@ -88,31 +88,32 @@ export default function HistoricoProf() {
         }
     };
 
-    // Exportação por Equipe (todos os atletas do profissional)
+    // Exportação por Modalidade/Equipe
     const exportarEquipe = async () => {
-    setExportando(true);
-    setErroExport("");
-    try {
-        // Passamos o atletaSelecionado como 'id' para filtrar pela modalidade dele
-        const blob = await exportacaoApi.exportarHistorico({ 
-            tipo: "equipe", 
-            id: atletaSelecionado 
-        });
-        
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `relatorio_equipe.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } catch (err) {
-        console.error(err);
-        setErroExport("Erro na exportação da equipe");
-    } finally {
-        setExportando(false);
-    }
-};
+        setExportando(true);
+        setErroExport("");
+        try {
+            const params = { tipo: "equipe" };
+            if (atletaSelecionado) params.id = atletaSelecionado;
+            if (modalidadeFiltro)  params.modalidade = modalidadeFiltro;
+
+            const blob = await exportacaoApi.exportarHistorico(params);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const slug = modalidadeFiltro ? `_${modalidadeFiltro.replace(/\s+/g, "_")}` : "";
+            a.download = `relatorio_equipe${slug}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+            setErroExport("Erro na exportação da equipe.");
+        } finally {
+            setExportando(false);
+        }
+    };
 
     return (
         <div className="prof-layout">
@@ -123,24 +124,26 @@ export default function HistoricoProf() {
                         <h1>Histórico Avançado</h1>
                         <p>Análise detalhada das sessões por atleta</p>
                     </div>
-                    {/* Botões de exportação responsivos */}
-                    {atletaSelecionado && (
+                    {/* Botões de exportação — aparecem quando há algum filtro ativo */}
+                    {(atletaSelecionado || modalidadeFiltro) && (
                         <div className="page-header-actions" style={{ gap: 12, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                            <button
-                                className="btn-ghost"
-                                onClick={exportarIndividual}
-                                disabled={exportando}
-                                style={{ display: "flex", alignItems: "center", gap: 6 }}
-                            >
-                                PDF Individual
-                            </button>
+                            {atletaSelecionado && (
+                                <button
+                                    className="btn-ghost"
+                                    onClick={exportarIndividual}
+                                    disabled={exportando}
+                                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                                >
+                                    PDF Individual
+                                </button>
+                            )}
                             <button
                                 className="btn-red"
                                 onClick={exportarEquipe}
                                 disabled={exportando}
                                 style={{ display: "flex", alignItems: "center", gap: 6 }}
                             >
-                                PDF da Equipe
+                                {modalidadeFiltro ? `PDF — ${modalidadeFiltro}` : "PDF da Equipe"}
                             </button>
                         </div>
                     )}
@@ -177,7 +180,7 @@ export default function HistoricoProf() {
                         {/* Seletor de Atleta */}
                         <div style={{ flex: "1 1 200px", minWidth: 200 }}>
                             <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 8 }}>
-                                Atleta {modalidadeFiltro && atletasFiltrados.length > 0 && (
+                                Atleta{modalidadeFiltro && atletasFiltrados.length > 0 && (
                                     <span style={{ fontWeight: 400, color: "var(--red)", marginLeft: 6 }}>
                                         {atletasFiltrados.length} encontrado{atletasFiltrados.length !== 1 ? "s" : ""}
                                     </span>
@@ -196,7 +199,7 @@ export default function HistoricoProf() {
                             </select>
                         </div>
 
-                        {/* Botão de limpar filtros */}
+                        {/* Botão limpar filtros */}
                         {(modalidadeFiltro || atletaSelecionado) && (
                             <button
                                 className="btn-ghost"
@@ -209,7 +212,6 @@ export default function HistoricoProf() {
                     </div>
                 </div>
 
-                {/* Restante do conteúdo igual ao original... */}
                 {atletaSelecionado && (
                     <>
                         <div className="stats-row" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 20 }}>
@@ -228,7 +230,7 @@ export default function HistoricoProf() {
                             <div className="stat-card">
                                 <div className="stat-card-icon">⚖️</div>
                                 <label>Maior Perda</label>
-                                <div className={`stat-val`} style={{ color: maiorPerda > 2 ? "var(--red)" : "inherit" }}>
+                                <div className="stat-val" style={{ color: maiorPerda > 2 ? "var(--red)" : "inherit" }}>
                                     {loading ? "..." : maiorPerda ? `${maiorPerda}%` : "—"}
                                 </div>
                                 <div className={`stat-sub ${maiorPerda > 2 ? "danger" : ""}`}>

@@ -134,19 +134,24 @@ function classificarRadiacao(v) {
 }
 
 export const exportacaoApi = {
-    async exportarHistorico({ tipo, id = null }) {
+    async exportarHistorico({ tipo, id = null, modalidade = null } = {}) {
         const token = getToken();
         const headers = {};
         if (token) headers["Authorization"] = `Bearer ${token}`;
 
         let path = "";
+
         if (tipo === "atleta") {
-            path = `/relatorios/atleta-pdf/${id}`;
-        } else if (tipo === "equipe") {
-            // Se houver um atleta selecionado, anexa via query string (?atleta_id=X)
-            path = id ? `/relatorios/equipe-pdf?atleta_id=${id}` : "/relatorios/equipe-pdf";
+            if (!id) throw new Error("ID do atleta é obrigatório para exportação individual.");
+            path = `/relatorios/historico-pdf/${id}`;
         } else if (tipo === "excel") {
             path = `/relatorios/excel/${id}`;
+        } else {
+            // Caso padrão: "equipe"
+            const queryParams = new URLSearchParams();
+            if (id) queryParams.set("atleta_id", id);
+            if (modalidade) queryParams.set("modalidade", modalidade);
+            path = `/relatorios/equipe-pdf${queryParams.toString() ? `?${queryParams}` : ""}`;
         }
 
         const res = await fetch(`${BASE_URL}${path}`, {
