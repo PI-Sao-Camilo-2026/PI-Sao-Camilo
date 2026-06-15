@@ -165,13 +165,13 @@ export default function Perfil() {
         const confirmar = window.confirm(
             "Tem certeza que deseja apagar sua conta? Essa ação é irreversível e todo o seu histórico de hidratação e treinos será permanentemente removido."
         );
-        
+
         if (confirmar) {
             try {
                 setLoading(true);
                 // Quando sua API de exclusão estiver pronta, você pode descomentar a linha abaixo:
                 // await usuariosApi.deletarConta();
-                
+
                 logout(navigate);
             } catch (err) {
                 setErro(err.message || "Erro ao apagar conta");
@@ -233,10 +233,18 @@ export default function Perfil() {
                             style={{
                                 background: "rgba(255,255,255,0.15)",
                                 border: "1px solid rgba(255,255,255,0.3)",
-                                color: "#fff", width: 34, height: 34,
-                                borderRadius: "50%", cursor: "pointer",
-                                fontSize: 15, display: "flex",
-                                alignItems: "center", justifyContent: "center",
+                                color: "#fff",
+
+                                padding: "8px 16px",   // espaço interno
+                                borderRadius: "999px", // formato cápsula
+
+                                cursor: "pointer",
+                                fontSize: 15,
+
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+
                                 flexShrink: 0,
                             }}
                         >
@@ -252,7 +260,7 @@ export default function Perfil() {
                             fontSize: 13, color: "#0A7C59", fontWeight: 600,
                             marginBottom: 14,
                         }}>
-                            ✓ Perfil updated com sucesso!
+                            ✓ Perfil alterado com sucesso!
                         </div>
                     )}
 
